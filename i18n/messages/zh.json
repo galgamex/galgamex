@@ -1,0 +1,48 @@
+{
+  "LanguageDetection": {
+    "title": "语言建议",
+    "description": "检测到您的浏览器语言和当前语言不一样，您随时都可切换语言 👉",
+    "countdown": "将在 {countdown} 秒后关闭"
+  },
+  "Header": {
+    "blogs": "博客",
+    "about": "关于",
+    "sourceCode": "源码"
+  },
+  "Footer": {
+    "Copyright": "版权所有 © {year} Next Forge。保留所有权利。",
+    "Newsletter": {
+      "title": "订阅我们的邮件",
+      "description": "获取最新的 Next.js 资讯和教程",
+      "defaultErrorMessage": "请输入有效的邮箱地址",
+      "successMessage": "订阅成功",
+      "errorMessage": "订阅失败",
+      "errorMessage2": "订阅失败，请稍后再试",
+      "subscribe": "订阅",
+      "subscribing": "订阅中",
+      "subscribed": "订阅成功！感谢您的关注。"
+    }
+  },
+  "Home": {
+    "title": "Next Forge",
+    "tagLine": "Next.js 多语言启动模板",
+    "description": "内置多语言支持的 Next.js 15 启动模板，助您快速构建面向全球的出海网站。简洁高效，开箱即用，完全优化的SEO基础架构。",
+    "whoIsUsing": "谁在使用此模板"
+  },
+  "Blogs": {
+    "title": "博客列表",
+    "description": "博客列表"
+  },
+  "About": {
+    "title": "关于",
+    "description": "关于网站"
+  },
+  "TermsOfService": {
+    "title": "服务条款",
+    "description": "服务条款"
+  },
+  "PrivacyPolicy": {
+    "title": "隐私政策",
+    "description": "隐私政策"
+  }
+}

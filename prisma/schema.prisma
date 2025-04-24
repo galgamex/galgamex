@@ -1,0 +1,306 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// 文章表
+model Article {
+  id         Int          @id @default(autoincrement())
+  title      String?      @db.Text
+  content    String?      @db.Text
+  avatar     String?      @db.Text
+  cover      String?      @db.Text
+  images     String?      @db.Text
+  summary    String?      @db.Text
+  status     Status       @default(DRAFT)
+  stage      stage        @default(SFW)
+  isTop      Boolean      @default(false)
+  isHot      Boolean      @default(false)
+  categoryId Int?         @default(1)
+  authorId   Int?
+  comments   Int          @default(0)
+  views      Int          @default(0)
+  likes      Int          @default(0)
+  type       Type         @default(ARTICLE)
+  // Relations
+  category   Category?    @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  author     User?        @relation(fields: [authorId], references: [id], onDelete: NoAction)
+  tags       ArticleTag[]
+  likeLog    LikeLog[]
+  Feedback   Feedback[]
+  Download   Download[]
+  // Timestamps
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime?    @updatedAt
+
+  @@map("article")
+}
+
+// 分类表
+model Category {
+  id        Int        @id @default(autoincrement())
+  name      String     @unique
+  alias     String?    @unique
+  slug      String?    @unique
+  avatar    String?    @db.Text
+  parentId  Int?
+  articles  Int        @default(0)
+  type      Type       @default(ARTICLE)
+  authorId  Int?
+  author    User?      @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  // Relations
+  children  Category[] @relation("childrenToParent")
+  article   Article[]
+  parent    Category?  @relation("childrenToParent", fields: [parentId], references: [id])
+  Tag       Tag[]      @relation("tag")
+  // Timestamps
+  createdAt DateTime   @default(now())
+  updatedAt DateTime?  @updatedAt
+}
+
+// 标签表
+model Tag {
+  id         Int          @id @default(autoincrement())
+  name       String       @unique
+  alias      String?      @unique
+  slug       String?      @unique
+  avatar     String?      @db.Text
+  articles   Int          @default(0)
+  // Relations
+  articleTag ArticleTag[]
+  // Timestamps
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  Category   Category?    @relation("tag", fields: [categoryId], references: [id], onDelete: Cascade)
+  categoryId Int?
+
+  @@map("tag")
+}
+
+// 用户表
+model User {
+  id        Int        @id @default(autoincrement())
+  username  String     @unique
+  nickname  String?    @db.VarChar(60)
+  email     String     @unique
+  password  String     @db.Text
+  avatar    String?    @db.Text
+  articles  Int        @default(0)
+  comments  Int        @default(0)
+  likes     Int        @default(0)
+  role      Role       @default(USER)
+  ip        String?    @db.VarChar(15)
+  // Relations
+  article   Article[]
+  like      LikeLog[]
+  comment   Comment[]
+  category  Category[]
+  // Timestamps
+  createdAt DateTime   @default(now())
+  updatedAt DateTime?  @updatedAt
+  lastLogin DateTime?
+  userLog   UserLog[]
+  Feedback  Feedback[]
+  Download  Download[]
+
+  @@map("user")
+}
+
+// 评论表
+model Comment {
+  id        Int       @id @default(autoincrement())
+  content   String    @db.Text
+  likes     Int       @default(0)
+  status    Status    @default(PUBLISH)
+  articleId Int
+  authorId  Int
+  rootId    Int?
+  parentId  Int?
+  emoji     String?   @db.Text
+  ip        String?   @db.VarChar(15)
+  // Relations
+  parent    Comment?  @relation("CommentReplies", fields: [parentId], references: [id])
+  replies   Comment[] @relation("CommentReplies")
+  author    User?     @relation(fields: [authorId], references: [id])
+  like      LikeLog[]
+  // Timestamps
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+
+  @@map("comment")
+}
+
+// 点赞记录表
+model LikeLog {
+  id        Int       @id @default(autoincrement())
+  articleId Int
+  commentId Int?
+  authorId  Int
+  type      LikeType  @default(ARTICLE)
+  // Relations
+  comment   Comment?  @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  article   Article?  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  author    User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  // Timestamps
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+
+  @@map("like_log")
+}
+
+model ArticleTag {
+  article   Article @relation(fields: [articleId], references: [id])
+  articleId Int
+  tag       Tag     @relation(fields: [tagId], references: [id])
+  tagId     Int
+
+  @@id([articleId, tagId])
+  @@map("article_tag")
+}
+
+model TelegramLog {
+  id        Int       @id @default(autoincrement())
+  articleId Int
+  images    String?   @db.Text
+  url       String?   @db.Text
+  remark    String?   @db.Text
+  status    Boolean   @default(false)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+
+  @@map("telegram_log")
+}
+
+// 用户记录表
+model UserLog {
+  id        Int         @id @default(autoincrement())
+  userId    Int
+  ip        String?     @db.VarChar(15)
+  ua        String?     @db.Text
+  type      UserLogType
+  authorId  Int?
+  remark    String?     @db.Text
+  // Relations
+  author    User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // Timestamps
+  createdAt DateTime    @default(now())
+  updatedAt DateTime?   @updatedAt
+
+  @@map("user_log")
+}
+
+model Config {
+  id        Int       @id @default(autoincrement())
+  key       String    @unique
+  value     String    @db.Text
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+
+  @@map("config")
+}
+
+model Feedback {
+  id        Int       @id @default(autoincrement())
+  content   String    @db.Text
+  reply     String?   @db.Text
+  authorId  Int
+  author    User?     @relation(fields: [authorId], references: [id])
+  articleId Int?
+  article   Article?  @relation(fields: [articleId], references: [id])
+  commentId Int?
+  status    Boolean   @default(false)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+
+  @@map("feedback")
+}
+
+model Download {
+  id        Int          @id @default(autoincrement())
+  type      DownloadType @default(DIRECT)
+  url       String       @db.Text
+  articleId Int?
+  authorId  Int?
+  status    Status       @default(DRAFT)
+  code      String?      @db.Text
+  unzipCode String?      @db.Text
+  // Relations
+  author    User?        @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  article   Article?     @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  // Timestamps
+  createdAt DateTime     @default(now())
+  updatedAt DateTime?    @updatedAt
+}
+
+// 下载类型枚举
+enum DownloadType {
+  BAIDU
+  ONEDRIVE
+  MEGA
+  GOOGLEDRIVE
+  UC
+  QUARK
+  DIRECT
+  PIKPAK
+  OTHER
+}
+
+// 分级枚举
+enum stage {
+  SFW
+  NSFW
+  R15
+  R18
+  R18G
+}
+
+// 点赞类型枚举
+enum LikeType {
+  ARTICLE
+  COMMENT
+}
+
+// 用户角色枚举
+enum Role {
+  ADMIN
+  USER
+  VIP
+  CIRCLER
+}
+
+// 状态枚举
+enum Status {
+  DRAFT
+  HIDDEN
+  PUBLISH
+  RECYCLE
+}
+
+// 类型枚举
+enum Type {
+  ARTICLE
+  FORUM
+}
+
+// 用户记录类型枚举
+enum UserLogType {
+  LOGIN
+  LOGOUT
+  REGISTER
+  UPDATE
+  DELETE
+  RESET
+  BAN
+  UNBAN
+  WARN
+}

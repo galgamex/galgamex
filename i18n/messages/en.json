@@ -1,0 +1,48 @@
+{
+  "LanguageDetection": {
+    "title": "Language Suggestion",
+    "description": "We noticed your browser language differs from the current site language. You can switch languages anytime 👉",
+    "countdown": "Closing in {countdown} seconds"
+  },
+  "Header": {
+    "blogs": "Blogs",
+    "about": "About",
+    "sourceCode": "Source Code"
+  },
+  "Footer": {
+    "Copyright": "Copyright © {year} Next Forge. All rights reserved.",
+    "Newsletter": {
+      "title": "Subscribe to our newsletter",
+      "description": "Get the latest news and updates from Next Forge",
+      "defaultErrorMessage": "Please enter a valid email address",
+      "successMessage": "Subscription successful",
+      "errorMessage": "Subscription failed",
+      "errorMessage2": "Subscription failed. Please try again later.",
+      "subscribe": "Subscribe",
+      "subscribing": "Subscribing...",
+      "subscribed": "Subscription successful! Thank you for your attention."
+    }
+  },
+  "Home": {
+    "title": "Next Forge",
+    "tagLine": "Multilingual Next.js 15 Starter",
+    "description": "A multilingual Next.js 15 starter with built-in i18n support. Launch your global-ready web application with a clean, efficient, and SEO-friendly foundation.",
+    "whoIsUsing": "Who is Using This Starter"
+  },
+  "Blogs": {
+    "title": "Blog Posts",
+    "description": "A list of blog posts"
+  },
+  "About": {
+    "title": "About",
+    "description": "About the site"
+  },
+  "TermsOfService": {
+    "title": "Terms of Service",
+    "description": "Terms of Service"
+  },
+  "PrivacyPolicy": {
+    "title": "Privacy Policy",
+    "description": "Privacy Policy"
+  }
+}

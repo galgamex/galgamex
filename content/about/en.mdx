@@ -1,0 +1,99 @@
+---
+title: About
+description: About Next Forge - Multilingual Next.js 15 Starter
+lastUpdated: 2025-02-19
+---
+
+> Update date: 2025-02-19
+
+# About Next Forge
+
+Next Forge is a feature-rich Next.js 15 multilingual starter template designed to help developers quickly build globally-ready websites. It comes with built-in i18n support, modern UI design, dark/light theme toggling, responsive layout, MDX blog system, SEO optimization, and integrated analytics tools.
+
+## ✨ Key Features
+
+- 🌐 **Built-in i18n Support**: Supports English, Chinese, and Japanese out of the box, making it easy to create multilingual websites.
+- 🎨 **Modern UI Design**: Clean and modern UI powered by Tailwind CSS.
+- 🌙 **Dark/Light Theme Toggle**: Allows users to switch between dark and light themes effortlessly.
+- 📱 **Responsive Layout**: Fully responsive design ensures a great experience on both mobile and desktop devices.
+- 📝 **MDX Blog System**: Write blog posts using MDX for enhanced flexibility and power.
+- 🔍 **SEO Optimization**: Comprehensive SEO features including automatic sitemap.xml generation, robots.txt configuration, and optimized metadata.
+- 📊 **Analytics Integration**: Integrated with Google Analytics, Baidu Analytics, Google Adsense, and Vercel Analytics for easy tracking and insights.
+- 🌿 **Eco-Friendly Performance**: Achieved A+ rating on [Website Carbon](https://www.websitecarbon.com/website/nextforge-dev/), making it one of the most energy-efficient websites.
+
+## 🚀 Quick Start
+
+1. Clone the repository:
+    ```bash
+    git clone https://github.com/weijunext/nextjs-15-starter.git
+    ```
+
+2. Install dependencies:
+    ```bash
+    npm install
+    ```
+
+3. Copy environment variables:
+    ```bash
+    cp .env.example .env
+    ```
+
+4. Start the development server:
+    ```bash
+    npm run dev
+    ```
+
+Visit [http://localhost:3000](http://localhost:3000) to view your application.
+
+## ⚙️ Configuration
+
+1. **Basic Setup**:
+    - Edit `config/site.ts` to configure website information.
+    - Update icons and logo in the `public/` directory.
+    - Configure `app/sitemap.ts` and `app/robots.ts`.
+
+2. **i18n Setup**:
+    - Add or modify language files in `i18n/messages/`.
+    - Configure supported languages in `i18n/routing.ts`.
+    - Set up i18n routing in `middleware.ts`.
+
+## 📝 Content Management
+
+### Blog Posts
+Create MDX files in `blogs/[locale]` with the following format:
+````
+
+---
+title: Post Title
+description: Post Description
+image: /image.png
+slug: /url-path
+tags: tag1,tag2
+date: 2025-02-20
+visible: published
+pin: true
+---
+
+Post content...
+````
+
+### Static Pages
+Manage static page content in `content/[page]/[locale].mdx`.
+
+## 📄 License
+
+Next Forge is licensed under the MIT License, allowing you to freely use, modify, and distribute the template.
+
+## 🤝 Contributing
+
+We welcome issues and pull requests! Your contributions help us improve this project.
+
+## About the Author
+
+A Next.js full-stack specialist offering expert services in project development, performance optimization, and SEO improvement.
+
+For consulting and training opportunities, reach out at weijunext@gmail.com
+
+- [Github](https://github.com/weijunext)
+- [Bento](https://bento.me/weijunext)
+- [Twitter/X](https://twitter.com/judewei_dev)
