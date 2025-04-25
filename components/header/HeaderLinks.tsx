@@ -9,7 +9,6 @@ import {
 import { SOURCE_CODE_URL } from "@/config/site";
 import prisma from "@/lib/prisma";
 import { cn } from "@/lib/utils";
-import { useTranslations } from "next-intl";
 import React from "react";
 
 // 获取分类
@@ -31,7 +30,6 @@ export const headerLinks = [
 ];
 
 const HeaderLinks = async () => {
-  const tHeader = useTranslations("Header");
   const categories = await prisma.category.findMany({
     include: {
       children: true
@@ -41,8 +39,6 @@ const HeaderLinks = async () => {
     }
 
   });
-  console.log(categories);
-
 
   return (
     <div className="hidden md:flex flex-row items-center gap-x-4 font-bold">

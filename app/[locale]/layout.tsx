@@ -2,10 +2,12 @@ import BaiDuAnalytics from "@/app/BaiDuAnalytics";
 import GoogleAdsense from "@/app/GoogleAdsense";
 import GoogleAnalytics from "@/app/GoogleAnalytics";
 import PlausibleAnalytics from "@/app/PlausibleAnalytics";
+import AppSidebar from "@/components/app-sidebar/AppSidebar";
 import Footer from "@/components/footer/Footer";
 import Header from "@/components/header/Header";
 import { LanguageDetectionAlert } from "@/components/LanguageDetectionAlert";
 import { TailwindIndicator } from "@/components/TailwindIndicator";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import { siteConfig } from "@/config/site";
 import { DEFAULT_LOCALE, Locale, routing } from "@/i18n/routing";
 import { constructMetadata } from "@/lib/metadata";
@@ -76,12 +78,17 @@ export default async function LocaleLayout({
             enableSystem
           >
             {messages.LanguageDetection && <LanguageDetectionAlert />}
-            {messages.Header && <Header />}
-            <main className="flex-1 flex flex-col items-center">
-              {children}
-            </main>
+            <SidebarProvider >
+              <AppSidebar />
+              <main className="flex-1 flex flex-col items-center bg">
+                {messages.Header && <Header />}
+                {children}
+                {messages.Footer && <Footer />}
+              </main>
+            </SidebarProvider>
 
-            {messages.Footer && <Footer />}
+
+
           </ThemeProvider>
         </NextIntlClientProvider>
         <TailwindIndicator />

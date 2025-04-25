@@ -22,6 +22,7 @@ model Article {
   cover      String?      @db.Text
   images     String?      @db.Text
   summary    String?      @db.Text
+  size       String?
   status     Status       @default(DRAFT)
   stage      stage        @default(SFW)
   isTop      Boolean      @default(false)
@@ -53,10 +54,12 @@ model Category {
   alias     String?    @unique
   slug      String?    @unique
   avatar    String?    @db.Text
+  icon      String?
   parentId  Int?
   articles  Int        @default(0)
   type      Type       @default(ARTICLE)
   authorId  Int?
+  layout    Layout     @default(SQUARE)
   author    User?      @relation(fields: [authorId], references: [id], onDelete: SetNull)
   // Relations
   children  Category[] @relation("childrenToParent")
@@ -240,6 +243,12 @@ model Download {
   // Timestamps
   createdAt DateTime     @default(now())
   updatedAt DateTime?    @updatedAt
+}
+
+enum Layout {
+  SQUARE
+  PORTRAIT
+  LANDSCAPE
 }
 
 // 下载类型枚举
