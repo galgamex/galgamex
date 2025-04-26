@@ -6,9 +6,12 @@ import { getTranslations } from 'next-intl/server'
 type MetadataProps = {
   page?: string
   title?: string
+  siteName?: string
   description?: string
+  tagLine?: string
   images?: string[]
   noIndex?: boolean
+  separator?: string
   locale: Locale
   path?: string
   canonicalUrl?: string
@@ -17,9 +20,12 @@ type MetadataProps = {
 export async function constructMetadata({
   page = 'Home',
   title,
+  siteName = 'GalGameClub',
+  tagLine = 'All The Worlds Best Games',
   description,
   images = [],
   noIndex = false,
+  separator = '|',
   locale,
   path,
   canonicalUrl,
@@ -28,13 +34,8 @@ export async function constructMetadata({
   const t = await getTranslations({ locale, namespace: 'Home' })
 
   // get page specific metadata translations
-  const pageTitle = title || t(`title`)
-  const pageDescription = description || t(`description`)
-
-  // build full title
-  const finalTitle = page === 'Home'
-    ? `${pageTitle} - ${t('tagLine')}`
-    : `${pageTitle} | ${t('title')}`
+  const pageTitle = title || siteName
+  const pageDescription = description || ''
 
   // build image URLs
   const imageUrls = images.length > 0
@@ -60,7 +61,10 @@ export async function constructMetadata({
   }, {} as Record<string, string>)
 
   return {
-    title: finalTitle,
+    title: {
+      default: pageTitle,
+      template: `%s${separator}${siteName}`,
+    },
     description: pageDescription,
     keywords: [],
     authors: siteConfig.authors,
@@ -72,16 +76,22 @@ export async function constructMetadata({
     },
     openGraph: {
       type: 'website',
-      title: finalTitle,
+      title: {
+        default: pageTitle,
+        template: `%s${separator}${siteName}`,
+      },
       description: pageDescription,
       url: pageURL,
-      siteName: t('title'),
+      siteName: siteName,
       locale: locale,
       images: imageUrls,
     },
     twitter: {
       card: 'summary_large_image',
-      title: finalTitle,
+      title: {
+        default: pageTitle,
+        template: `%s ${separator} ${siteName}`,
+      },
       description: pageDescription,
       site: `${siteConfig.url}/${pageURL}`,
       images: imageUrls,

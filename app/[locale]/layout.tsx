@@ -10,6 +10,7 @@ import { TailwindIndicator } from "@/components/TailwindIndicator";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { siteConfig } from "@/config/site";
 import { DEFAULT_LOCALE, Locale, routing } from "@/i18n/routing";
+import { getAllConfigs } from "@/lib/config";
 import { constructMetadata } from "@/lib/metadata";
 import { cn } from "@/lib/utils";
 import "@/styles/globals.css";
@@ -20,20 +21,21 @@ import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations } from "next-intl/server";
 import { ThemeProvider } from "next-themes";
 import { notFound } from "next/navigation";
-
 type MetadataProps = {
   params: Promise<{ locale: string }>;
 };
-
 export async function generateMetadata({
   params,
 }: MetadataProps): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "Home" });
-
+  const configs = await getAllConfigs();
+  const { site_name, site_separator, site_tagline } = configs;
   return constructMetadata({
     page: "Home",
-    title: t("title"),
+    title: `${site_name}${site_separator}${site_tagline}`,
+    siteName: site_name,
+    separator: site_separator,
     description: t("description"),
     locale: locale as Locale,
     path: `/`,

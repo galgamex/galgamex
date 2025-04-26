@@ -30,6 +30,7 @@
     "gray-matter": "^4.0.3",
     "js-cookie": "^3.0.5",
     "keyv": "^5.3.3",
+    "keyv-file": "^5.1.2",
     "lucide-react": "^0.468.0",
     "next": "15.2.4",
     "next-intl": "^4.0.2",
