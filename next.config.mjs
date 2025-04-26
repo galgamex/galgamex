@@ -6,21 +6,22 @@ const withNextIntl = createNextIntlPlugin();
 const nextConfig = {
   images: {
     remotePatterns: [
-      ...(process.env.R2_PUBLIC_URL
-        ? [
-            {
-              hostname: process.env.R2_PUBLIC_URL.replace("https://", ""),
-            },
-          ]
-        : []),
+      {
+        protocol: 'https',
+        hostname: '**',
+      },
+      {
+        protocol: 'http',
+        hostname: '**',
+      }
     ],
   },
   compiler: {
     removeConsole:
       process.env.NODE_ENV === "production"
         ? {
-            exclude: ["error"],
-          }
+          exclude: ["error"],
+        }
         : false,
   },
 };

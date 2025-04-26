@@ -3,7 +3,6 @@ import GoogleAdsense from "@/app/GoogleAdsense";
 import GoogleAnalytics from "@/app/GoogleAnalytics";
 import PlausibleAnalytics from "@/app/PlausibleAnalytics";
 import AppSidebar from "@/components/app-sidebar/AppSidebar";
-import Footer from "@/components/footer/Footer";
 import Header from "@/components/header/Header";
 import { LanguageDetectionAlert } from "@/components/LanguageDetectionAlert";
 import { TailwindIndicator } from "@/components/TailwindIndicator";
@@ -82,10 +81,13 @@ export default async function LocaleLayout({
             {messages.LanguageDetection && <LanguageDetectionAlert />}
             <SidebarProvider >
               <AppSidebar />
-              <main className="flex-1 flex flex-col items-center bg">
+              <main className="flex-1 flex flex-col items-center bg relative w-full">
                 {messages.Header && <Header />}
-                {children}
-                {messages.Footer && <Footer />}
+                <div className="p-4 flex-1 w-full">
+                  {children}
+
+                </div>
+                {/* {messages.Footer && <Footer />} */}
               </main>
             </SidebarProvider>
 
