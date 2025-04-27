@@ -38,7 +38,7 @@ type GameData = {
   patches: any[];
   saves: any[];
   characters: any[];
-  screenshots: number[];
+  images: number[];
   reviews: any[];
   recommendations: any[];
 };
@@ -375,7 +375,7 @@ export default function GameDetailClient({ gameData }: GameDetailClientProps) {
                 ))}
 
                 {/* 截图项目 */}
-                {gameData.screenshots.map((num) => (
+                {gameData.images.map((num) => (
                   <div key={`screenshot-${num}`} className="w-80 h-48 flex-shrink-0 rounded-md overflow-hidden shadow-md">
                     <Image
                       src={`https://t.alcy.cc/pc`}
