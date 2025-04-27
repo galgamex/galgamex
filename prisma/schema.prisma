@@ -13,303 +13,422 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// 文章表
+// 文章表 - 存储游戏、文章等主要内容
 model Article {
-  id         Int          @id @default(autoincrement())
-  title      String?      @db.Text
-  content    String?      @db.Text
-  avatar     String?      @db.Text
-  cover      String?      @db.Text
-  images     String?      @db.Text
-  summary    String?      @db.Text
-  size       String?
-  status     Status       @default(DRAFT)
-  stage      stage        @default(SFW)
-  isTop      Boolean      @default(false)
-  isHot      Boolean      @default(false)
-  categoryId Int?         @default(1)
-  authorId   Int?
-  comments   Int          @default(0)
-  views      Int          @default(0)
-  likes      Int          @default(0)
-  type       Type         @default(ARTICLE)
-  // Relations
-  category   Category?    @relation(fields: [categoryId], references: [id], onDelete: SetNull)
-  author     User?        @relation(fields: [authorId], references: [id], onDelete: NoAction)
-  tags       ArticleTag[]
-  likeLog    LikeLog[]
-  Feedback   Feedback[]
-  Download   Download[]
-  // Timestamps
-  createdAt  DateTime     @default(now())
-  updatedAt  DateTime?    @updatedAt
+  id         Int          @id @default(autoincrement()) // 文章/游戏ID
+  title      String?      @db.Text                      // 文章/游戏标题
+  content    String?      @db.Text                      // 文章/游戏详细内容
+  avatar     String?      @db.Text                      // 文章/游戏头像
+  cover      String?      @db.Text                      // 文章/游戏封面图
+  images     String?      @db.Text                      // 文章/游戏图片集合（JSON字符串）
+  summary    String?      @db.Text                      // 文章/游戏简介
+  size       String?                                    // 游戏大小
+  status     Status       @default(DRAFT)               // 状态（草稿、发布等）
+  stage      stage        @default(SFW)                 // 分级（全年龄、R15、R18等）
+  isTop      Boolean      @default(false)               // 是否置顶
+  isHot      Boolean      @default(false)               // 是否热门
+  categoryId Int?         @default(1)                   // 分类ID
+  authorId   Int?                                       // 作者ID
+  comments   Int          @default(0)                   // 评论数量
+  views      Int          @default(0)                   // 查看次数
+  likes      Int          @default(0)                   // 点赞数量
+  type       Type         @default(ARTICLE)             // 类型（文章或论坛）
+  // 新增字段
+  originalTitle String?   @db.Text                      // 原始标题（非中文标题）
+  releaseDate   String?                                 // 发布日期
+  developer     String?                                 // 开发商
+  publisher     String?                                 // 发行商
+  rating        Float     @default(0)                   // 评分
+  favorites     Int       @default(0)                   // 收藏数量
+  shares        Int       @default(0)                   // 分享数量
+  reviewCount   Int       @default(0)                   // 评论计数（与comments有区别）
+  videos        String?   @db.Text                      // 视频（JSON字符串）
+  // Relations - 关系定义
+  category   Category?    @relation(fields: [categoryId], references: [id], onDelete: SetNull) // 关联分类
+  author     User?        @relation(fields: [authorId], references: [id], onDelete: NoAction)  // 关联作者
+  tags       ArticleTag[]                               // 关联标签（多对多）
+  likeLog    LikeLog[]                                  // 关联点赞记录
+  Feedback   Feedback[]                                 // 关联反馈
+  Download   Download[]                                 // 关联下载链接
+  GameSave   GameSave[]                                 // 关联存档
+  GamePatch  GamePatch[]                                // 关联补丁
+  Character  Character[]                                // 关联角色
+  recommendedTo Recommendation[] @relation("articleToArticle")     // 推荐给其他文章
+  recommendedBy Recommendation[] @relation("recommendedArticle")   // 被其他文章推荐
+  // Timestamps - 时间戳
+  createdAt  DateTime     @default(now())               // 创建时间
+  updatedAt  DateTime?    @updatedAt                    // 最后更新时间
 
   @@map("article")
 }
 
-// 分类表
+// 分类表 - 存储文章和内容的分类信息
 model Category {
-  id        Int        @id @default(autoincrement())
-  name      String     @unique
-  alias     String?    @unique
-  slug      String?    @unique
-  avatar    String?    @db.Text
-  icon      String?
-  parentId  Int?
-  articles  Int        @default(0)
-  type      Type       @default(ARTICLE)
-  authorId  Int?
-  layout    Layout     @default(SQUARE)
-  author    User?      @relation(fields: [authorId], references: [id], onDelete: SetNull)
-  // Relations
-  children  Category[] @relation("childrenToParent")
-  article   Article[]
-  parent    Category?  @relation("childrenToParent", fields: [parentId], references: [id])
-  Tag       Tag[]      @relation("tag")
-  // Timestamps
-  createdAt DateTime   @default(now())
-  updatedAt DateTime?  @updatedAt
+  id        Int        @id @default(autoincrement()) // 分类ID
+  name      String     @unique                       // 分类名称
+  alias     String?    @unique                       // 分类别名
+  slug      String?    @unique                       // 分类别名（URL友好）
+  avatar    String?    @db.Text                      // 分类图标URL
+  icon      String?                                  // 分类图标名称
+  parentId  Int?                                     // 父分类ID
+  articles  Int        @default(0)                   // 该分类下的文章数量
+  type      Type       @default(ARTICLE)             // 分类类型（文章或论坛）
+  authorId  Int?                                     // 创建者ID
+  layout    Layout     @default(SQUARE)              // 布局方式（方形、纵向、横向）
+  author    User?      @relation(fields: [authorId], references: [id], onDelete: SetNull) // 关联创建者
+  // Relations - 关系定义
+  children  Category[] @relation("childrenToParent") // 子分类列表
+  article   Article[]                                // 关联文章
+  parent    Category?  @relation("childrenToParent", fields: [parentId], references: [id]) // 父分类
+  Tag       Tag[]      @relation("tag")              // 关联标签
+  // Timestamps - 时间戳
+  createdAt DateTime   @default(now())               // 创建时间
+  updatedAt DateTime?  @updatedAt                    // 最后更新时间
 }
 
-// 标签表
+// 标签表 - 存储文章的标签信息
 model Tag {
-  id         Int          @id @default(autoincrement())
-  name       String       @unique
-  alias      String?      @unique
-  slug       String?      @unique
-  avatar     String?      @db.Text
-  articles   Int          @default(0)
-  // Relations
-  articleTag ArticleTag[]
-  // Timestamps
-  createdAt  DateTime     @default(now())
-  updatedAt  DateTime     @updatedAt
-  Category   Category?    @relation("tag", fields: [categoryId], references: [id], onDelete: Cascade)
-  categoryId Int?
+  id         Int          @id @default(autoincrement()) // 标签ID
+  name       String       @unique                       // 标签名称
+  alias      String?      @unique                       // 标签别名
+  slug       String?      @unique                       // 标签别名（URL友好）
+  avatar     String?      @db.Text                      // 标签图标URL
+  articles   Int          @default(0)                   // 使用该标签的文章数量
+  // Relations - 关系定义
+  articleTag ArticleTag[]                               // 文章-标签关联
+  // Timestamps - 时间戳
+  createdAt  DateTime     @default(now())               // 创建时间
+  updatedAt  DateTime     @updatedAt                    // 最后更新时间
+  Category   Category?    @relation("tag", fields: [categoryId], references: [id], onDelete: Cascade) // 关联分类
+  categoryId Int?                                       // 所属分类ID
 
   @@map("tag")
 }
 
-// 用户表
+// 用户表 - 存储用户信息
 model User {
-  id        Int        @id @default(autoincrement())
-  username  String     @unique
-  nickname  String?    @db.VarChar(60)
-  email     String     @unique
-  password  String     @db.Text
-  avatar    String?    @db.Text
-  articles  Int        @default(0)
-  comments  Int        @default(0)
-  likes     Int        @default(0)
-  role      Role       @default(USER)
-  ip        String?    @db.VarChar(15)
-  // Relations
-  article   Article[]
-  like      LikeLog[]
-  comment   Comment[]
-  category  Category[]
-  // Timestamps
-  createdAt DateTime   @default(now())
-  updatedAt DateTime?  @updatedAt
-  lastLogin DateTime?
-  userLog   UserLog[]
-  Feedback  Feedback[]
-  Download  Download[]
+  id        Int        @id @default(autoincrement()) // 用户ID
+  username  String     @unique                       // 用户名
+  nickname  String?    @db.VarChar(60)               // 用户昵称
+  email     String     @unique                       // 电子邮箱
+  password  String     @db.Text                      // 密码（加密）
+  avatar    String?    @db.Text                      // 用户头像URL
+  articles  Int        @default(0)                   // 发布的文章数量
+  comments  Int        @default(0)                   // 发表的评论数量
+  likes     Int        @default(0)                   // 获得的点赞数量
+  role      Role       @default(USER)                // 用户角色（管理员、普通用户等）
+  ip        String?    @db.VarChar(15)               // 注册IP
+  // Relations - 关系定义
+  article   Article[]                                // 发布的文章
+  like      LikeLog[]                                // 点赞记录
+  comment   Comment[]                                // 发表的评论
+  category  Category[]                               // 创建的分类
+  // Timestamps - 时间戳
+  createdAt DateTime   @default(now())               // 注册时间
+  updatedAt DateTime?  @updatedAt                    // 资料更新时间
+  lastLogin DateTime?                                // 上次登录时间
+  userLog   UserLog[]                                // 用户日志
+  Feedback  Feedback[]                               // 用户反馈
+  Download  Download[]                               // 用户上传的下载
+  GameSave  GameSave[]                               // 用户上传的存档
+  GamePatch GamePatch[]                              // 用户上传的补丁
 
   @@map("user")
 }
 
-// 评论表
+// 评论表 - 存储用户评论
 model Comment {
-  id        Int       @id @default(autoincrement())
-  content   String    @db.Text
-  likes     Int       @default(0)
-  status    Status    @default(PUBLISH)
-  articleId Int
-  authorId  Int
-  rootId    Int?
-  parentId  Int?
-  emoji     String?   @db.Text
-  ip        String?   @db.VarChar(15)
-  // Relations
-  parent    Comment?  @relation("CommentReplies", fields: [parentId], references: [id])
-  replies   Comment[] @relation("CommentReplies")
-  author    User?     @relation(fields: [authorId], references: [id])
-  like      LikeLog[]
-  // Timestamps
-  createdAt DateTime  @default(now())
-  updatedAt DateTime? @updatedAt
+  id        Int       @id @default(autoincrement()) // 评论ID
+  content   String    @db.Text                      // 评论内容
+  likes     Int       @default(0)                   // 评论获得的点赞数
+  status    Status    @default(PUBLISH)             // 评论状态（发布、隐藏等）
+  articleId Int                                     // 关联文章ID
+  authorId  Int                                     // 评论作者ID
+  rootId    Int?                                    // 根评论ID（用于嵌套评论）
+  parentId  Int?                                    // 父评论ID（用于回复）
+  emoji     String?   @db.Text                      // 评论表情（JSON格式）
+  ip        String?   @db.VarChar(15)               // 评论者IP
+  // Relations - 关系定义
+  parent    Comment?  @relation("CommentReplies", fields: [parentId], references: [id]) // 父评论
+  replies   Comment[] @relation("CommentReplies")   // 子评论/回复
+  author    User?     @relation(fields: [authorId], references: [id]) // 关联作者
+  like      LikeLog[]                               // 点赞记录
+  // Timestamps - 时间戳
+  createdAt DateTime  @default(now())               // 评论时间
+  updatedAt DateTime? @updatedAt                    // 更新时间
 
   @@map("comment")
 }
 
-// 点赞记录表
+// 点赞记录表 - 记录用户的点赞行为
 model LikeLog {
-  id        Int       @id @default(autoincrement())
-  articleId Int
-  commentId Int?
-  authorId  Int
-  type      LikeType  @default(ARTICLE)
-  // Relations
-  comment   Comment?  @relation(fields: [commentId], references: [id], onDelete: Cascade)
-  article   Article?  @relation(fields: [articleId], references: [id], onDelete: Cascade)
-  author    User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  // Timestamps
-  createdAt DateTime  @default(now())
-  updatedAt DateTime? @updatedAt
+  id        Int       @id @default(autoincrement()) // 点赞记录ID
+  articleId Int                                     // 文章ID
+  commentId Int?                                    // 评论ID（可选，点赞评论时使用）
+  authorId  Int                                     // 点赞者ID
+  type      LikeType  @default(ARTICLE)             // 点赞类型（文章或评论）
+  // Relations - 关系定义
+  comment   Comment?  @relation(fields: [commentId], references: [id], onDelete: Cascade) // 关联评论
+  article   Article?  @relation(fields: [articleId], references: [id], onDelete: Cascade) // 关联文章
+  author    User      @relation(fields: [authorId], references: [id], onDelete: Cascade)  // 关联用户
+  // Timestamps - 时间戳
+  createdAt DateTime  @default(now())               // 点赞时间
+  updatedAt DateTime? @updatedAt                    // 更新时间（取消点赞）
 
   @@map("like_log")
 }
 
+// 文章-标签关联表 - 多对多关系
 model ArticleTag {
-  article   Article @relation(fields: [articleId], references: [id])
-  articleId Int
-  tag       Tag     @relation(fields: [tagId], references: [id])
-  tagId     Int
+  article   Article @relation(fields: [articleId], references: [id]) // 关联文章
+  articleId Int                                                      // 文章ID
+  tag       Tag     @relation(fields: [tagId], references: [id])     // 关联标签
+  tagId     Int                                                      // 标签ID
 
-  @@id([articleId, tagId])
+  @@id([articleId, tagId]) // 联合主键
   @@map("article_tag")
 }
 
+// Telegram发布日志 - 记录向Telegram频道发布的内容
 model TelegramLog {
-  id        Int       @id @default(autoincrement())
-  articleId Int
-  images    String?   @db.Text
-  url       String?   @db.Text
-  remark    String?   @db.Text
-  status    Boolean   @default(false)
-  createdAt DateTime  @default(now())
-  updatedAt DateTime? @updatedAt
+  id        Int       @id @default(autoincrement()) // 日志ID
+  articleId Int                                     // 文章ID
+  images    String?   @db.Text                      // 发送的图片URL（JSON格式）
+  url       String?   @db.Text                      // 发送的文章URL
+  remark    String?   @db.Text                      // 备注信息
+  status    Boolean   @default(false)               // 发送状态
+  createdAt DateTime  @default(now())               // 创建时间
+  updatedAt DateTime? @updatedAt                    // 更新时间
 
   @@map("telegram_log")
 }
 
-// 用户记录表
+// 用户记录表 - 记录用户的关键行为
 model UserLog {
-  id        Int         @id @default(autoincrement())
-  userId    Int
-  ip        String?     @db.VarChar(15)
-  ua        String?     @db.Text
-  type      UserLogType
-  authorId  Int?
-  remark    String?     @db.Text
-  // Relations
-  author    User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  // Timestamps
-  createdAt DateTime    @default(now())
-  updatedAt DateTime?   @updatedAt
+  id        Int         @id @default(autoincrement()) // 日志ID
+  userId    Int                                       // 用户ID
+  ip        String?     @db.VarChar(15)               // 操作IP
+  ua        String?     @db.Text                      // 用户代理（浏览器信息）
+  type      UserLogType                               // 日志类型（登录、注册等）
+  authorId  Int?                                      // 操作者ID（如管理员操作）
+  remark    String?     @db.Text                      // 备注信息
+  // Relations - 关系定义
+  author    User        @relation(fields: [userId], references: [id], onDelete: Cascade) // 关联用户
+  // Timestamps - 时间戳
+  createdAt DateTime    @default(now())               // 创建时间
+  updatedAt DateTime?   @updatedAt                    // 更新时间
 
   @@map("user_log")
 }
 
+// 系统配置表 - 存储系统全局设置
 model Config {
-  id        Int       @id @default(autoincrement())
-  key       String    @unique
-  value     String    @db.Text
-  createdAt DateTime  @default(now())
-  updatedAt DateTime? @updatedAt
+  id        Int       @id @default(autoincrement()) // 配置ID
+  key       String    @unique                       // 配置键名
+  value     String    @db.Text                      // 配置值
+  createdAt DateTime  @default(now())               // 创建时间
+  updatedAt DateTime? @updatedAt                    // 更新时间
 
   @@map("config")
 }
 
+// 反馈表 - 存储用户反馈信息
 model Feedback {
-  id        Int       @id @default(autoincrement())
-  content   String    @db.Text
-  reply     String?   @db.Text
-  authorId  Int
-  author    User?     @relation(fields: [authorId], references: [id])
-  articleId Int?
-  article   Article?  @relation(fields: [articleId], references: [id])
-  commentId Int?
-  status    Boolean   @default(false)
-  createdAt DateTime  @default(now())
-  updatedAt DateTime? @updatedAt
+  id        Int       @id @default(autoincrement()) // 反馈ID
+  content   String    @db.Text                      // 反馈内容
+  reply     String?   @db.Text                      // 回复内容
+  authorId  Int                                     // 反馈用户ID
+  author    User?     @relation(fields: [authorId], references: [id]) // 关联用户
+  articleId Int?                                    // 相关文章ID（可选）
+  article   Article?  @relation(fields: [articleId], references: [id]) // 关联文章
+  commentId Int?                                    // 相关评论ID（可选）
+  status    Boolean   @default(false)               // 处理状态
+  createdAt DateTime  @default(now())               // 创建时间
+  updatedAt DateTime? @updatedAt                    // 更新时间
 
   @@map("feedback")
 }
 
+// 下载表 - 存储下载链接信息
 model Download {
-  id        Int          @id @default(autoincrement())
-  type      DownloadType @default(DIRECT)
-  url       String       @db.Text
-  articleId Int?
-  authorId  Int?
-  status    Status       @default(DRAFT)
-  code      String?      @db.Text
-  unzipCode String?      @db.Text
-  // Relations
-  author    User?        @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  article   Article?     @relation(fields: [articleId], references: [id], onDelete: Cascade)
-  // Timestamps
-  createdAt DateTime     @default(now())
-  updatedAt DateTime?    @updatedAt
+  id        Int          @id @default(autoincrement()) // 下载ID
+  type      DownloadType @default(DIRECT)              // 下载类型（百度网盘、直链等）
+  url       String       @db.Text                      // 下载链接
+  articleId Int?                                       // 关联文章ID
+  authorId  Int?                                       // 上传者ID
+  status    Status       @default(DRAFT)               // 状态（草稿、发布等）
+  code      String?      @db.Text                      // 提取码
+  unzipCode String?      @db.Text                      // 解压密码
+  // Relations - 关系定义
+  author    User?        @relation(fields: [authorId], references: [id], onDelete: Cascade)  // 关联用户
+  article   Article?     @relation(fields: [articleId], references: [id], onDelete: Cascade) // 关联文章
+  // Timestamps - 时间戳
+  createdAt DateTime     @default(now())               // 创建时间
+  updatedAt DateTime?    @updatedAt                    // 更新时间
 }
 
+// 存档表 - 存储游戏存档信息
+model GameSave {
+  id          Int       @id @default(autoincrement()) // 存档ID
+  name        String                                  // 存档名称
+  description String?   @db.Text                      // 存档描述
+  url         String    @db.Text                      // 存档下载链接
+  size        String?                                 // 存档大小
+  gameVersion String?                                 // 适用的游戏版本
+  downloads   Int       @default(0)                   // 下载次数
+  rating      Float     @default(0)                   // 评分
+  articleId   Int                                     // 关联游戏ID
+  authorId    Int                                     // 上传者ID
+  status      Status    @default(DRAFT)               // 存档状态
+  features    String?   @db.Text                      // 存档特点(JSON格式)
+  code        String?   @db.Text                      // 提取码
+  unzipCode   String?   @db.Text                      // 解压密码
+  // Relations - 关系定义
+  article     Article   @relation(fields: [articleId], references: [id], onDelete: Cascade) // 关联游戏
+  author      User      @relation(fields: [authorId], references: [id])                     // 关联上传者
+  // Timestamps - 时间戳
+  createdAt   DateTime  @default(now())               // 创建时间
+  updatedAt   DateTime? @updatedAt                    // 更新时间
+
+  @@map("game_save")
+}
+
+// 补丁表 - 存储游戏补丁信息
+model GamePatch {
+  id          Int       @id @default(autoincrement()) // 补丁ID
+  name        String                                  // 补丁名称
+  description String?   @db.Text                      // 补丁描述
+  version     String                                  // 补丁版本
+  gameVersion String?                                 // 适用的游戏版本
+  size        String?                                 // 补丁大小
+  url         String    @db.Text                      // 补丁下载链接
+  downloads   Int       @default(0)                   // 下载次数
+  rating      Float     @default(0)                   // 评分
+  articleId   Int                                     // 关联游戏ID
+  authorId    Int                                     // 上传者ID
+  status      Status    @default(DRAFT)               // 补丁状态
+  features    String?   @db.Text                      // 补丁特点(JSON格式)
+  translator  String?                                 // 翻译者/汉化组
+  code        String?   @db.Text                      // 提取码
+  unzipCode   String?   @db.Text                      // 解压密码
+  // Relations - 关系定义
+  article     Article   @relation(fields: [articleId], references: [id], onDelete: Cascade) // 关联游戏
+  author      User      @relation(fields: [authorId], references: [id])                     // 关联上传者
+  // Timestamps - 时间戳
+  createdAt   DateTime  @default(now())               // 创建时间
+  updatedAt   DateTime? @updatedAt                    // 更新时间
+
+  @@map("game_patch")
+}
+
+// 角色表 - 存储游戏角色信息
+model Character {
+  id         Int       @id @default(autoincrement()) // 角色ID
+  name       String                                  // 角色名称
+  nameJp     String?                                 // 日文名
+  avatar     String?   @db.Text                      // 角色头像
+  images     String?   @db.Text                      // 角色图片集(JSON格式)
+  description String?  @db.Text                      // 角色描述
+  cv         String?                                 // 配音演员
+  cvJp       String?                                 // 日文配音演员
+  traits     String?   @db.Text                      // 性格特点(JSON格式)
+  birthday   String?                                 // 生日
+  height     String?                                 // 身高
+  weight     String?                                 // 体重
+  age        String?                                 // 年龄
+  hobby      String?   @db.Text                      // 爱好(JSON格式)
+  isMain     Boolean   @default(false)               // 是否为主要角色
+  isHeroine  Boolean   @default(false)               // 是否为女主角
+  articleId  Int                                     // 关联游戏ID
+  // Relations - 关系定义
+  article    Article   @relation(fields: [articleId], references: [id], onDelete: Cascade)  // 关联游戏
+  // Timestamps - 时间戳
+  createdAt  DateTime  @default(now())               // 创建时间
+  updatedAt  DateTime? @updatedAt                    // 更新时间
+
+  @@map("character")
+}
+
+// 布局类型枚举 - 定义内容展示的布局方式
 enum Layout {
-  SQUARE
-  PORTRAIT
-  LANDSCAPE
+  SQUARE    // 方形布局
+  PORTRAIT  // 纵向布局（竖屏）
+  LANDSCAPE // 横向布局（横屏）
 }
 
-// 下载类型枚举
+// 下载类型枚举 - 定义不同的下载源类型
 enum DownloadType {
-  BAIDU
-  ONEDRIVE
-  MEGA
-  GOOGLEDRIVE
-  UC
-  QUARK
-  DIRECT
-  PIKPAK
-  OTHER
+  BAIDU       // 百度网盘
+  ONEDRIVE    // 微软网盘
+  MEGA        // MEGA网盘
+  GOOGLEDRIVE // 谷歌网盘
+  UC          // UC网盘
+  QUARK       // 夸克网盘
+  DIRECT      // 直接下载链接
+  PIKPAK      // PikPak网盘
+  OTHER       // 其他下载方式
 }
 
-// 分级枚举
+// 分级枚举 - 定义内容的年龄分级
 enum stage {
-  SFW
-  NSFW
-  R15
-  R18
-  R18G
+  SFW   // 全年龄内容
+  NSFW  // 不适合工作场合
+  R15   // 15岁以上
+  R18   // 18岁以上
+  R18G  // 18岁以上（重口味）
 }
 
-// 点赞类型枚举
+// 点赞类型枚举 - 定义点赞的目标类型
 enum LikeType {
-  ARTICLE
-  COMMENT
+  ARTICLE // 点赞文章
+  COMMENT // 点赞评论
 }
 
-// 用户角色枚举
+// 用户角色枚举 - 定义用户的权限级别
 enum Role {
-  ADMIN
-  USER
-  VIP
-  CIRCLER
+  ADMIN    // 管理员
+  USER     // 普通用户
+  VIP      // VIP用户
+  CIRCLER  // 圈内用户
 }
 
-// 状态枚举
+// 状态枚举 - 定义内容的发布状态
 enum Status {
-  DRAFT
-  HIDDEN
-  PUBLISH
-  RECYCLE
+  DRAFT   // 草稿
+  HIDDEN  // 隐藏
+  PUBLISH // 已发布
+  RECYCLE // 回收站
 }
 
-// 类型枚举
+// 类型枚举 - 定义内容的类型
 enum Type {
-  ARTICLE
-  FORUM
+  ARTICLE // 文章类型
+  FORUM   // 论坛类型
 }
 
-// 用户记录类型枚举
+// 用户记录类型枚举 - 定义用户行为记录的类型
 enum UserLogType {
-  LOGIN
-  LOGOUT
-  REGISTER
-  UPDATE
-  DELETE
-  RESET
-  BAN
-  UNBAN
-  WARN
+  LOGIN    // 登录
+  LOGOUT   // 登出
+  REGISTER // 注册
+  UPDATE   // 更新资料
+  DELETE   // 删除账号
+  RESET    // 重置密码
+  BAN      // 被封禁
+  UNBAN    // 解除封禁
+  WARN     // 警告
+}
+
+// 新增推荐游戏关联表
+model Recommendation {
+  id        Int       @id @default(autoincrement())     // 推荐ID
+  articleId Int                                         // 原文章ID
+  article   Article   @relation("articleToArticle", fields: [articleId], references: [id], onDelete: Cascade)
+  recId     Int                                         // 推荐文章ID
+  recArticle Article  @relation("recommendedArticle", fields: [recId], references: [id], onDelete: Cascade)
+  // Timestamps
+  createdAt DateTime  @default(now())                   // 创建时间
+  updatedAt DateTime? @updatedAt                        // 更新时间
+
+  @@map("recommendation")
 }
