@@ -179,7 +179,7 @@ async function getGameData(id: string) {
         age: "17岁"
       }
     ],
-    screenshots: [1, 2, 3, 4, 5],
+    images: [1, 2, 3, 4, 5],
     reviews: [
       {
         username: "樱花控",
