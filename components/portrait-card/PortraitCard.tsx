@@ -3,6 +3,17 @@ import type { Article } from '@/types/article';
 import { CloudDownload, Eye, MessageCircle, ThumbsUp } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+
+// 格式化数字函数
+function formatNumber(num: number): string {
+  if (num >= 10000) {
+    return (num / 10000).toFixed(1) + 'w';
+  } else if (num >= 1000) {
+    return (num / 1000).toFixed(1) + 'k';
+  }
+  return num.toString();
+}
+
 export default function PortraitCard({
   article,
   lang
@@ -14,32 +25,34 @@ export default function PortraitCard({
     <div className='relative shadow bg-background'>
       <Link
         href={`/article/${article.id}`}
-        className=' flex flex-col'
+        className='flex flex-col'
       >
-        <AspectRatio className="overflow-hidden rounded relative" ratio={4 / 6}>
+        <AspectRatio className="overflow-hidden relative" ratio={4 / 6}>
           <Image
             src={article.avatar || article.cover || article.images?.split(',')[0] || ''}
             alt={article.title!}
             draggable={false}
-            className='rounded object-cover bg-gray-100 dark:bg-gray-800 hover:scale-110 transition-transform duration-300'
+            width={500}
+            height={750}
+            className='object-cover bg-gray-100 dark:bg-gray-800 hover:scale-110 transition-transform duration-300'
           />
           {/* 大小信息 */}
           {article.size && (
-            <p className='absolute top-0 right-0 rounded text-xs text-white bg-back/50 px-2 py-1'>
+            <p className='absolute top-0 right-0 text-xs text-white bg-black/50 px-2 py-1'>
               {Math.round(Number(article.size)).toFixed(0)}G
             </p>
           )}
           {/* 下载渠道 */}
           {article.download?.length && (
-            <div className='absolute bottom-0 left-0 rounded text-white bg-back/50 py-1 flex items-center text-xs space-y-1 px-2'>
-              <CloudDownload />
-              <span>{article.download.length}个下载渠道</span>
+            <div className='absolute bottom-0 left-0 text-white bg-black/50 py-1 flex items-center text-xs space-y-1 px-2'>
+              <CloudDownload className="w-3 h-3 mr-1" />
+              <span>{article.download.length}个下载</span>
             </div>
           )}
           {article.tag?.length && (
             <div className='absolute right-0 bottom-0 flex flex-col items-end space-y-1'>
               {article.tag.map(item => (
-                <div className='py-1 px-2 text-white text-xs line-clamp-1 text-ellipsis bg-black/50 rounded'>
+                <div key={item.id} className='py-1 px-2 text-white text-xs line-clamp-1 text-ellipsis bg-black/50'>
                   <span>
                     {item.name}
                   </span>
@@ -48,31 +61,29 @@ export default function PortraitCard({
             </div>
           )}
         </AspectRatio>
-        <div className='flex flex-col space-t-3 p-3'>
-          <h2 className='text-base text-ellipsis line-clamp-1'>
+        <div className='flex flex-col p-3 gap-2'>
+          <h2 className='text-base text-ellipsis line-clamp-1 font-medium'>
             {article.title}
           </h2>
-          <div className='flex items-center'>
-            <div className='shrink-0 bg-red-400 rounded px-2 py-1'>
-              <span>{article.category?.name}</span>
+          <div className='grid grid-cols-4 gap-1 text-xs text-gray-500'>
+            <div className='flex items-center justify-center'>
+              <CloudDownload className="w-3 h-3 mr-1" />
+              <span>{formatNumber(article.download?.length || 0)}</span>
             </div>
-            <div className='flex-1 flex place-content-between space-x-3'>
-              <div className='flex items-center text-xs'>
-                <ThumbsUp />
-                <span>{article.likes}</span>
-              </div>
-              <div className='flex items-center text-xs'>
-                <MessageCircle />
-                <span>{article.comments}</span>
-              </div>
-              <div className='flex items-center text-xs'>
-                <Eye />
-                <span>{article.views}</span>
-              </div>
+            <div className='flex items-center justify-center'>
+              <ThumbsUp className="w-3 h-3 mr-1" />
+              <span>{formatNumber(article.likes)}</span>
+            </div>
+            <div className='flex items-center justify-center'>
+              <MessageCircle className="w-3 h-3 mr-1" />
+              <span>{formatNumber(article.comments)}</span>
+            </div>
+            <div className='flex items-center justify-center'>
+              <Eye className="w-3 h-3 mr-1" />
+              <span>{formatNumber(article.views)}</span>
             </div>
           </div>
         </div>
-
       </Link>
     </div>
   );
