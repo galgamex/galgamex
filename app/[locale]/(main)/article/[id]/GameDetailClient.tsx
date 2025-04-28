@@ -17,162 +17,19 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { Article } from "@/types/article";
+import { Comment } from "@/types/comment";
+import { Prisma } from "@prisma/client";
+
 import { AlertCircle, Download, Eye, HeartIcon, Info, MessageCircle, MoreVertical, Pencil, Share2Icon, StarIcon, ThumbsUp, Trash2 } from "lucide-react";
 import Image from "next/image";
 import React, { TouchEvent, useRef, useState } from "react";
 
-// 游戏数据类型
-type GameData = {
-  id: number;                  // 文章/游戏ID
-  title: string;               // 文章/游戏标题
-  content: string;             // 文章/游戏详细内容
-  avatar: string | null;       // 文章/游戏头像
-  cover: string | null;        // 文章/游戏封面图
-  images: string | null;       // 文章/游戏图片集合（JSON字符串）
-  summary: string | null;      // 文章/游戏简介
-  size: string | null;         // 游戏大小
-  status: string;              // 状态（草稿、发布等）
-  stage: string;               // 分级（全年龄、R15、R18等）
-  isTop: boolean;              // 是否置顶
-  isHot: boolean;              // 是否热门
-  categoryId: number | null;   // 分类ID
-  authorId: number | null;     // 作者ID
-  comments: number;            // 评论数量
-  views: number;               // 查看次数
-  likes: number;               // 点赞数量
-  downloads: number;           // 下载次数
-  type: string;                // 类型（文章或论坛）
-  // 以下是新增字段
-  originalTitle: string | null; // 原始标题（非中文标题）
-  releaseDate: string | null;   // 发布日期
-  developer: string | null;     // 开发商
-  publisher: string | null;     // 发行商
-  rating: number;               // 评分
-  favorites: number;            // 收藏数量
-  shares: number;               // 分享次数
-  reviewCount: number;          // 评论计数
-  videos: string | null;        // 视频（JSON字符串）
-
-  // 关联数据
-  category?: {                  // 分类信息
-    id: number;
-    name: string;
-    alias?: string;
-  };
-  author?: {                    // 作者信息
-    id: number;
-    username: string;
-    nickname?: string;
-    avatar?: string;
-  };
-  tags?: {                      // 标签列表
-    id: number;
-    name: string;
-  }[];
-  patches?: {                   // 补丁列表
-    id: number;
-    name: string;
-    translator?: string;
-    version: string;
-    gameVersion?: string;
-    size?: string;
-    description?: string;
-    downloads: number;
-    rating: number;
-    status: string;
-    features?: string;
-    code?: string;
-    unzipCode?: string;
-    authorId: number;
-    createdAt: string;
-  }[];
-  saves?: {                     // 存档列表
-    id: number;
-    name: string;
-    description?: string;
-    size?: string;
-    gameVersion?: string;
-    downloads: number;
-    rating: number;
-    status: string;
-    features?: string;
-    code?: string;
-    unzipCode?: string;
-    authorId: number;
-    createdAt: string;
-  }[];
-  characters?: {                // 角色列表
-    id: number;
-    name: string;
-    nameJp?: string;
-    avatar?: string;
-    images?: string;
-    description?: string;
-    cv?: string;
-    cvJp?: string;
-    traits?: string;
-    birthday?: string;
-    height?: string;
-    weight?: string;
-    age?: string;
-    hobby?: string;
-    isMain: boolean;
-    isHeroine: boolean;
-  }[];
-  downloadLinks?: {             // 下载链接
-    id: number;
-    type: string;
-    url: string;
-    code?: string;
-    unzipCode?: string;
-    count: number;
-    status: string;
-  }[];
-  recommendations?: {           // 推荐游戏
-    id: number;
-    recId: number;
-    recArticle?: {
-      id: number;
-      title: string;
-      cover?: string;
-      rating: number;
-    };
-  }[];
-
-  // 添加评论数据
-  commentList?: Comment[];
-};
-
-// 用户类型
-type User = {
-  id: number;
-  username: string;
-  nickname?: string;
-  avatar?: string;
-  role: string;
-};
-
-// 评论类型
-type Comment = {
-  id: number;
-  content: string;
-  likes: number;
-  status: string;
-  articleId: number;
-  authorId: number;
-  rootId?: number;
-  parentId?: number;
-  emoji?: string;
-  createdAt: string;
-  updatedAt?: string;
-  author?: User;
-  replies?: Comment[];
-  isUserLiked?: boolean; // 当前用户是否点赞
-};
-
 type GameDetailClientProps = {
-  gameData: GameData;
+  gameData: Article;
 };
+
+
 
 export default function GameDetailClient({ gameData }: GameDetailClientProps) {
   const [selectedCharacter, setSelectedCharacter] = useState<any | null>(null);
@@ -195,7 +52,7 @@ export default function GameDetailClient({ gameData }: GameDetailClientProps) {
   const [showSwipeIndicator, setShowSwipeIndicator] = useState(false);
 
   // 评论相关状态
-  const [comments, setComments] = useState<Comment[]>(gameData.commentList || []);
+  const [comments, setComments] = useState<Prisma.CommentUncheckedCreateInput[]>([]);
   const [commentContent, setCommentContent] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingComment, setEditingComment] = useState<Comment | null>(null);
@@ -418,7 +275,7 @@ export default function GameDetailClient({ gameData }: GameDetailClientProps) {
       if (editingComment) {
         const updatedComments = comments.map(comment =>
           comment.id === editingComment.id
-            ? { ...comment, content: commentContent, updatedAt: new Date().toISOString() }
+            ? { ...comment, content: commentContent }
             : comment
         );
         setComments(updatedComments);
@@ -430,8 +287,8 @@ export default function GameDetailClient({ gameData }: GameDetailClientProps) {
       }
       // 如果是回复评论
       else if (replyToComment) {
-        const newComment: Comment = {
-          id: comments.length ? Math.max(...comments.map(c => c.id)) + 1 : 1,
+        const newComment: Prisma.CommentUncheckedCreateInput = {
+
           content: commentContent,
           likes: 0,
           status: 'PUBLISH',
@@ -439,15 +296,10 @@ export default function GameDetailClient({ gameData }: GameDetailClientProps) {
           authorId: 1, // 假设当前用户ID为1
           parentId: replyToComment.id,
           rootId: replyToComment.rootId || replyToComment.id,
-          createdAt: new Date().toISOString(),
-          author: {
-            id: 1,
-            username: 'current_user',
-            nickname: '当前用户',
-            avatar: 'https://t.alcy.cc/pc',
-            role: 'USER'
-          },
-          isUserLiked: false
+          emoji: null,
+          ip: null,
+          createdAt: null,
+          updatedAt: null
         };
 
         setComments([...comments, newComment]);
@@ -459,23 +311,18 @@ export default function GameDetailClient({ gameData }: GameDetailClientProps) {
       }
       // 如果是新评论
       else {
-        const newComment: Comment = {
-          id: comments.length ? Math.max(...comments.map(c => c.id)) + 1 : 1,
+        const newComment: Prisma.CommentUncheckedCreateInput = {
           content: commentContent,
           likes: 0,
           status: 'PUBLISH',
           articleId: gameData.id,
-          authorId: 1, // 假设当前用户ID为1
-          createdAt: new Date().toISOString(),
-          author: {
-            id: 1,
-            username: 'current_user',
-            nickname: '当前用户',
-            avatar: 'https://t.alcy.cc/pc',
-            role: 'USER'
-          },
-          replies: [],
-          isUserLiked: false
+          authorId: 1,
+          rootId: null,
+          parentId: null,
+          emoji: null,
+          ip: null,
+          createdAt: null,
+          updatedAt: null
         };
 
         setComments([...comments, newComment]);
@@ -552,7 +399,7 @@ export default function GameDetailClient({ gameData }: GameDetailClientProps) {
   };
 
   // 评论组件
-  const CommentItem = ({ comment, isReply = false }: { comment: Comment, isReply?: boolean }) => {
+  const CommentItem = ({ comment, isReply = false }: { comment: Prisma.CommentUncheckedCreateInput, isReply?: boolean }) => {
     const isOwner = comment.authorId === 1; // 假设当前用户ID为1
 
     return (
@@ -566,7 +413,7 @@ export default function GameDetailClient({ gameData }: GameDetailClientProps) {
           <div className="flex justify-between items-start">
             <div>
               <div className="font-medium">{comment.author?.nickname || comment.author?.username || '匿名用户'}</div>
-              <div className="text-xs text-muted-foreground">{formatDate(comment.createdAt)}{comment.updatedAt && ' (已编辑)'}</div>
+              <div className="text-xs text-muted-foreground">{formatDate(comment?.createdAt?.toISOString()!)}{comment.updatedAt && ' (已编辑)'}</div>
             </div>
 
             {isOwner && (
@@ -639,8 +486,8 @@ export default function GameDetailClient({ gameData }: GameDetailClientProps) {
         <div className="w-full md:w-1/3 lg:w-1/4 max-w-[250px] mx-auto md:mx-0">
           <AspectRatio ratio={3 / 4} className="overflow-hidden rounded-lg relative bg-gray-200 dark:bg-gray-800 shadow-md">
             <Image
-              src="https://t.alcy.cc/pc"
-              alt={gameData.title}
+              src={gameData.avatar || ''}
+              alt={gameData.title || ''}
               fill
               sizes="(max-width: 768px) 300px, (max-width: 1024px) 250px, 200px"
               className="object-cover"
@@ -653,8 +500,8 @@ export default function GameDetailClient({ gameData }: GameDetailClientProps) {
         <div className="flex-1 flex flex-col">
           <div className="flex-1">
             <div className="flex flex-col gap-3">
-              <h1 className="text-3xl font-bold">{gameData.title}</h1>
-              <div className="text-muted-foreground text-sm">原名: {gameData.originalTitle}</div>
+              <h1 className="text-3xl font-bold line-clamp-2">{gameData.title}</h1>
+              <div className="text-muted-foreground text-sm line-clamp-2">原名: {gameData.originalTitle}</div>
 
               <div className="flex flex-col gap-2 text-sm">
                 <div className="flex items-center gap-1.5">
@@ -663,11 +510,11 @@ export default function GameDetailClient({ gameData }: GameDetailClientProps) {
                 </div>
                 <div className="flex items-center gap-1.5">
                   <span className="text-muted-foreground w-16">开发商:</span>
-                  <span>{gameData.developer}</span>
+                  <span>{gameData.developer?.name}</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <span className="text-muted-foreground w-16">发行商:</span>
-                  <span>{gameData.publisher}</span>
+                  <span>{gameData.publisher?.name}</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <span className="text-muted-foreground w-16">评分:</span>
@@ -748,7 +595,7 @@ export default function GameDetailClient({ gameData }: GameDetailClientProps) {
         <div
           ref={tabsListRef}
           className={cn(
-            "w-full overflow-x-auto pb-2 scrollbar-hide relative",
+            "w-full overflow-x-auto pb-2 scrollbar-hide relative  sticky top-12 bg-background",
             { "swipe-indicator": showSwipeIndicator }
           )}
           onTouchStart={handleTouchStart}
@@ -820,10 +667,10 @@ export default function GameDetailClient({ gameData }: GameDetailClientProps) {
                 ))}
 
                 {/* 截图项目 */}
-                {gameData.images && JSON.parse(gameData.images).map((image: string, index: number) => (
+                {gameData.images && gameData.images.split(',').map((url, index) => (
                   <div key={`screenshot-${index}`} className="w-80 h-48 flex-shrink-0 rounded-md overflow-hidden shadow-md">
                     <Image
-                      src={`https://t.alcy.cc/pc`}
+                      src={url}  // 这里应该使用实际的url而不是固定值
                       alt={`游戏截图 ${index + 1}`}
                       width={320}
                       height={192}
@@ -933,7 +780,7 @@ export default function GameDetailClient({ gameData }: GameDetailClientProps) {
           </div>
 
           <div className="space-y-4">
-            {gameData.patches && gameData.patches.map((patch) => (
+            {gameData.gamePatch && gameData.gamePatch.map((patch) => (
               <div key={patch.id} className="border rounded-lg p-4 bg-card">
                 <div className="flex flex-col md:flex-row md:items-start gap-4">
                   <div className="flex-1">
@@ -943,7 +790,7 @@ export default function GameDetailClient({ gameData }: GameDetailClientProps) {
                       <span>版本: {patch.version}</span>
                       <span>适用游戏版本: {patch.gameVersion || '所有版本'}</span>
                       <span>大小: {patch.size}</span>
-                      <span>发布时间: {patch.createdAt}</span>
+                      <span>发布时间: {patch.createdAt?.toISOString()}</span>
                     </div>
                     <p className="text-sm mb-3">{patch.description}</p>
 
@@ -991,7 +838,7 @@ export default function GameDetailClient({ gameData }: GameDetailClientProps) {
           </div>
 
           <div className="space-y-4">
-            {gameData.saves && gameData.saves.map((save) => (
+            {gameData.gameSave && gameData.gameSave.map((save) => (
               <div key={save.id} className="border rounded-lg p-4 bg-card">
                 <div className="flex flex-col md:flex-row md:items-start gap-4">
                   <div className="flex-1">
@@ -999,7 +846,7 @@ export default function GameDetailClient({ gameData }: GameDetailClientProps) {
                     <div className="text-sm flex flex-wrap gap-x-4 gap-y-1 text-muted-foreground mb-2">
                       <span>适用游戏版本: {save.gameVersion || '所有版本'}</span>
                       <span>大小: {save.size || '未知'}</span>
-                      <span>上传时间: {save.createdAt}</span>
+                      <span>上传时间: {save.createdAt?.toISOString()}</span>
                     </div>
                     <p className="text-sm mb-3">{save.description}</p>
 
@@ -1093,24 +940,24 @@ export default function GameDetailClient({ gameData }: GameDetailClientProps) {
           <h2 className="text-2xl font-bold">相关推荐</h2>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            {gameData.recommendations && gameData.recommendations.map((rec) => (
-              rec.recArticle && (
+            {gameData.recommendedBy && gameData.recommendedBy.map((rec) => (
+              rec && (
                 <div key={rec.id} className="flex flex-col overflow-hidden rounded-lg border bg-card shadow-sm hover:shadow-md transition-shadow">
                   <div className="aspect-[3/4] relative">
                     <Image
-                      src={rec.recArticle.cover || "https://t.alcy.cc/pc"}
-                      alt={rec.recArticle.title}
+                      src={rec.cover || "https://t.alcy.cc/pc"}
+                      alt={rec.title || ''}
                       fill
                       sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 16vw"
                       className="object-cover transition-transform hover:scale-105"
                     />
                   </div>
                   <div className="p-2">
-                    <h3 className="text-sm font-medium line-clamp-2 h-10">{rec.recArticle.title}</h3>
+                    <h3 className="text-sm font-medium line-clamp-2 h-10">{rec.title}</h3>
                     <div className="flex items-center justify-between mt-1 text-xs text-muted-foreground">
                       <div className="flex items-center">
                         <StarIcon className="h-3 w-3 fill-yellow-400 text-yellow-400 mr-1" />
-                        <span>{rec.recArticle.rating.toFixed(1)}</span>
+                        <span>{rec.rating?.toFixed(1)}</span>
                       </div>
                     </div>
                   </div>
