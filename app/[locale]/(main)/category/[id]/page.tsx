@@ -7,7 +7,9 @@ type Params = { params: { id: string; locale: string }; searchParams: { page?: s
 
 // 生成元数据函数（用于SEO）
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
-  const { id } = params;
+  // 确保params已经解析完成
+  const resolvedParams = await Promise.resolve(params);
+  const { id } = resolvedParams;
 
   // 获取分类数据
   const categoryData = await getCategoryData(id);
@@ -72,6 +74,18 @@ async function getArticles(categoryId: string, page: number = 1, pageSize: numbe
     authorId: (i % 10) + 1,
     createdAt: new Date(2024, i % 12, (i % 28) + 1),
     updatedAt: new Date(2024, i % 12, (i % 28) + 1),
+    // 添加缺少的字段
+    publisher: `发行商 ${i % 5 + 1}`,
+    originalTitle: `Original Title ${i + 1}`,
+    releaseDate: `2024-${(i % 12) + 1}-${(i % 28) + 1}`,
+    developer: `开发商 ${i % 5 + 1}`,
+    rating: Math.floor(Math.random() * 5) + 1,
+    favorites: 50 + i * 5,
+    shares: 20 + i * 2,
+    reviewCount: 15 + i,
+    videos: null,
+    downloads: 50 + i * 3, // 下载次数
+
     category: {
       id: parseInt(categoryId),
       name: ["Galgame", "RPG", "AVG", "ADV", "SLG"][parseInt(categoryId) % 5] || "游戏分类",
@@ -107,6 +121,7 @@ async function getArticles(categoryId: string, page: number = 1, pageSize: numbe
       status: Status.PUBLISH,
       code: j === 0 ? "abcd" : null,
       unzipCode: j === 0 ? "1234" : null,
+      count: Math.floor(Math.random() * 100),
       createdAt: new Date(2024, i % 12, (i % 28) + 1),
       updatedAt: null
     }))
@@ -139,7 +154,9 @@ const filterOptions = {
 
 // 主页面组件（服务器组件）
 export default async function CategoryPage({ params, searchParams }: Params) {
-  const { id } = params;
+  // 确保params已经解析完成
+  const resolvedParams = await Promise.resolve(params);
+  const { id } = resolvedParams;
   const page = parseInt(searchParams.page || "1");
   const pageSize = parseInt(searchParams.size || "12");
 
