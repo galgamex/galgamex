@@ -32,6 +32,7 @@ model Article {
   comments   Int          @default(0)                   // 评论数量
   views      Int          @default(0)                   // 查看次数
   likes      Int          @default(0)                   // 点赞数量
+  downloads  Int          @default(0)                   // 下载次数
   type       Type         @default(ARTICLE)             // 类型（文章或论坛）
   // 新增字段
   originalTitle String?   @db.Text                      // 原始标题（非中文标题）
@@ -55,6 +56,7 @@ model Article {
   Character  Character[]                                // 关联角色
   recommendedTo Recommendation[] @relation("articleToArticle")     // 推荐给其他文章
   recommendedBy Recommendation[] @relation("recommendedArticle")   // 被其他文章推荐
+  downloadLogs DownloadLog[]                            // 下载记录
   // Timestamps - 时间戳
   createdAt  DateTime     @default(now())               // 创建时间
   updatedAt  DateTime?    @updatedAt                    // 最后更新时间
@@ -123,6 +125,8 @@ model User {
   like      LikeLog[]                                // 点赞记录
   comment   Comment[]                                // 发表的评论
   category  Category[]                               // 创建的分类
+  submittedReviews Review[] @relation("submittedReviews") // 用户提交的审核
+  reviewedReviews  Review[] @relation("reviewedReviews")  // 用户审核的内容
   // Timestamps - 时间戳
   createdAt DateTime   @default(now())               // 注册时间
   updatedAt DateTime?  @updatedAt                    // 资料更新时间
@@ -132,6 +136,7 @@ model User {
   Download  Download[]                               // 用户上传的下载
   GameSave  GameSave[]                               // 用户上传的存档
   GamePatch GamePatch[]                              // 用户上传的补丁
+  downloadLogs DownloadLog[]                         // 下载记录
 
   @@map("user")
 }
@@ -259,9 +264,11 @@ model Download {
   status    Status       @default(DRAFT)               // 状态（草稿、发布等）
   code      String?      @db.Text                      // 提取码
   unzipCode String?      @db.Text                      // 解压密码
+  count     Int          @default(0)                   // 此链接的下载次数
   // Relations - 关系定义
   author    User?        @relation(fields: [authorId], references: [id], onDelete: Cascade)  // 关联用户
   article   Article?     @relation(fields: [articleId], references: [id], onDelete: Cascade) // 关联文章
+  downloadLogs DownloadLog[]                           // 下载记录
   // Timestamps - 时间戳
   createdAt DateTime     @default(now())               // 创建时间
   updatedAt DateTime?    @updatedAt                    // 更新时间
@@ -431,4 +438,65 @@ model Recommendation {
   updatedAt DateTime? @updatedAt                        // 更新时间
 
   @@map("recommendation")
+}
+
+// 下载记录表 - 记录每次文件下载的详细信息
+model DownloadLog {
+  id           Int       @id @default(autoincrement())  // 记录ID
+  downloadId   Int                                      // 关联的下载资源ID
+  download     Download  @relation(fields: [downloadId], references: [id], onDelete: Cascade) // 关联下载资源
+  articleId    Int?                                     // 关联的文章/游戏ID
+  article      Article?  @relation(fields: [articleId], references: [id], onDelete: SetNull) // 关联文章/游戏
+  userId       Int?                                     // 下载用户ID（可选，未登录用户为空）
+  user         User?     @relation(fields: [userId], references: [id], onDelete: SetNull)    // 关联用户
+  ip           String?   @db.VarChar(50)                // 下载者IP地址
+  ua           String?   @db.Text                       // 用户代理（浏览器信息）
+  referer      String?   @db.Text                       // 来源页面
+  downloadType String?                                  // 下载类型（游戏本体、补丁、存档等）
+  status       Boolean   @default(true)                 // 下载状态（成功/失败）
+  remark       String?   @db.Text                       // 备注信息
+  // Timestamps
+  createdAt    DateTime  @default(now())                // 下载时间
+  updatedAt    DateTime? @updatedAt                     // 更新时间
+
+  @@map("download_log")
+}
+
+// 审核表 - 用于管理用户上传内容的审核流程
+model Review {
+  id          Int       @id @default(autoincrement())  // 审核记录ID
+  title       String                                   // 审核标题
+  content     String?   @db.Text                       // 审核内容描述
+  type        ReviewType                               // 审核类型（补丁、存档等）
+  status      ReviewStatus @default(PENDING)           // 审核状态
+  submitterId Int                                      // 提交者ID
+  reviewerId  Int?                                     // 审核者ID
+  feedback    String?   @db.Text                       // 审核反馈
+  objectId    Int                                      // 关联对象ID
+  objectData  String    @db.Text                       // 对象数据（JSON字符串）
+  // Relations - 关系定义
+  submitter   User      @relation("submittedReviews", fields: [submitterId], references: [id]) // 关联提交者
+  reviewer    User?     @relation("reviewedReviews", fields: [reviewerId], references: [id])   // 关联审核者
+  // Timestamps - 时间戳
+  createdAt   DateTime  @default(now())                // 创建时间
+  updatedAt   DateTime  @updatedAt                     // 更新时间
+  
+  @@map("review")
+}
+
+// 审核类型枚举 - 定义不同的审核内容类型
+enum ReviewType {
+  PATCH       // 游戏补丁
+  SAVE        // 游戏存档
+  DOWNLOAD    // 下载链接
+  CHARACTER   // 游戏角色
+  COMMENT     // 用户评论
+}
+
+// 审核状态枚举 - 定义审核的不同状态
+enum ReviewStatus {
+  PENDING     // 待审核
+  APPROVED    // 已通过
+  REJECTED    // 已拒绝
+  MODIFIED    // 已修改后通过
 }
