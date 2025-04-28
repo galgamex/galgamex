@@ -486,8 +486,8 @@ export default function GameDetailClient({ gameData }: GameDetailClientProps) {
         <div className="w-full md:w-1/3 lg:w-1/4 max-w-[250px] mx-auto md:mx-0">
           <AspectRatio ratio={3 / 4} className="overflow-hidden rounded-lg relative bg-gray-200 dark:bg-gray-800 shadow-md">
             <Image
-              src={gameData.avatar || ''}
-              alt={gameData.title || ''}
+              src={gameData?.avatar || 'https://t.alcy.cc/pc'}
+              alt={gameData?.title || ''}
               fill
               sizes="(max-width: 768px) 300px, (max-width: 1024px) 250px, 200px"
               className="object-cover"
@@ -500,21 +500,21 @@ export default function GameDetailClient({ gameData }: GameDetailClientProps) {
         <div className="flex-1 flex flex-col">
           <div className="flex-1">
             <div className="flex flex-col gap-3">
-              <h1 className="text-3xl font-bold line-clamp-2">{gameData.title}</h1>
-              <div className="text-muted-foreground text-sm line-clamp-2">原名: {gameData.originalTitle}</div>
+              <h1 className="text-3xl font-bold line-clamp-2">{gameData?.title}</h1>
+              <div className="text-muted-foreground text-sm line-clamp-2">原名: {gameData?.originalTitle}</div>
 
               <div className="flex flex-col gap-2 text-sm">
                 <div className="flex items-center gap-1.5">
                   <span className="text-muted-foreground w-16">发售日期:</span>
-                  <span>{gameData.releaseDate}</span>
+                  <span>{gameData?.releaseDate}</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <span className="text-muted-foreground w-16">开发商:</span>
-                  <span>{gameData.developer?.name}</span>
+                  <span>{gameData?.developer?.name}</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <span className="text-muted-foreground w-16">发行商:</span>
-                  <span>{gameData.publisher?.name}</span>
+                  <span>{gameData?.publisher?.name}</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <span className="text-muted-foreground w-16">评分:</span>
@@ -524,7 +524,7 @@ export default function GameDetailClient({ gameData }: GameDetailClientProps) {
                         <StarIcon key={i} className="h-3.5 w-3.5 fill-current" />
                       ))}
                     </span>
-                    <span>{gameData.rating}/10</span>
+                    <span>{gameData?.rating}/10</span>
                   </div>
                 </div>
               </div>
@@ -533,7 +533,7 @@ export default function GameDetailClient({ gameData }: GameDetailClientProps) {
               <div>
                 <div className="flex items-center flex-wrap gap-1.5">
                   <span className="text-muted-foreground text-sm">标签：</span>
-                  {gameData.tags?.map((tag, index) => (
+                  {gameData?.tags?.map((tag, index) => (
                     <span key={index} className="text-xs px-2 py-0.5 bg-secondary/40 rounded-full">
                       {tag.name}
                     </span>
@@ -564,19 +564,19 @@ export default function GameDetailClient({ gameData }: GameDetailClientProps) {
             <div className="flex items-center text-sm text-muted-foreground gap-3 ml-2">
               <span className="flex items-center gap-1" title="查看次数">
                 <Eye size={12} className="opacity-70" />
-                {gameData.views}
+                {gameData?.views}
               </span>
               <span className="flex items-center gap-1" title="下载次数">
                 <Download size={12} className="opacity-70" />
-                {gameData.downloads}
+                {gameData?.downloads}
               </span>
               <span className="flex items-center gap-1" title="收藏次数">
                 <HeartIcon size={12} className="opacity-70" />
-                {gameData.favorites}
+                {gameData?.favorites}
               </span>
               <span className="flex items-center gap-1" title="分享次数">
                 <Share2Icon size={12} className="opacity-70" />
-                {gameData.shares}
+                {gameData?.shares}
               </span>
             </div>
           </div>
@@ -624,7 +624,7 @@ export default function GameDetailClient({ gameData }: GameDetailClientProps) {
             <div className="flex flex-col gap-2">
               <h2 className="text-xl font-semibold">游戏简介</h2>
               <p className="text-muted-foreground leading-relaxed">
-                {gameData.content} {/* 显示游戏详细内容，使用content字段 */}
+                {gameData?.content} {/* 显示游戏详细内容，使用content字段 */}
               </p>
             </div>
           </div>
@@ -637,7 +637,7 @@ export default function GameDetailClient({ gameData }: GameDetailClientProps) {
               {/* 包含视频和截图的滚动区域 */}
               <div className="flex space-x-4 overflow-x-auto py-2 pb-4">
                 {/* 视频项目 */}
-                {gameData.videos && JSON.parse(gameData.videos).map((video: any) => (
+                {gameData?.videos && JSON.parse(gameData?.videos).map((video: any) => (
                   <div
                     key={video.id}
                     className="w-80 h-48 flex-shrink-0 rounded-md overflow-hidden shadow-md relative group cursor-pointer"
@@ -667,7 +667,7 @@ export default function GameDetailClient({ gameData }: GameDetailClientProps) {
                 ))}
 
                 {/* 截图项目 */}
-                {gameData.images && gameData.images.split(',').map((url, index) => (
+                {gameData?.images && gameData?.images?.split(',').map((url, index) => (
                   <div key={`screenshot-${index}`} className="w-80 h-48 flex-shrink-0 rounded-md overflow-hidden shadow-md">
                     <Image
                       src={url}  // 这里应该使用实际的url而不是固定值
@@ -687,7 +687,7 @@ export default function GameDetailClient({ gameData }: GameDetailClientProps) {
         <TabsContent value="characters" className="flex flex-col gap-6">
           <h2 className="text-2xl font-bold">游戏角色</h2>
           <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4">
-            {gameData.characters?.map((character, index) => (
+            {gameData?.characters?.map((character, index) => (
               <div
                 key={index}
                 className="bg-secondary/20 rounded overflow-hidden cursor-pointer"
@@ -695,16 +695,16 @@ export default function GameDetailClient({ gameData }: GameDetailClientProps) {
               >
                 <div className="aspect-[3/4] w-full relative">
                   <Image
-                    src={character.avatar || `https://t.alcy.cc/pc`}
-                    alt={character.name}
+                    src={character?.avatar || `https://t.alcy.cc/pc`}
+                    alt={character?.name}
                     fill
                     sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 16vw"
                     className="object-cover"
                   />
                 </div>
                 <div className="p-2">
-                  <h3 className="text-sm font-medium truncate">{character.name}</h3>
-                  <div className="text-xs text-muted-foreground">CV: {character.cv}</div>
+                  <h3 className="text-sm font-medium truncate">{character?.name}</h3>
+                  <div className="text-xs text-muted-foreground">CV: {character?.cv}</div>
                 </div>
               </div>
             ))}
@@ -780,7 +780,7 @@ export default function GameDetailClient({ gameData }: GameDetailClientProps) {
           </div>
 
           <div className="space-y-4">
-            {gameData.gamePatch && gameData.gamePatch.map((patch) => (
+            {gameData?.gamePatch && gameData?.gamePatch?.map((patch) => (
               <div key={patch.id} className="border rounded-lg p-4 bg-card">
                 <div className="flex flex-col md:flex-row md:items-start gap-4">
                   <div className="flex-1">
@@ -838,7 +838,7 @@ export default function GameDetailClient({ gameData }: GameDetailClientProps) {
           </div>
 
           <div className="space-y-4">
-            {gameData.gameSave && gameData.gameSave.map((save) => (
+            {gameData?.gameSave && gameData?.gameSave?.map((save) => (
               <div key={save.id} className="border rounded-lg p-4 bg-card">
                 <div className="flex flex-col md:flex-row md:items-start gap-4">
                   <div className="flex-1">
@@ -901,14 +901,14 @@ export default function GameDetailClient({ gameData }: GameDetailClientProps) {
 
           <div className="flex justify-between items-center px-4 py-3 bg-muted/30 rounded-lg">
             <div>
-              <div className="text-3xl font-bold">{gameData.rating.toFixed(1)}</div>
-              <div className="text-sm text-muted-foreground">{gameData.reviewCount} 用户评分</div>
+              <div className="text-3xl font-bold">{gameData?.rating?.toFixed(1)}</div>
+              <div className="text-sm text-muted-foreground">{gameData?.reviewCount} 用户评分</div>
             </div>
 
             <div className="flex items-center">
               <div className="flex">
                 {Array(5).fill(0).map((_, i) => (
-                  <StarIcon key={i} className={`h-6 w-6 ${i < Math.round(gameData.rating / 2) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`} />
+                  <StarIcon key={i} className={`h-6 w-6 ${i < Math.round(gameData?.rating / 2) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`} />
                 ))}
               </div>
             </div>
@@ -940,7 +940,7 @@ export default function GameDetailClient({ gameData }: GameDetailClientProps) {
           <h2 className="text-2xl font-bold">相关推荐</h2>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            {gameData.recommendedBy && gameData.recommendedBy.map((rec) => (
+            {gameData?.recommendedBy && gameData?.recommendedBy?.map((rec) => (
               rec && (
                 <div key={rec.id} className="flex flex-col overflow-hidden rounded-lg border bg-card shadow-sm hover:shadow-md transition-shadow">
                   <div className="aspect-[3/4] relative">
@@ -953,11 +953,11 @@ export default function GameDetailClient({ gameData }: GameDetailClientProps) {
                     />
                   </div>
                   <div className="p-2">
-                    <h3 className="text-sm font-medium line-clamp-2 h-10">{rec.title}</h3>
+                    <h3 className="text-sm font-medium line-clamp-2 h-10">{rec?.title}</h3>
                     <div className="flex items-center justify-between mt-1 text-xs text-muted-foreground">
                       <div className="flex items-center">
                         <StarIcon className="h-3 w-3 fill-yellow-400 text-yellow-400 mr-1" />
-                        <span>{rec.rating?.toFixed(1)}</span>
+                        <span>{rec?.rating?.toFixed(1)}</span>
                       </div>
                     </div>
                   </div>
@@ -980,7 +980,7 @@ export default function GameDetailClient({ gameData }: GameDetailClientProps) {
             <AspectRatio ratio={16 / 9} className="bg-black">
               {selectedVideo && (
                 <video
-                  src={selectedVideo.url}
+                  src={selectedVideo?.url}
                   controls
                   autoPlay
                   className="w-full h-full object-contain"
@@ -992,7 +992,7 @@ export default function GameDetailClient({ gameData }: GameDetailClientProps) {
           </div>
           {selectedVideo && (
             <div className="text-sm text-muted-foreground mt-2">
-              {selectedVideo.title} - {selectedVideo.duration}
+              {selectedVideo?.title} - {selectedVideo?.duration}
             </div>
           )}
         </DialogContent>
