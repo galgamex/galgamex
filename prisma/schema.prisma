@@ -37,8 +37,11 @@ model Article {
   // 新增字段
   originalTitle String?   @db.Text                      // 原始标题（非中文标题）
   releaseDate   String?                                 // 发布日期
-  developer     String?                                 // 开发商
-  publisher     String?                                 // 发行商
+  developer     String?                                 // 开发商（纯文本，向后兼容）
+  publisher     String?                                 // 发行商（纯文本，向后兼容）
+  // 新增关联字段
+  developerId  Int?                                     // 开发商ID
+  publisherId  Int?                                     // 发行商ID
   rating        Float     @default(0)                   // 评分
   favorites     Int       @default(0)                   // 收藏数量
   shares        Int       @default(0)                   // 分享数量
@@ -47,6 +50,8 @@ model Article {
   // Relations - 关系定义
   category   Category?    @relation(fields: [categoryId], references: [id], onDelete: SetNull) // 关联分类
   author     User?        @relation(fields: [authorId], references: [id], onDelete: NoAction)  // 关联作者
+  developerRelation Developer? @relation("developedArticles", fields: [developerId], references: [id], onDelete: SetNull) // 关联开发商
+  publisherRelation Publisher? @relation("publishedArticles", fields: [publisherId], references: [id], onDelete: SetNull) // 关联发行商
   tags       ArticleTag[]                               // 关联标签（多对多）
   likeLog    LikeLog[]                                  // 关联点赞记录
   Feedback   Feedback[]                                 // 关联反馈
@@ -499,4 +504,38 @@ enum ReviewStatus {
   APPROVED    // 已通过
   REJECTED    // 已拒绝
   MODIFIED    // 已修改后通过
+}
+
+// 发行商表 - 存储游戏发行商信息
+model Publisher {
+  id         Int       @id @default(autoincrement()) // 发行商ID
+  name       String    @unique                       // 发行商名称
+  alias      String?                                 // 发行商别名
+  logo       String?   @db.Text                      // 发行商LOGO
+  country    String?                                 // 发行商所在国家
+  website    String?   @db.Text                      // 发行商官网
+  description String?  @db.Text                      // 发行商描述
+  foundedYear Int?                                   // 成立年份
+  articles   Article[] @relation("publishedArticles") // 发行的游戏
+  createdAt  DateTime  @default(now())               // 创建时间
+  updatedAt  DateTime? @updatedAt                    // 更新时间
+
+  @@map("publisher")
+}
+
+// 开发商表 - 存储游戏开发商信息
+model Developer {
+  id         Int       @id @default(autoincrement()) // 开发商ID
+  name       String    @unique                       // 开发商名称
+  alias      String?                                 // 开发商别名
+  logo       String?   @db.Text                      // 开发商LOGO
+  country    String?                                 // 开发商所在国家
+  website    String?   @db.Text                      // 开发商官网
+  description String?  @db.Text                      // 开发商描述
+  foundedYear Int?                                   // 成立年份
+  articles   Article[] @relation("developedArticles") // 开发的游戏
+  createdAt  DateTime  @default(now())               // 创建时间
+  updatedAt  DateTime? @updatedAt                    // 更新时间
+
+  @@map("developer")
 }
