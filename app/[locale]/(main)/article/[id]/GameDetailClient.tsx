@@ -535,7 +535,7 @@ export default function GameDetailClient({ gameData }: GameDetailClientProps) {
                   <span className="text-muted-foreground text-sm">标签：</span>
                   {gameData?.tags?.map((tag, index) => (
                     <span key={index} className="text-xs px-2 py-0.5 bg-secondary/40 rounded-full">
-                      {tag.name}
+                      {tag.tag.name}
                     </span>
                   ))}
                 </div>
