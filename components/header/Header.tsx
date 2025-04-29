@@ -16,7 +16,7 @@ const Header = () => {
 
   return (
     <header className="sticky top-0 z-50 border-b bg-background py-2 w-full">
-      <div className="mx-auto px-2 sm:px-4 lg:px-12">
+      <div className="container mx-auto px-4">
         <nav className="relative z-50 flex justify-between gap-x-6">
           <div className="flex items-center md:gap-x-12">
             <I18nLink
