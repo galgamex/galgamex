@@ -84,6 +84,16 @@ export default async function ArticleDetailPage({ params }: Params) {
     id: Number(id),
   });
 
+  // 如果没有找到游戏数据，可以处理错误情况
+  if (!gameData) {
+    // 这里可以选择重定向到404页面或显示错误信息
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-2xl font-bold">游戏不存在或已被删除</h1>
+      </div>
+    );
+  }
+
   // 获取分类路径数据
   const categoryPath = gameData?.categoryId
     ? await getCategoryPath(gameData.categoryId)
