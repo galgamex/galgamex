@@ -22,7 +22,7 @@ export default function PortraitCard({
   lang?: string
 }) {
   return (
-    <div className='relative shadow bg-background'>
+    <div className='relative shadow bg-background dark:bg-muted rounded-lg overflow-hidden'>
       <Link
         href={`/article/${article.id}`}
         className='flex flex-col'
@@ -32,9 +32,8 @@ export default function PortraitCard({
             src={article.avatar || article.cover || article.images?.split(',')[0] || ''}
             alt={article.title!}
             draggable={false}
-            width={500}
-            height={750}
-            className='object-cover bg-gray-100 dark:bg-gray-800 hover:scale-110 transition-transform duration-300'
+            fill
+            className='object-cover bg-muted hover:scale-110 transition-transform duration-300'
           />
           {/* 大小信息 */}
           {article.size && (
@@ -49,12 +48,12 @@ export default function PortraitCard({
               <span>{article.download.length}个下载</span>
             </div>
           )}
-          {article.tag?.length && (
+          {article.tags?.length && (
             <div className='absolute right-0 bottom-0 flex flex-col items-end space-y-1'>
-              {article.tag.map(item => (
-                <div key={item.id} className='py-1 px-2 text-white text-xs line-clamp-1 text-ellipsis bg-black/50'>
+              {article.tags.map(tag => (
+                <div key={tag.tagId} className='py-1 px-2 text-white text-xs line-clamp-1 text-ellipsis bg-black/50'>
                   <span>
-                    {item.name}
+                    {tag.tag.name}
                   </span>
                 </div>
               ))}

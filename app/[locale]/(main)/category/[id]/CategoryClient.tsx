@@ -288,7 +288,7 @@ export default function CategoryClient({ articles, pagination, filterOptions, ca
           <div className="relative flex-1 overflow-hidden">
             <div
               ref={tagScrollRef}
-              className="flex gap-2 overflow-x-auto pb-2 no-scrollbar"
+              className="flex flex-wrap gap-2 overflow-x-auto pb-2 no-scrollbar"
               style={{ msOverflowStyle: 'none', scrollbarWidth: 'none' }}
             >
               {(filterOptions.tags || ["全部"]).map((tag) => (
@@ -449,7 +449,7 @@ export default function CategoryClient({ articles, pagination, filterOptions, ca
   return (
     <>
       {/* 顶部筛选区域 */}
-      <div className="bg-white dark:bg-gray-800 shadow-sm p-4 mb-6 rounded-lg">
+      <div className="bg-white dark:bg-muted shadow-sm p-4 mb-6 rounded-lg">
         {/* 搜索框 */}
         <div className="mb-4 relative">
           <div className="relative">
@@ -524,11 +524,11 @@ export default function CategoryClient({ articles, pagination, filterOptions, ca
       )}
 
       {/* 分页信息 */}
-      {filteredArticles.length > 0 && (
+      {/* {filteredArticles.length > 0 && (
         <div className="text-center text-sm text-gray-500 mb-8">
           第 {pagination.currentPage} 页，共 {pagination.totalPages} 页，总计 {pagination.totalItems} 个游戏
         </div>
-      )}
+      )} */}
     </>
   );
 }

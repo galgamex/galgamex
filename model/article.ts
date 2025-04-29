@@ -41,16 +41,23 @@ export const findArticles = async (params: Prisma.ArticleWhereInput) => {
   return prisma.article.findMany(
     {
       where: params,
-      include: {  // 包含基本关联模型数据
-        author: true,
-        category: true,
-        tags: {
+      include: {  // 包含所有关联模型数据
+        author: true,      // 作者信息
+        category: true,    // 分类信息
+        tags: {           // 标签列表（包含标签详情）
           include: {
-            tag: true
+            tag: true     // 包含标签对象
           }
         },
-        publisher: true,
-        developer: true,
+        publisher: true,   // 发布者信息
+        developer: true,   // 开发者信息
+        character: true,   // 角色信息
+        download: true,    // 下载信息
+        feedback: true,    // 反馈信息
+        gameSave: true,    // 游戏存档
+        gamePatch: true,   // 游戏补丁
+        recommendedTo: true, // 推荐给其他文章
+        recommendedBy: true // 被其他文章推荐
       }
     }
   )

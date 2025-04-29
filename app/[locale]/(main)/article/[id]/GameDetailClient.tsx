@@ -20,20 +20,20 @@ import { cn } from "@/lib/utils";
 import { Article } from "@/types/article";
 import { Comment } from "@/types/comment";
 import { Prisma } from "@prisma/client";
+import { DialogClose } from "@radix-ui/react-dialog";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
-import { AlertCircle, ChevronRight, Download, Eye, HeartIcon, Info, MessageCircle, MoreVertical, Pencil, Share2Icon, StarIcon, ThumbsUp, Trash2 } from "lucide-react";
+import { AlertCircle, Download, Eye, HeartIcon, Info, MessageCircle, MoreVertical, Pencil, Share2Icon, StarIcon, ThumbsUp, Trash2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React, { TouchEvent, useRef, useState } from "react";
 
+
 type GameDetailClientProps = {
   gameData: Article;
-  categoryPath?: Array<{ id: number; name: string; }>;
-};
+}
 
-
-
-export default function GameDetailClient({ gameData, categoryPath = [] }: GameDetailClientProps) {
+export default function GameDetailClient({ gameData }: GameDetailClientProps) {
   const [selectedCharacter, setSelectedCharacter] = useState<any | null>(null);
   const [showPatchUploadDialog, setShowPatchUploadDialog] = useState(false);
   const [showSaveUploadDialog, setShowSaveUploadDialog] = useState(false);
@@ -41,6 +41,8 @@ export default function GameDetailClient({ gameData, categoryPath = [] }: GameDe
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   const [selectedVideo, setSelectedVideo] = useState<any | null>(null);
   const { toast } = useToast();
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+
 
   // Tab相关状态和引用
   const [activeTab, setActiveTab] = useState("info");
@@ -482,42 +484,8 @@ export default function GameDetailClient({ gameData, categoryPath = [] }: GameDe
   };
 
   return (
-    <div className="container">
-      {/* 面包屑导航 */}
-      <nav className="flex mb-4 text-sm text-muted-foreground">
-        <ol className="flex items-center space-x-1">
-          <li>
-            <Link href="/" className="hover:text-primary transition-colors">
-              首页
-            </Link>
-          </li>
-
-          {categoryPath.map((category, index) => (
-            <React.Fragment key={category.id}>
-              <li>
-                <ChevronRight className="h-4 w-4" />
-              </li>
-              <li>
-                <Link
-                  href={`/category/${category.id}`}
-                  className="hover:text-primary transition-colors"
-                >
-                  {category.name}
-                </Link>
-              </li>
-            </React.Fragment>
-          ))}
-
-          <li>
-            <ChevronRight className="h-4 w-4" />
-          </li>
-          <li className="text-foreground font-medium truncate" aria-current="page">
-            {gameData?.title}
-          </li>
-        </ol>
-      </nav>
-
-      <div className="flex flex-col md:flex-row gap-6 mb-4">
+    <div className="container flex flex-col gap-6">
+      <div className="flex flex-col md:flex-row gap-6">
         {/* 游戏封面 */}
         <div className="w-full md:w-1/3 lg:w-1/4 max-w-[250px] mx-auto md:mx-0">
           <AspectRatio ratio={3 / 4} className="overflow-hidden rounded-lg relative bg-gray-200 dark:bg-gray-800 shadow-md">
@@ -570,9 +538,9 @@ export default function GameDetailClient({ gameData, categoryPath = [] }: GameDe
                 <div className="flex items-center flex-wrap gap-1.5">
                   <span className="text-muted-foreground text-sm">标签：</span>
                   {gameData?.tags?.map((tag, index) => (
-                    <span key={index} className="text-xs px-2 py-0.5 bg-secondary/40 rounded-full">
+                    <Link href={`/tag/${tag.tagId}`} key={tag.tagId} className="text-xs px-2 py-0.5 bg-secondary/80 rounded-lg">
                       {tag.tag?.name}
-                    </span>
+                    </Link>
                   ))}
                 </div>
               </div>
@@ -631,7 +599,7 @@ export default function GameDetailClient({ gameData, categoryPath = [] }: GameDe
         <div
           ref={tabsListRef}
           className={cn(
-            "w-full overflow-x-auto pb-2 scrollbar-hide relative  sticky top-12 bg-background",
+            "w-full overflow-x-auto scrollbar-hide relative  mb-4 sticky top-[54px] z-10",
             { "swipe-indicator": showSwipeIndicator }
           )}
           onTouchStart={handleTouchStart}
@@ -640,7 +608,7 @@ export default function GameDetailClient({ gameData, categoryPath = [] }: GameDe
           onTouchCancel={handleTouchCancel}
         >
           <div className="flex justify-start w-full">
-            <TabsList className="w-full h-auto flex flex-nowrap justify-start gap-0.5 mb-4 bg-transparent min-w-max">
+            <TabsList className="rounded-none w-full h-auto flex flex-nowrap bg-background dark:bg-muted dark:rounded-lg justify-start gap-0.5 min-w-max">
               {tabOptions.map((tab) => (
                 <TabsTrigger
                   key={tab.value}
@@ -658,7 +626,7 @@ export default function GameDetailClient({ gameData, categoryPath = [] }: GameDe
         <TabsContent value="info" className="flex flex-col gap-6">
           <div>
             <div className="flex flex-col gap-2">
-              <h2 className="text-xl font-semibold">游戏简介</h2>
+              <h2 className="text-xl font-semibold leading-9">游戏简介</h2>
               <p className="text-muted-foreground leading-relaxed">
                 {gameData?.content} {/* 显示游戏详细内容，使用content字段 */}
               </p>
@@ -704,29 +672,55 @@ export default function GameDetailClient({ gameData, categoryPath = [] }: GameDe
 
                 {/* 截图项目 */}
                 {gameData?.images && gameData?.images?.split(',').map((url, index) => (
-                  <div key={`screenshot-${index}`} className="w-80 h-48 flex-shrink-0 rounded-md overflow-hidden shadow-md">
+                  <div
+                    key={`screenshot-${index}`}
+                    className="w-80 h-48 flex-shrink-0 rounded-md overflow-hidden shadow-md relative group cursor-pointer"
+                    onClick={() => setSelectedImage(url)}
+                  >
                     <Image
-                      src={url}  // 这里应该使用实际的url而不是固定值
+                      src={url}
                       alt={`游戏截图 ${index + 1}`}
                       width={320}
                       height={192}
                       className="w-full h-full object-cover"
                     />
+                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                      </svg>
+                    </div>
                   </div>
                 ))}
               </div>
             </div>
           </div>
+          {/* 图片放大弹窗 */}
+          <Dialog open={!!selectedImage} onOpenChange={(open) => !open && setSelectedImage(null)}>
+            <DialogContent className="max-w-[90vw] max-h-[90vh]" aria-describedby={undefined}>
+              <VisuallyHidden>
+                <DialogTitle>图片放大视图</DialogTitle>
+              </VisuallyHidden>
+              <div className="relative w-full h-[80vh] min-h-[300px]"> {/* 添加固定高度和最小高度 */}
+                <Image
+                  src={selectedImage || 'https://t.alcy.cc/pc'}
+                  alt="放大图片"
+                  fill
+                  className="object-contain"
+                />
+              </div>
+            </DialogContent>
+          </Dialog>
         </TabsContent>
 
         {/* 角色介绍内容 */}
         <TabsContent value="characters" className="flex flex-col gap-6">
-          <h2 className="text-2xl font-bold">游戏角色</h2>
+          <h2 className="text-xl font-semibold leading-9">游戏角色</h2>
           <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4">
             {gameData?.character?.map((character, index) => (
               <div
                 key={index}
-                className="bg-secondary/20 rounded overflow-hidden cursor-pointer"
+                className=" rounded overflow-hidden cursor-pointer bg-background dark:bg-muted shadow"
                 onClick={() => setSelectedCharacter(character)}
               >
                 <div className="aspect-[3/4] w-full relative">
@@ -748,12 +742,13 @@ export default function GameDetailClient({ gameData, categoryPath = [] }: GameDe
 
           {/* 角色详情弹窗 */}
           <Dialog open={!!selectedCharacter} onOpenChange={(open: boolean) => !open && setSelectedCharacter(null)}>
-            <DialogContent className="sm:max-w-md md:max-w-2xl">
+            <DialogContent className="sm:max-w-md md:max-w-2xl max-h-[80vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle className="text-xl md:text-2xl">{selectedCharacter?.name}</DialogTitle>
                 <DialogDescription className="text-sm md:text-base">
                   CV: {selectedCharacter?.cv}
                 </DialogDescription>
+                <DialogClose />
               </DialogHeader>
               <div className="flex flex-col sm:flex-row gap-4 md:gap-6">
                 <div className="sm:w-1/3">
@@ -809,7 +804,7 @@ export default function GameDetailClient({ gameData, categoryPath = [] }: GameDe
         {/* 汉化补丁内容 */}
         <TabsContent value="patches" className="flex flex-col gap-6">
           <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-bold">汉化补丁</h2>
+            <h2 className="text-xl font-semibold leading-9">汉化补丁</h2>
             <Button onClick={() => checkLoginStatus(() => setShowPatchUploadDialog(true))}>
               上传汉化补丁
             </Button>
@@ -867,7 +862,7 @@ export default function GameDetailClient({ gameData, categoryPath = [] }: GameDe
         {/* 存档下载内容 */}
         <TabsContent value="saves" className="flex flex-col gap-6">
           <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-bold">游戏存档</h2>
+            <h2 className="text-xl font-semibold leading-9">游戏存档</h2>
             <Button onClick={() => checkLoginStatus(() => setShowSaveUploadDialog(true))}>
               上传存档
             </Button>
@@ -922,7 +917,7 @@ export default function GameDetailClient({ gameData, categoryPath = [] }: GameDe
 
         <TabsContent value="reviews" className="flex flex-col gap-6">
           <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-bold">用户评价</h2>
+            <h2 className="text-xl font-semibold leading-9">用户评价</h2>
             <Button
               onClick={() => checkLoginStatus(() => {
                 setShowCommentDialog(true);
@@ -973,7 +968,7 @@ export default function GameDetailClient({ gameData, categoryPath = [] }: GameDe
         </TabsContent>
 
         <TabsContent value="recommendations" className="flex flex-col gap-6">
-          <h2 className="text-2xl font-bold">相关推荐</h2>
+          <h2 className="text-xl font-semibold leading-9">相关推荐</h2>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
             {gameData?.recommendedBy && gameData?.recommendedBy?.map((rec) => (

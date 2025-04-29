@@ -47,35 +47,7 @@ export async function generateMetadata({
   };
 }
 
-// 获取分类路径
-async function getCategoryPath(categoryId: number) {
-  if (!categoryId) return [];
-
-  // 获取分类及其所有父分类
-  const path = [];
-  let currentCategory = await prisma.category.findUnique({
-    where: { id: categoryId },
-    select: { id: true, name: true, parentId: true }
-  });
-
-  if (currentCategory) {
-    path.unshift({ id: currentCategory.id, name: currentCategory.name });
-
-    // 循环获取所有父分类
-    while (currentCategory?.parentId) {
-      currentCategory = await prisma.category.findUnique({
-        where: { id: currentCategory.parentId },
-        select: { id: true, name: true, parentId: true }
-      });
-
-      if (currentCategory) {
-        path.unshift({ id: currentCategory.id, name: currentCategory.name });
-      }
-    }
-  }
-
-  return path;
-}
+// 获取分类路
 
 // 主页面组件（服务器组件）
 export default async function ArticleDetailPage({ params }: Params) {
@@ -83,6 +55,7 @@ export default async function ArticleDetailPage({ params }: Params) {
   const gameData = await findArticle({
     id: Number(id),
   });
+
 
   // 如果没有找到游戏数据，可以处理错误情况
   if (!gameData) {
@@ -94,11 +67,7 @@ export default async function ArticleDetailPage({ params }: Params) {
     );
   }
 
-  // 获取分类路径数据
-  const categoryPath = gameData?.categoryId
-    ? await getCategoryPath(gameData.categoryId)
-    : [];
 
   // 服务器端渲染游戏的基本信息（对SEO友好）
-  return <GameDetailClient gameData={gameData} categoryPath={categoryPath} />;
+  return <GameDetailClient gameData={gameData} />;
 }
