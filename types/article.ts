@@ -11,6 +11,7 @@ import {
   LikeLog,
   Article as PrismaArticle,
   Publisher,
+  Tag,
   User
 } from "@prisma/client";
 
@@ -27,7 +28,7 @@ export type Article = PrismaArticle & {
   updatedAt?: Date;
 
   // 关联字段
-  tags?: ArticleTag[];
+  tags?: (ArticleTag & { tag: Tag })[];
   category?: Category;
   author?: User;
   publisher?: Publisher;
