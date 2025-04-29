@@ -21,17 +21,19 @@ import { Article } from "@/types/article";
 import { Comment } from "@/types/comment";
 import { Prisma } from "@prisma/client";
 
-import { AlertCircle, Download, Eye, HeartIcon, Info, MessageCircle, MoreVertical, Pencil, Share2Icon, StarIcon, ThumbsUp, Trash2 } from "lucide-react";
+import { AlertCircle, ChevronRight, Download, Eye, HeartIcon, Info, MessageCircle, MoreVertical, Pencil, Share2Icon, StarIcon, ThumbsUp, Trash2 } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import React, { TouchEvent, useRef, useState } from "react";
 
 type GameDetailClientProps = {
   gameData: Article;
+  categoryPath?: Array<{ id: number; name: string; }>;
 };
 
 
 
-export default function GameDetailClient({ gameData }: GameDetailClientProps) {
+export default function GameDetailClient({ gameData, categoryPath = [] }: GameDetailClientProps) {
   const [selectedCharacter, setSelectedCharacter] = useState<any | null>(null);
   const [showPatchUploadDialog, setShowPatchUploadDialog] = useState(false);
   const [showSaveUploadDialog, setShowSaveUploadDialog] = useState(false);
@@ -480,7 +482,41 @@ export default function GameDetailClient({ gameData }: GameDetailClientProps) {
   };
 
   return (
-    <div className="container py-8">
+    <div className="container">
+      {/* 面包屑导航 */}
+      <nav className="flex mb-4 text-sm text-muted-foreground">
+        <ol className="flex items-center space-x-1">
+          <li>
+            <Link href="/" className="hover:text-primary transition-colors">
+              首页
+            </Link>
+          </li>
+
+          {categoryPath.map((category, index) => (
+            <React.Fragment key={category.id}>
+              <li>
+                <ChevronRight className="h-4 w-4" />
+              </li>
+              <li>
+                <Link
+                  href={`/category/${category.id}`}
+                  className="hover:text-primary transition-colors"
+                >
+                  {category.name}
+                </Link>
+              </li>
+            </React.Fragment>
+          ))}
+
+          <li>
+            <ChevronRight className="h-4 w-4" />
+          </li>
+          <li className="text-foreground font-medium truncate" aria-current="page">
+            {gameData?.title}
+          </li>
+        </ol>
+      </nav>
+
       <div className="flex flex-col md:flex-row gap-6 mb-4">
         {/* 游戏封面 */}
         <div className="w-full md:w-1/3 lg:w-1/4 max-w-[250px] mx-auto md:mx-0">
@@ -535,7 +571,7 @@ export default function GameDetailClient({ gameData }: GameDetailClientProps) {
                   <span className="text-muted-foreground text-sm">标签：</span>
                   {gameData?.tags?.map((tag, index) => (
                     <span key={index} className="text-xs px-2 py-0.5 bg-secondary/40 rounded-full">
-                      {tag.tag.name}
+                      {tag.tag?.name}
                     </span>
                   ))}
                 </div>
