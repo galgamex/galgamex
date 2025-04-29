@@ -1,6 +1,6 @@
 // 服务器组件，不使用"use client"
 import prisma from "@/lib/prisma";
-import { findArticle } from "@/model/article";
+import { Article } from "@/types/article";
 import { Metadata } from "next";
 import GameDetailClient from "./GameDetailClient";
 
@@ -21,7 +21,11 @@ export async function generateMetadata({
     include: {
       category: true,
       author: true,
-      tags: true,
+      tags: {
+        include: {
+          tag: true, // 包含标签的详细信息
+        }
+      },
       publisher: true,
       developer: true,
       character: true,
@@ -51,10 +55,38 @@ export async function generateMetadata({
 // 主页面组件（服务器组件）
 export default async function ArticleDetailPage({ params }: Params) {
   const { id } = await params;
-  const gameData = await findArticle({
-    id: Number(id),
+  // 修改查询方式，确保获取完整的标签数据
+  const gameData = await prisma.article.findUnique({
+    where: { id: Number(id) },
+    include: {
+      category: true,
+      author: true,
+      tags: {
+        include: {
+          tag: true, // 包含每个标签的详细信息
+        }
+      },
+      publisher: true,
+      developer: true,
+      character: true,
+      download: true,
+      recommendedTo: true,
+      recommendedBy: true,
+      downloadLogs: true,
+      likeLog: true,
+      gameSave: true,
+      gamePatch: true,
+    }
   });
 
+  // 确保gameData不为null
+  if (!gameData) {
+    throw new Error("Game not found");
+  }
+
+  // 类型断言为Article类型
+  const articleData = gameData as unknown as Article;
+
   // 服务器端渲染游戏的基本信息（对SEO友好）
-  return <GameDetailClient gameData={gameData} />;
+  return <GameDetailClient gameData={articleData} />;
 }
