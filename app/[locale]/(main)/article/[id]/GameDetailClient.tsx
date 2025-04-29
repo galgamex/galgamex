@@ -723,7 +723,7 @@ export default function GameDetailClient({ gameData, categoryPath = [] }: GameDe
         <TabsContent value="characters" className="flex flex-col gap-6">
           <h2 className="text-2xl font-bold">游戏角色</h2>
           <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4">
-            {gameData?.characters?.map((character, index) => (
+            {gameData?.character?.map((character, index) => (
               <div
                 key={index}
                 className="bg-secondary/20 rounded overflow-hidden cursor-pointer"
