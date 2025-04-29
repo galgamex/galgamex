@@ -38,7 +38,7 @@ export type Article = PrismaArticle & {
   download?: Download[];
   gameSave?: GameSave[];
   gamePatch?: GamePatch[];
-  characters?: Character[];
+  character?: Character[];
   recommendedTo?: Article[];
   recommendedBy?: Article[];
   downloadLogs?: DownloadLog[];
