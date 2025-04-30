@@ -1,4 +1,6 @@
 import prisma from "@/lib/prisma"; // 导入 Prisma 客户端
+import { findCategory } from "@/model/category";
+import { findTags } from "@/model/tag";
 import { Article } from "@/types/article"; // 导入自定义 Article 类型
 import { Status, Type } from "@prisma/client";
 import { Metadata } from "next";
@@ -6,73 +8,29 @@ import { unstable_cache } from "next/cache";
 import CategoryClient from "./CategoryClient";
 
 // 参数类型定义
-type Params = { params: { id: string; locale: string }; searchParams: { page?: string; size?: string } };
-
-// 检查 Prisma 客户端连接是否正常
-async function checkPrismaConnection() {
-  try {
-    // 尝试执行一个简单的查询
-    await prisma.$queryRaw`SELECT 1`;
-    return true;
-  } catch (error) {
-    console.error("Prisma 连接错误:", error);
-    return false;
-  }
-}
+type Params = { params: Promise<{ id: number; locale: string }>; searchParams: { page?: string; size?: string } };
 
 // 缓存获取分类数据的函数
 const getCategoryDataCached = unstable_cache(
-  async (id: string) => {
-    try {
-      // 从数据库获取分类数据
-      const category = await prisma.category.findUnique({
-        where: { id: parseInt(id) },
-      });
-
-      if (!category) {
-        throw new Error(`找不到ID为 ${id} 的分类`);
-      }
-
-      return category;
-    } catch (error) {
-      console.error("获取分类数据失败:", error);
-      // 获取失败时返回模拟数据
-      return getCategoryDataMock(id);
-    }
+  async (id) => {
+    return await findCategory({
+      id: Number(id)
+    });
   },
   ["category-data"],
-  { revalidate: 3600 } // 缓存1小时
+  { revalidate: 3600 }
 );
 
 // 缓存获取标签的函数
 const getTagsCached = unstable_cache(
-  async () => {
-    try {
-      console.log('尝试从数据库获取标签列表...');
-
-      // 从数据库中获取所有标签
-      const tags = await prisma.tag.findMany({
-        orderBy: {
-          articles: 'desc', // 按文章数量排序
-        },
-        take: 30, // 限制获取数量，避免过多
-      });
-
-      console.log(`获取到 ${tags.length} 个标签`);
-
-      // 检查是否获取到标签
-      if (!tags || tags.length === 0) {
-        console.log('未找到标签，使用默认标签');
-        return getDefaultTags();
-      }
-
-      // 将标签名称提取为数组，并添加"全部"选项
-      return ["全部", ...tags.map((tag) => tag.name)];
-    } catch (error) {
-      console.error("获取标签失败:", error);
-      // 发生错误时返回默认标签
-      return getDefaultTags();
-    }
+  async (id: number) => {
+    const tags = await findTags({
+      categoryId: id
+    })
+    // 处理为数组
+    return [{ name: '全部', id: 0 }, ...tags.map(tag => {
+      return { name: tag.name, id: tag.id }
+    })]
   },
   ["all-tags"],
   { revalidate: 3600 } // 缓存1小时
@@ -81,30 +39,30 @@ const getTagsCached = unstable_cache(
 // 生成元数据函数（用于SEO）
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   // 确保params已经解析完成
-  const resolvedParams = await Promise.resolve(params);
+  const resolvedParams = await params;
   const { id } = resolvedParams;
 
   // 获取分类数据
   const categoryData = await getCategoryData(id);
 
   return {
-    title: `${categoryData.name} | 春风之恋 - 游戏分类`,
-    description: `浏览${categoryData.name}分类下的全部游戏，包含${categoryData.articles}个游戏作品。`,
+    title: `${categoryData?.name} | 春风之恋 - 游戏分类`,
+    description: `浏览${categoryData?.name}分类下的全部游戏，包含${categoryData?.articles}个游戏作品。`,
     openGraph: {
-      title: `${categoryData.name} - 游戏分类`,
-      description: `浏览${categoryData.name}分类下的全部游戏，包含${categoryData.articles}个游戏作品。`,
-      images: [{ url: categoryData.avatar || "https://t.alcy.cc/pc", alt: categoryData.name }],
+      title: `${categoryData?.name} - 游戏分类`,
+      description: `浏览${categoryData?.name}分类下的全部游戏，包含${categoryData?.articles}个游戏作品。`,
+      images: [{ url: categoryData?.avatar || "https://t.alcy.cc/pc", alt: categoryData?.name }],
       type: 'website',
     },
   };
 }
 
 // 获取分类数据函数
-async function getCategoryData(id: string) {
+async function getCategoryData(id: number) {
   try {
     // 从数据库获取分类数据
     const category = await prisma.category.findUnique({
-      where: { id: parseInt(id) },
+      where: { id: Number(id) },
     });
 
     if (!category) {
@@ -115,31 +73,11 @@ async function getCategoryData(id: string) {
   } catch (error) {
     console.error("获取分类数据失败:", error);
     // 获取失败时返回模拟数据
-    return getCategoryDataMock(id);
   }
 }
 
-// 模拟分类数据函数 - 作为备份
-function getCategoryDataMock(id: string) {
-  return {
-    id: parseInt(id),
-    name: ["Galgame", "RPG", "AVG", "ADV", "SLG"][parseInt(id) % 5] || "游戏分类",
-    alias: `category-${id}`,
-    slug: `category-${id}`,
-    avatar: "https://t.alcy.cc/pc",
-    icon: ["game", "rpg", "avg", "adv", "slg"][parseInt(id) % 5] || "game",
-    parentId: null,
-    articles: 50 + parseInt(id) * 5,
-    type: Type.ARTICLE,
-    authorId: null,
-    layout: "SQUARE",
-    createdAt: new Date(2023, 1, 1),
-    updatedAt: null
-  };
-}
-
 // 获取文章列表函数（已优化查询性能）
-async function getArticles(categoryId: string, page: number = 1, pageSize: number = 12) {
+async function getArticles(categoryId: number, page: number = 1, pageSize: number = 12) {
   try {
     console.log(`尝试从数据库获取分类 ${categoryId} 的文章...`);
 
@@ -148,7 +86,7 @@ async function getArticles(categoryId: string, page: number = 1, pageSize: numbe
       // 获取总数
       prisma.article.count({
         where: {
-          categoryId: parseInt(categoryId),
+          categoryId: Number(categoryId),
           status: Status.PUBLISH
         }
       }),
@@ -156,7 +94,7 @@ async function getArticles(categoryId: string, page: number = 1, pageSize: numbe
       // 获取分页文章数据（优化查询，仅获取必要字段和关联）
       prisma.article.findMany({
         where: {
-          categoryId: parseInt(categoryId),
+          categoryId: Number(categoryId),
           status: Status.PUBLISH
         },
         include: {
@@ -485,30 +423,14 @@ export default async function CategoryPage({ params, searchParams }: Params) {
   const pageSize = parseInt(resolvedSearchParams.size || "12");
 
   // 检查数据库连接
-  const isPrismaConnected = await checkPrismaConnection();
 
   // 如果数据库连接有问题，直接使用模拟数据
   let categoryData, articlesData, filterOptions;
-
-  if (isPrismaConnected) {
-    // 并行获取分类数据、文章列表和筛选选项
-    [categoryData, articlesData, filterOptions] = await Promise.all([
-      getCategoryDataCached(id), // 使用缓存的函数
-      getArticles(id, page, pageSize),
-      getFilterOptions()
-    ]);
-  } else {
-    console.log("使用模拟数据作为备份");
-    // 使用所有的模拟数据
-    categoryData = getCategoryDataMock(id);
-    articlesData = await getArticlesMock(id, page, pageSize);
-    filterOptions = {
-      years: ["全部", "2025", "2024", "2023", "2022", "2021", "2018", "2017", "2016", "2015", "2014", "2013", "2012", "2011", "2010", "2009", "2008", "2007", "2006", "2005", "2004", "2003", "2002", "2001", "2000", "1999", "1998"],
-      tags: getDefaultTags(),
-      platforms: ["全部", "PC", "安卓", "KRKR"],
-      ratings: ["全部", "R18", "全年龄"]
-    };
-  }
+  [categoryData, articlesData, filterOptions] = await Promise.all([
+    getCategoryDataCached(id), // 使用缓存的函数
+    getArticles(id, page, pageSize),
+    getFilterOptions()
+  ])
 
   // 服务器端渲染分类的基本信息（对SEO友好）
   return (

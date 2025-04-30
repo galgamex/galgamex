@@ -1,6 +1,7 @@
 // 服务器组件，不使用"use client"
 import prisma from "@/lib/prisma";
 import { findArticle } from "@/model/article";
+import { Article } from "@/types/article";
 import { Metadata } from "next";
 import GameDetailClient from "./GameDetailClient";
 
@@ -52,9 +53,9 @@ export async function generateMetadata({
 // 主页面组件（服务器组件）
 export default async function ArticleDetailPage({ params }: Params) {
   const { id } = await params;
-  const gameData = await findArticle({
+  const gameData: Article = await findArticle({
     id: Number(id),
-  });
+  }) as unknown as Article;
 
 
   // 如果没有找到游戏数据，可以处理错误情况

@@ -367,7 +367,7 @@ model Developer {
   website     String? // 官方网站
   createdAt   DateTime  @default(now()) // 创建时间
   updatedAt   DateTime? @updatedAt // 更新时间
-  Article     Article[]
+  article     Article[]
 
   @@map("developer")
 }
@@ -381,7 +381,7 @@ model Publisher {
   website     String? // 官方网站
   createdAt   DateTime? @default(now()) // 创建时间 
   updatedAt   DateTime? @updatedAt // 更新时间
-  Article     Article[]
+  article     Article[]
 
   @@map("publisher")
 }

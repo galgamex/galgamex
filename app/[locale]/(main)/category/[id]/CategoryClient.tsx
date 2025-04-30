@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Article } from "@/types/article"
+import { Tag } from "@prisma/client"
 import { Search } from "lucide-react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
@@ -23,11 +24,11 @@ interface CategoryClientProps {
   pagination: PaginationInfo;
   filterOptions: {
     years: string[];
-    tags: string[];
+    tags: Tag[];
     platforms: string[];
     ratings: string[];
   };
-  categoryId: string;
+  categoryId: string | number;
 }
 
 export default function CategoryClient({ articles, pagination, filterOptions, categoryId }: CategoryClientProps) {
@@ -291,15 +292,15 @@ export default function CategoryClient({ articles, pagination, filterOptions, ca
               className="flex flex-wrap gap-2 overflow-x-auto pb-2 no-scrollbar"
               style={{ msOverflowStyle: 'none', scrollbarWidth: 'none' }}
             >
-              {(filterOptions.tags || ["全部"]).map((tag) => (
+              {(filterOptions.tags || [{ name: '全部', id: 0 }]).map((tag) => (
                 <Button
-                  key={tag}
-                  variant={selectedFilters.tag === tag ? "default" : "outline"}
+                  key={tag.id}
+                  variant={selectedFilters.tag === tag.name ? "default" : "outline"}
                   size="sm"
                   className="text-xs px-3 shrink-0"
-                  onClick={() => updateFilter('tag', tag)}
+                  onClick={() => updateFilter('tag', tag.name)}
                 >
-                  {tag}
+                  {tag.name}
                 </Button>
               ))}
             </div>

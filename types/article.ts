@@ -16,17 +16,6 @@ import {
 } from "@prisma/client";
 
 export type Article = PrismaArticle & {
-  // 基础字段
-  originalTitle?: string;
-  releaseDate?: string;
-  rating?: number;
-  favorites?: number;
-  shares?: number;
-  reviewCount?: number;
-  videos?: string;
-  createdAt?: Date;
-  updatedAt?: Date;
-
   // 关联字段
   tags?: (ArticleTag & { tag: Tag })[];
   category?: Category;

@@ -4,6 +4,7 @@ export async function register() {
   if (process.env.NEXT_RUNTIME === 'nodejs') {
     // 服务器端代码，只在服务器启动时执行一次
     await initDatabase();
+
   }
 }
 
@@ -49,5 +50,5 @@ async function initDatabase() {
     });
   }
 
-  console.log('数据库初始化完成');
+
 }
