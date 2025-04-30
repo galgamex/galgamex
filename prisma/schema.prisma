@@ -100,11 +100,7 @@ model Tag {
   articles   Int          @default(0) // 使用该标签的文章数量
   // Relations - 关系定义
   articleTag ArticleTag[] // 文章-标签关联
-<<<<<<< HEAD
   category   Category?    @relation("tag", fields: [categoryId], references: [id], onDelete: Cascade) // 关联分类
-=======
-  Category   Category?    @relation("tag", fields: [categoryId], references: [id], onDelete: Cascade) // 关联分类
->>>>>>> db49cfc43ddcb68c6af0695cd56e7283189c8c6f
   categoryId Int? // 所属分类ID
   // Timestamps - 时间戳
   createdAt  DateTime?    @default(now()) // 创建时间
@@ -138,17 +134,10 @@ model User {
   updatedAt        DateTime?     @updatedAt // 资料更新时间
   lastLogin        DateTime? // 上次登录时间
   userLog          UserLog[] // 用户日志
-<<<<<<< HEAD
   feedback         Feedback[] // 用户反馈
   download         Download[] // 用户上传的下载
   gameSave         GameSave[] // 用户上传的存档
   gamePatch        GamePatch[] // 用户上传的补丁
-=======
-  Feedback         Feedback[] // 用户反馈
-  Download         Download[] // 用户上传的下载
-  GameSave         GameSave[] // 用户上传的存档
-  GamePatch        GamePatch[] // 用户上传的补丁
->>>>>>> db49cfc43ddcb68c6af0695cd56e7283189c8c6f
   downloadLogs     DownloadLog[] // 下载记录
 
   @@map("user")
