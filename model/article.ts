@@ -37,7 +37,15 @@ export const findArticle = async (params: Prisma.ArticleWhereUniqueInput) => {
  * @param params 查询条件，需符合Prisma的ArticleWhereInput类型
  * @returns 文章列表（包含部分关联数据）
  */
-export const findArticles = async (params: Prisma.ArticleWhereInput) => {
+export const findArticles = async (params: Prisma.ArticleWhereInput, {
+  take,
+  skip,
+  orderBy
+}: {
+  take?: number,
+  skip?: number,
+  orderBy?: Prisma.ArticleOrderByWithRelationInput
+}) => {
   return prisma.article.findMany(
     {
       where: params,
@@ -58,7 +66,11 @@ export const findArticles = async (params: Prisma.ArticleWhereInput) => {
         gamePatch: true,   // 游戏补丁
         recommendedTo: true, // 推荐给其他文章
         recommendedBy: true // 被其他文章推荐
-      }
+
+      },
+      take,       // 分页：每页显示的数量
+      skip,        // 分页：跳过的记录数
+      orderBy   // 排序条件
     }
   )
 }
