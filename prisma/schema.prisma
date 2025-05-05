@@ -146,6 +146,9 @@ model User {
   promotionRecords  PromotionRecord[]     // 用户的推广记录
   referrals         PromotionRecord[]     @relation("Referrals") // 用户推荐的记录
   points            UserPoints?           // 用户积分
+  // 用户等级系统相关
+  levelProgress    UserLevelProgress?    // 用户等级进度
+  levelLogs        LevelLog[]            // 用户等级变更记录
 
   @@map("user")
 }
@@ -706,4 +709,68 @@ enum PointLogType {
   ADMIN           // 管理员调整
   EXPIRED         // 积分过期
   REFUND          // 退款
+}
+
+// 用户等级表 - 存储等级配置
+model UserLevel {
+  id              Int       @id @default(autoincrement()) // 等级ID
+  level           Int       @unique // 等级数值
+  name            String    // 等级名称
+  description     String?   @db.Text // 等级描述
+  requiredExp     Int       // 升级所需经验
+  icon            String?   @db.Text // 等级图标
+  color           String?   // 等级显示颜色(如#FF5733)
+  benefits        String?   @db.Text // 等级权益(JSON格式)
+  // Relations
+  userProgress    UserLevelProgress[] // 达到此等级的用户
+  // Timestamps
+  createdAt       DateTime? @default(now()) // 创建时间
+  updatedAt       DateTime? @updatedAt // 更新时间
+
+  @@map("user_level")
+}
+
+// 用户等级进度表 - 记录用户当前等级和经验
+model UserLevelProgress {
+  id              Int       @id @default(autoincrement()) // 记录ID
+  userId          Int       @unique // 用户ID
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade) // 关联用户
+  currentLevel    Int       // 当前等级
+  currentLevelObj UserLevel @relation(fields: [currentLevel], references: [level]) // 关联等级
+  currentExp      Int       @default(0) // 当前经验值
+  totalExp        Int       @default(0) // 总获得经验值
+  // Timestamps
+  createdAt       DateTime? @default(now()) // 创建时间
+  updatedAt       DateTime? @updatedAt // 更新时间
+
+  @@map("user_level_progress")
+}
+
+// 等级变更记录表
+model LevelLog {
+  id              Int           @id @default(autoincrement()) // 记录ID
+  userId          Int           // 用户ID
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade) // 关联用户
+  prevLevel       Int?          // 变更前等级
+  newLevel        Int           // 变更后等级
+  expGained       Int           // 获得的经验值
+  source          LevelExpSource // 经验来源
+  description     String?       @db.Text // 变更描述
+  // Timestamps
+  createdAt       DateTime?     @default(now()) // 创建时间
+
+  @@map("level_log")
+}
+
+// 经验来源枚举
+enum LevelExpSource {
+  LOGIN           // 每日登录
+  ARTICLE         // 发布文章
+  COMMENT         // 发表评论
+  RECEIVED_LIKE   // 收到点赞
+  UPLOAD          // 上传资源
+  DOWNLOAD        // 资源被下载
+  TASK            // 完成任务
+  PROMOTION       // 推广活动
+  ADMIN           // 管理员调整
 }
