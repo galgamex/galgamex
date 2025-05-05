@@ -139,6 +139,12 @@ model User {
   gameSave         GameSave[] // 用户上传的存档
   gamePatch        GamePatch[] // 用户上传的补丁
   downloadLogs     DownloadLog[] // 下载记录
+  // Add new relations
+  taskCompletions   TaskCompletion[]      // 用户完成的任务
+  promotions        Promotion[]           // 用户创建的推广
+  promotionRecords  PromotionRecord[]     // 用户的推广记录
+  referrals         PromotionRecord[]     @relation("Referrals") // 用户推荐的记录
+  points            UserPoints?           // 用户积分
 
   @@map("user")
 }
@@ -529,4 +535,174 @@ enum ReviewStatus {
   APPROVED // 已通过
   REJECTED // 已拒绝
   MODIFIED // 已修改后通过
+}
+
+// 任务中心功能 - 任务表
+model Task {
+  id           Int           @id @default(autoincrement()) // 任务ID
+  title        String        // 任务标题
+  description  String?       @db.Text // 任务描述
+  type         TaskType      // 任务类型
+  reward       Int           // 任务奖励点数
+  rewardType   RewardType    // 奖励类型
+  target       Int           // 任务目标数量
+  icon         String?       @db.Text // 任务图标
+  status       Status        @default(PUBLISH) // 任务状态
+  startTime    DateTime?     // 任务开始时间
+  endTime      DateTime?     // 任务结束时间
+  repeatable   Boolean       @default(false) // 是否可重复完成
+  repeatCycle  RepeatCycle?  // 重复周期(如每日、每周)
+  condition    String?       @db.Text // 完成条件(JSON格式)
+  sortOrder    Int           @default(0) // 排序顺序
+  completions  TaskCompletion[] // 关联的任务完成记录
+  // Timestamps
+  createdAt    DateTime?     @default(now()) // 创建时间
+  updatedAt    DateTime?     @updatedAt // 更新时间
+
+  @@map("task")
+}
+
+// 任务完成记录表
+model TaskCompletion {
+  id        Int       @id @default(autoincrement()) // 记录ID
+  taskId    Int       // 关联的任务ID
+  task      Task      @relation(fields: [taskId], references: [id], onDelete: Cascade) // 关联任务
+  userId    Int       // 用户ID
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade) // 关联用户
+  progress  Int       @default(0) // 当前进度
+  completed Boolean   @default(false) // 是否已完成
+  rewarded  Boolean   @default(false) // 是否已发放奖励
+  data      String?   @db.Text // 任务相关数据(JSON格式)
+  // Timestamps
+  createdAt DateTime? @default(now()) // 创建时间
+  updatedAt DateTime? @updatedAt // 更新时间
+  
+  @@unique([taskId, userId]) // 用户任务唯一索引
+  @@map("task_completion")
+}
+
+// 推广功能 - 推广活动表
+model Promotion {
+  id           Int            @id @default(autoincrement()) // 活动ID
+  title        String         // 活动标题
+  description  String?        @db.Text // 活动描述
+  code         String         @unique // 推广码
+  type         PromotionType  // 推广类型
+  reward       Int            // 推广奖励点数
+  rewardType   RewardType     // 奖励类型
+  maxUses      Int?           // 最大使用次数
+  usedCount    Int            @default(0) // 已使用次数
+  articleId    Int?           // 关联的文章/游戏ID
+  article      Article?       @relation(fields: [articleId], references: [id], onDelete: SetNull) // 关联文章
+  creatorId    Int            // 创建者ID
+  creator      User           @relation(fields: [creatorId], references: [id], onDelete: Cascade) // 关联创建者
+  startTime    DateTime?      // 活动开始时间
+  endTime      DateTime?      // 活动结束时间
+  status       Status         @default(PUBLISH) // 活动状态
+  records      PromotionRecord[] // 关联的推广记录
+  // Timestamps
+  createdAt    DateTime?      @default(now()) // 创建时间
+  updatedAt    DateTime?      @updatedAt // 更新时间
+
+  @@map("promotion")
+}
+
+// 推广记录表
+model PromotionRecord {
+  id          Int       @id @default(autoincrement()) // 记录ID
+  promotionId Int       // 推广活动ID
+  promotion   Promotion @relation(fields: [promotionId], references: [id], onDelete: Cascade) // 关联推广
+  userId      Int       // 用户ID
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade) // 关联用户
+  referrerId  Int?      // 推荐人ID
+  referrer    User?     @relation("Referrals", fields: [referrerId], references: [id], onDelete: SetNull) // 关联推荐人
+  ip          String?   @db.VarChar(50) // IP地址
+  ua          String?   @db.Text // 用户代理
+  rewarded    Boolean   @default(false) // 是否已发放奖励
+  // Timestamps
+  createdAt   DateTime? @default(now()) // 创建时间
+  updatedAt   DateTime? @updatedAt // 更新时间
+
+  @@map("promotion_record")
+}
+
+// 用户积分表
+model UserPoints {
+  id          Int       @id @default(autoincrement()) // 记录ID
+  userId      Int       @unique // 用户ID
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade) // 关联用户
+  points      Int       @default(0) // 当前积分
+  totalEarned Int       @default(0) // 总共获得的积分
+  totalSpent  Int       @default(0) // 总共消费的积分
+  logs        PointLog[] // 积分变动记录
+  // Timestamps
+  createdAt   DateTime? @default(now()) // 创建时间
+  updatedAt   DateTime? @updatedAt // 更新时间
+
+  @@map("user_points")
+}
+
+// 积分变动记录表
+model PointLog {
+  id          Int           @id @default(autoincrement()) // 记录ID
+  userId      Int           // 用户ID
+  userPoints  UserPoints    @relation(fields: [userId], references: [userId], onDelete: Cascade) // 关联用户积分
+  amount      Int           // 变动数量(正数增加,负数减少)
+  type        PointLogType  // 变动类型
+  description String?       @db.Text // 变动描述
+  related     String?       @db.Text // 关联内容(JSON格式)
+  // Timestamps
+  createdAt   DateTime?     @default(now()) // 创建时间
+
+  @@map("point_log")
+}
+
+// 任务类型枚举
+enum TaskType {
+  SIGNUP          // 注册账号
+  LOGIN           // 每日登录
+  COMMENT         // 发表评论
+  UPLOAD          // 上传资源
+  DOWNLOAD        // 下载资源
+  SHARE           // 分享内容
+  VIEW            // 浏览内容
+  INVITE          // 邀请用户
+  COMPLETE_PROFILE // 完善资料
+  RATE            // 评分
+  CUSTOM          // 自定义任务
+}
+
+// 重复周期枚举
+enum RepeatCycle {
+  DAILY           // 每日任务
+  WEEKLY          // 每周任务
+  MONTHLY         // 每月任务
+  ONCE            // 一次性任务
+}
+
+// 推广类型枚举
+enum PromotionType {
+  REFERRAL        // 推荐注册
+  RESOURCE        // 资源推广
+  ACTIVITY        // 活动推广
+  AFFILIATE       // 联盟营销
+}
+
+// 奖励类型枚举
+enum RewardType {
+  POINTS          // 积分奖励
+  VIP             // VIP天数
+  BADGE           // 徽章
+  DOWNLOAD        // 下载额度
+}
+
+// 积分记录类型枚举
+enum PointLogType {
+  TASK            // 任务奖励
+  PROMOTION       // 推广奖励
+  PURCHASE        // 购买消费
+  EXCHANGE        // 兑换消费
+  ADMIN           // 管理员调整
+  EXPIRED         // 积分过期
+  REFUND          // 退款
 }
