@@ -1,0 +1,99 @@
+---
+title: サイトについて
+description: Next Forge - 多言語対応 Next.js 15 スターターについて
+lastUpdated: 2025-02-19
+---
+
+> 更新日: 2025-02-19
+
+# Next Forge について
+
+Next Forge は、グローバル対応のウェブサイトを素早く構築するための、機能豊富な Next.js 15 多言語スターターテンプレートです。多言語対応、モダンな UI デザイン、ダーク/ライトテーマ切り替え、レスポンシブデザイン、MDX ブログシステム、SEO 最適化、アナリティクス統合など、多くの機能を備えています。
+
+## ✨ 主な機能
+
+- 🌐 **多言語対応**: 英語、中国語、日本語をサポートし、多言語サイトを簡単に構築できます。
+- 🎨 **モダンな UI デザイン**: Tailwind CSS を利用したクリーンでモダンな UI デザイン。
+- 🌙 **ダーク/ライトテーマ切り替え**: ユーザーが簡単にダークモードとライトモードを切り替えられる機能。
+- 📱 **レスポンシブデザイン**: モバイルとデスクトップの両方で最適なユーザー体験を提供します。
+- 📝 **MDX ブログシステム**: MDX を使用してブログ記事を執筆し、柔軟性とパワーを兼ね備えています。
+- 🔍 **SEO 最適化**: sitemap.xml の自動生成、robots.txt の設定、最適化されたメタデータなど、包括的な SEO 機能を搭載。
+- 📊 **アナリティクス統合**: Google Analytics、Baidu Analytics、Google Adsense、Vercel Analytics を統合し、簡単にデータを追跡できます。
+- 🌿 **エコフレンドリーなパフォーマンス**: [Website Carbon](https://www.websitecarbon.com/website/nextforge-dev/) で A+ 評価を獲得し、最もエネルギー効率の良いウェブサイトの一つです。
+
+## 🚀 クイックスタート
+
+1. リポジトリのクローン：
+    ```bash
+    git clone https://github.com/weijunext/nextjs-15-starter.git
+    ```
+
+2. 依存関係のインストール：
+    ```bash
+    npm install
+    ```
+
+3. 環境変数の設定：
+    ```bash
+    cp .env.example .env
+    ```
+
+4. 開発サーバーの起動：
+    ```bash
+    npm run dev
+    ```
+
+[http://localhost:3000](http://localhost:3000) にアクセスしてアプリケーションを確認できます。
+
+## ⚙️ 設定方法
+
+1. **基本設定**:
+    - `config/site.ts` を編集してウェブサイト情報を設定します。
+    - `public/` ディレクトリ内のアイコンとロゴを更新します。
+    - `app/sitemap.ts` と `app/robots.ts` を設定します。
+
+2. **多言語設定**:
+    - `i18n/messages/` 内の言語ファイルを追加または編集します。
+    - `i18n/routing.ts` でサポートする言語を設定します。
+    - `middleware.ts` で多言語ルーティングを設定します。
+
+## 📝 コンテンツ管理
+
+### ブログ投稿
+`blogs/[locale]` ディレクトリに以下のフォーマットで MDX ファイルを作成します：
+````
+
+---
+title: 投稿タイトル
+description: 投稿の説明
+image: /image.png
+slug: /url-path
+tags: tag1,tag2
+date: 2025-02-20
+visible: published
+pin: true
+---
+
+投稿内容...
+````
+
+### 静的ページ
+`content/[page]/[locale].mdx` で静的ページのコンテンツを管理します。
+
+## 📄 ライセンス
+
+Next Forge は MIT ライセンスで提供されており、自由に使用、変更、配布することができます。
+
+## 🤝 コントリビューション
+
+Issue や Pull Request を歓迎します！皆さんの貢献がこのプロジェクトをより良いものにします。
+
+## 作者について
+
+Next.js のフルスタックスペシャリストとして、プロジェクト開発、パフォーマンス最適化、SEO 改善のエキスパートサービスを提供しています。
+
+コンサルティングやトレーニングの機会については、weijunext@gmail.com までご連絡ください。
+
+- [Github](https://github.com/weijunext)
+- [Bento](https://bento.me/weijunext)
+- [Twitter/X](https://twitter.com/judewei_dev)
