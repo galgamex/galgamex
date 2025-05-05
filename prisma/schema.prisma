@@ -59,6 +59,7 @@ model Article {
   recommendedTo Recommendation[] @relation("articleToArticle") // 推荐给其他文章
   recommendedBy Recommendation[] @relation("recommendedArticle") // 被其他文章推荐
   downloadLogs  DownloadLog[] // 下载记录
+  promotions    Promotion[] // 关联推广
   // Timestamps - 时间戳
   createdAt     DateTime?        @default(now()) // 创建时间
   updatedAt     DateTime?        @updatedAt // 最后更新时间
