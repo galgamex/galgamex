@@ -6,7 +6,7 @@ import {
   findDownloads,
   updateDownload
 } from '@/model/download';
-// @ts-ignore - 忽略类型错误
+
 import { Prisma } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 

@@ -6,7 +6,7 @@ import {
   findArticlesCount,
   updateArticle
 } from '@/model/article';
-// @ts-ignore - 忽略类型错误
+
 import { Prisma } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
@@ -117,6 +117,7 @@ async function handleDeleteRequest(req: NextApiRequest, res: NextApiResponse) {
 
 // 构建查询条件
 const buildWhereCondition = <T extends Prisma.ArticleWhereInput>(query: any): T => {
+<<<<<<< HEAD
   const where = {} as T;
 
   // 基本字段过滤
@@ -130,14 +131,36 @@ const buildWhereCondition = <T extends Prisma.ArticleWhereInput>(query: any): T 
   // 布尔字段过滤
   if (query.isTop) where.isTop = (query.isTop === 'true') as any;
   if (query.isHot) where.isHot = (query.isHot === 'true') as any;
+=======
+  const where: Partial<T> = {};
+
+  // 基本字段过滤
+  if (query.title) where.title = { contains: query.title };
+  if (query.categoryId) where.categoryId = Number(query.categoryId);
+  if (query.authorId) where.authorId = Number(query.authorId);
+  if (query.status) where.status = query.status;
+  if (query.stage) where.stage = query.stage;
+  if (query.type) where.type = query.type;
+
+  // 布尔字段过滤
+  if (query.isTop) where.isTop = query.isTop === 'true';
+  if (query.isHot) where.isHot = query.isHot === 'true';
+>>>>>>> a6ac27f93e8412109e9c1df1aef5f458ccc64b4a
 
   // 日期范围过滤
   if (query.startDate && query.endDate) {
     where.createdAt = {
       gte: new Date(query.startDate),
       lte: new Date(query.endDate)
+<<<<<<< HEAD
     } as any;
   }
 
   return where;
+=======
+    };
+  }
+
+  return where as T;
+>>>>>>> a6ac27f93e8412109e9c1df1aef5f458ccc64b4a
 };
