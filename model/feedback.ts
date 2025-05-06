@@ -1,26 +1,27 @@
-import prisma from "@/lib/prisma";
-import { Prisma } from "@prisma/client";
+import prisma from "@/lib/prisma"
+// @ts-ignore - 忽略类型错误
+import { Prisma } from "@prisma/client"
 
 /**
  * 根据唯一条件查询单个反馈
- * @param params 查询条件，需符合Prisma的FeedbackWhereUniqueInput类型
- * @returns 包含完整关联数据的反馈对象
+ * @param params 查询条件
+ * @returns 返回反馈或null
  */
 export const findFeedback = async (params: Prisma.FeedbackWhereUniqueInput) => {
   return prisma.feedback.findUnique({
     where: params,
     include: {
-      article: true,
-      author: true
+      author: true,  // 包含关联的用户信息
+      article: true  // 包含关联的文章信息
     }
-  });
+  })
 }
 
 /**
  * 根据条件查询多个反馈
- * @param params 查询条件，需符合Prisma的FeedbackWhereInput类型
+ * @param params 查询条件
  * @param options 分页和排序选项
- * @returns 反馈列表（包含关联数据）
+ * @returns 返回反馈数组
  */
 export const findFeedbacks = async (
   params: Prisma.FeedbackWhereInput,
@@ -33,53 +34,51 @@ export const findFeedbacks = async (
   return prisma.feedback.findMany({
     where: params,
     include: {
-      article: true,
-      author: true
+      author: true,
+      article: true
     },
     orderBy: options?.orderBy || { createdAt: 'desc' },
-    take: options?.take,
-    skip: options?.skip
-  });
+    take: options?.take || 10,
+    skip: options?.skip || 0,
+  })
 }
 
 /**
- * 根据条件统计反馈数量
- * @param params 查询条件，需符合Prisma的FeedbackWhereInput类型
- * @returns 符合条件的反馈总数
+ * 统计符合条件的反馈数量
+ * @param params 查询条件
+ * @returns 返回反馈数量
  */
 export const findFeedbacksCount = async (params: Prisma.FeedbackWhereInput) => {
-  return prisma.feedback.count({ where: params });
+  return prisma.feedback.count({ where: params })
 }
 
 /**
  * 创建新反馈
- * @param params 反馈数据
- * @returns 新创建的反馈对象
+ * @param data 反馈数据
+ * @returns 返回创建的反馈
  */
-export const createFeedback = async (params: Prisma.FeedbackCreateInput) => {
-  return prisma.feedback.create({
-    data: params
-  });
+export const createFeedback = async (data: Prisma.FeedbackCreateInput) => {
+  return prisma.feedback.create({ data })
 }
 
 /**
  * 更新反馈
- * @param params 包含where条件和data的对象
- * @returns 更新后的反馈对象
+ * @param params 包含where条件(唯一标识)和data(更新数据)的对象
+ * @returns 返回更新后的反馈
  */
 export const updateFeedback = async (params: {
   where: Prisma.FeedbackWhereUniqueInput,
   data: Prisma.FeedbackUpdateInput
 }) => {
-  const { where, data } = params;
-  return prisma.feedback.update({ where, data });
+  const { where, data } = params
+  return prisma.feedback.update({ where, data })
 }
 
 /**
  * 删除反馈
- * @param where 删除条件，需符合Prisma的FeedbackWhereUniqueInput类型
- * @returns 被删除的反馈对象
+ * @param where 删除条件
+ * @returns 返回被删除的反馈
  */
 export const deleteFeedback = async (where: Prisma.FeedbackWhereUniqueInput) => {
-  return prisma.feedback.delete({ where });
+  return prisma.feedback.delete({ where })
 } 

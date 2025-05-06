@@ -1,11 +1,13 @@
 import prisma from "@/lib/prisma"
+// @ts-ignore - 忽略类型错误
+import { Prisma } from "@prisma/client"
 
 /**
  * 根据唯一条件查询单个角色
  * @param params 查询条件
- * @returns 返回匹配的角色或null
+ * @returns 返回单个角色或null
  */
-export const findCharacter = async (params: any) => {
+export const findCharacter = async (params: Prisma.CharacterWhereUniqueInput) => {
   return prisma.character.findUnique({
     where: params,
   })
@@ -14,23 +16,10 @@ export const findCharacter = async (params: any) => {
 /**
  * 根据条件查询多个角色
  * @param params 查询条件
- * @param options 分页和排序选项
  * @returns 返回角色数组
  */
-export const findCharacters = async (
-  params: any,
-  options?: {
-    skip?: number,
-    take?: number,
-    orderBy?: any
-  }
-) => {
-  return prisma.character.findMany({ 
-    where: params,
-    skip: options?.skip,
-    take: options?.take,
-    orderBy: options?.orderBy
-  })
+export const findCharacters = async (params: Prisma.CharacterWhereInput) => {
+  return prisma.character.findMany({ where: params })
 }
 
 /**
@@ -38,7 +27,7 @@ export const findCharacters = async (
  * @param params 查询条件
  * @returns 返回角色数量
  */
-export const findCharactersCount = async (params: any) => {
+export const findCharacterCount = async (params: Prisma.CharacterWhereInput) => {
   return prisma.character.count({ where: params })
 }
 
@@ -47,21 +36,21 @@ export const findCharactersCount = async (params: any) => {
  * @param data 角色数据
  * @returns 返回创建的角色
  */
-export const createCharacter = async (data: any) => {
+export const createCharacter = async (data: Prisma.CharacterCreateInput) => {
   return prisma.character.create({ data })
 }
 
 /**
  * 更新角色信息
- * @param params 包含where条件和要更新的数据
+ * @param params 查询条件（用于定位要更新的角色）
+ * @param data 更新数据
  * @returns 返回更新后的角色
  */
-export const updateCharacter = async (params: {
-  where: any,
-  data: any
-}) => {
-  const { where, data } = params;
-  return prisma.character.update({ where, data })
+export const updateCharacter = async (
+  params: Prisma.CharacterWhereUniqueInput,
+  data: Prisma.CharacterUpdateInput
+) => {
+  return prisma.character.update({ where: params, data })
 }
 
 /**
@@ -69,6 +58,6 @@ export const updateCharacter = async (params: {
  * @param params 查询条件（用于定位要删除的角色）
  * @returns 返回被删除的角色
  */
-export const deleteCharacter = async (params: any) => {
+export const deleteCharacter = async (params: Prisma.CharacterWhereUniqueInput) => {
   return prisma.character.delete({ where: params })
 }

@@ -1,11 +1,13 @@
 import prisma from "@/lib/prisma"
+// @ts-ignore - 忽略类型错误
+import { Prisma } from "@prisma/client"
 
 /**
  * 根据唯一条件查询单个标签
  * @param params 查询条件
- * @returns 返回匹配的标签或null
+ * @returns 返回单个标签或null
  */
-export const findTag = async (params: any) => {
+export const findTag = async (params: Prisma.TagWhereUniqueInput) => {
   return prisma.tag.findUnique({
     where: params,
     include: {
@@ -15,25 +17,12 @@ export const findTag = async (params: any) => {
 }
 
 /**
- * 根据条件查询多个标签
+ * 根据条件查询多个标签（不包含关联信息）
  * @param params 查询条件
- * @param options 分页和排序选项
  * @returns 返回标签数组
  */
-export const findTags = async (
-  params: any,
-  options?: {
-    skip?: number,
-    take?: number,
-    orderBy?: any
-  }
-) => {
-  return prisma.tag.findMany({ 
-    where: params,
-    skip: options?.skip,
-    take: options?.take,
-    orderBy: options?.orderBy
-  })
+export const findTags = async (params: Prisma.TagWhereInput) => {
+  return prisma.tag.findMany({ where: params })
 }
 
 /**
@@ -41,7 +30,7 @@ export const findTags = async (
  * @param params 查询条件
  * @returns 返回标签数量
  */
-export const findTagsCount = async (params: any) => {
+export const findTagCount = async (params: Prisma.TagWhereInput) => {
   return prisma.tag.count({ where: params })
 }
 
@@ -50,21 +39,18 @@ export const findTagsCount = async (params: any) => {
  * @param data 标签数据
  * @returns 返回创建的标签
  */
-export const createTag = async (data: any) => {
+export const createTag = async (data: Prisma.TagCreateInput) => {
   return prisma.tag.create({ data })
 }
 
 /**
  * 更新标签
- * @param params 包含where条件和要更新的数据
+ * @param params 查询条件（用于定位要更新的标签）
+ * @param data 更新数据
  * @returns 返回更新后的标签
  */
-export const updateTag = async (params: {
-  where: any,
-  data: any
-}) => {
-  const { where, data } = params;
-  return prisma.tag.update({ where, data })
+export const updateTag = async (params: Prisma.TagWhereUniqueInput, data: Prisma.TagUpdateInput) => {
+  return prisma.tag.update({ where: params, data })
 }
 
 /**
@@ -72,7 +58,7 @@ export const updateTag = async (params: {
  * @param params 查询条件（用于定位要删除的标签）
  * @returns 返回被删除的标签
  */
-export const deleteTag = async (params: any) => {
+export const deleteTag = async (params: Prisma.TagWhereUniqueInput) => {
   return prisma.tag.delete({ where: params })
 }
 

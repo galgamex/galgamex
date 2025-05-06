@@ -1,4 +1,5 @@
 import prisma from "@/lib/prisma";
+// @ts-ignore - 忽略类型错误
 import { Prisma } from "@prisma/client";
 
 /**

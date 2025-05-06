@@ -1,82 +1,87 @@
-import prisma from "@/lib/prisma";
+import prisma from "@/lib/prisma"
+// @ts-ignore - 忽略类型错误
+import { Prisma } from "@prisma/client"
 
 /**
  * 根据唯一条件查询单个游戏存档
  * @param params 查询条件
- * @returns 包含完整关联数据的游戏存档对象
+ * @returns 返回游戏存档或null
  */
-export const findGameSave = async (params: any) => {
+export const findGameSave = async (params: Prisma.GameSaveWhereUniqueInput) => {
   return prisma.gameSave.findUnique({
     where: params,
     include: {
-      author: true
+      article: true,  // 包含关联的游戏信息
+      author: true    // 包含关联的用户信息
     }
-  });
+  })
 }
 
 /**
  * 根据条件查询多个游戏存档
  * @param params 查询条件
  * @param options 分页和排序选项
- * @returns 游戏存档列表（包含关联数据）
+ * @returns 返回游戏存档数组
  */
 export const findGameSaves = async (
-  params: any,
+  params: Prisma.GameSaveWhereInput,
   options?: {
     take?: number,
     skip?: number,
-    orderBy?: any
+    orderBy?: Prisma.GameSaveOrderByWithRelationInput
   }
 ) => {
   return prisma.gameSave.findMany({
     where: params,
     include: {
+      article: true,
       author: true
     },
     orderBy: options?.orderBy || { createdAt: 'desc' },
-    take: options?.take,
-    skip: options?.skip
-  });
+    take: options?.take || 10,
+    skip: options?.skip || 0,
+  })
 }
 
 /**
- * 根据条件统计游戏存档数量
+ * 统计符合条件的游戏存档数量
  * @param params 查询条件
- * @returns 符合条件的游戏存档总数
+ * @returns 返回游戏存档数量
  */
-export const findGameSavesCount = async (params: any) => {
-  return prisma.gameSave.count({ where: params });
+export const findGameSavesCount = async (params: Prisma.GameSaveWhereInput) => {
+  return prisma.gameSave.count({ where: params })
 }
 
 /**
  * 创建新游戏存档
- * @param params 游戏存档数据
- * @returns 新创建的游戏存档对象
+ * @param data 游戏存档数据
+ * @returns 返回创建的游戏存档
  */
-export const createGameSave = async (params: any) => {
-  return prisma.gameSave.create({
-    data: params
-  });
+export const createGameSave = async (data: Prisma.GameSaveCreateInput) => {
+  return prisma.gameSave.create({ data })
 }
 
 /**
  * 更新游戏存档
- * @param params 包含where条件和data的对象
- * @returns 更新后的游戏存档对象
+ * @param whereInput 查询条件
+ * @param data 更新数据
+ * @returns 返回更新后的游戏存档
  */
-export const updateGameSave = async (params: {
-  where: any,
-  data: any
-}) => {
-  const { where, data } = params;
-  return prisma.gameSave.update({ where, data });
+export const updateGameSave = async (
+  whereInput: Prisma.GameSaveWhereUniqueInput,
+  data: Prisma.GameSaveUpdateInput
+) => {
+  return prisma.gameSave.update({
+    where: whereInput,
+    data
+  })
 }
 
 /**
  * 删除游戏存档
  * @param where 删除条件
- * @returns 被删除的游戏存档对象
+ * @returns 返回被删除的游戏存档
  */
-export const deleteGameSave = async (where: any) => {
-  return prisma.gameSave.delete({ where });
+export const deleteGameSave = async (where: Prisma.GameSaveWhereUniqueInput) => {
+  return prisma.gameSave.delete({ where })
 } 

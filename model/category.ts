@@ -1,11 +1,13 @@
 import prisma from "@/lib/prisma";
+// @ts-ignore - 忽略类型错误
+import { Prisma } from "@prisma/client";
 
 /**
  * 根据唯一条件查询单个分类
  * @param params 查询条件
  * @returns 返回匹配的分类或null
  */
-export const findCategory = async (params: any) => {
+export const findCategory = async (params: Prisma.CategoryWhereUniqueInput) => {
   return prisma.category.findUnique({
     where: params,
     include: {
@@ -19,28 +21,16 @@ export const findCategory = async (params: any) => {
 /**
  * 查询多个分类
  * @param params 查询条件
- * @param options 分页和排序选项
  * @returns 返回匹配的分类数组
  */
-export const findCategories = async (
-  params: any,
-  options?: {
-    skip?: number,
-    take?: number,
-    orderBy?: any,
-    include?: any
-  }
-) => {
+export const findCategories = async (params: Prisma.CategoryWhereInput) => {
   return prisma.category.findMany({
     where: params,
-    include: options?.include || {
+    include: {
       children: true,
       parent: true,
       author: true,
-    },
-    skip: options?.skip,
-    take: options?.take,
-    orderBy: options?.orderBy
+    }
   })
 }
 
@@ -49,7 +39,7 @@ export const findCategories = async (
  * @param params 查询条件
  * @returns 返回匹配的分类数量
  */
-export const findCategoriesCount = async (params: any) => {
+export const findCategoryCount = async (params: Prisma.CategoryWhereInput) => {
   return prisma.category.count({
     where: params,
   })
@@ -60,21 +50,18 @@ export const findCategoriesCount = async (params: any) => {
  * @param data 分类数据
  * @returns 返回创建的分类
  */
-export const createCategory = async (data: any) => {
+export const createCategory = async (data: Prisma.CategoryCreateInput) => {
   return prisma.category.create({ data })
 }
 
 /**
  * 更新分类
- * @param params 包含where条件和要更新的数据
+ * @param params 查询条件(用于定位要更新的分类)
+ * @param data 更新数据
  * @returns 返回更新后的分类
  */
-export const updateCategory = async (params: {
-  where: any,
-  data: any
-}) => {
-  const { where, data } = params;
-  return prisma.category.update({ where, data })
+export const updateCategory = async (params: Prisma.CategoryWhereUniqueInput, data: Prisma.CategoryUpdateInput) => {
+  return prisma.category.update({ where: params, data })
 }
 
 /**
@@ -82,7 +69,7 @@ export const updateCategory = async (params: {
  * @param params 查询条件(用于定位要删除的分类)
  * @returns 返回被删除的分类
  */
-export const deleteCategory = async (params: any) => {
+export const deleteCategory = async (params: Prisma.CategoryWhereUniqueInput) => {
   return prisma.category.delete({ where: params })
 }
 
@@ -91,6 +78,6 @@ export const deleteCategory = async (params: any) => {
  * @param params 查询条件(用于定位要删除的分类)
  * @returns 返回删除操作结果
  */
-export const deleteCategories = async (params: any) => {
+export const deleteCategories = async (params: Prisma.CategoryWhereInput) => {
   return prisma.category.deleteMany({ where: params })
 }

@@ -2,10 +2,11 @@ import {
   createDownload,
   deleteDownload,
   findDownload,
-  findDownloads,
   findDownloadCount,
+  findDownloads,
   updateDownload
 } from '@/model/download';
+// @ts-ignore - 忽略类型错误
 import { Prisma } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
@@ -40,11 +41,11 @@ export default async function handler(
 async function handleGetRequest(req: NextApiRequest, res: NextApiResponse) {
   const { id, ...query } = req.query;
 
-  // 获取单个下载记录
+  // 获取单个下载
   if (id) {
     const download = await findDownload({ id: Number(id) });
     if (!download) {
-      return res.status(404).json({ error: '下载记录不存在' });
+      return res.status(404).json({ error: '下载资源不存在' });
     }
     return res.status(200).json(download);
   }
@@ -55,7 +56,7 @@ async function handleGetRequest(req: NextApiRequest, res: NextApiResponse) {
   delete query.page;
   delete query.limit;
 
-  // 获取下载记录列表
+  // 获取下载列表
   const where = buildWhereCondition<Prisma.DownloadWhereInput>(query);
   const [downloads, total] = await Promise.all([
     findDownloads(where),
@@ -77,9 +78,9 @@ async function handlePostRequest(req: NextApiRequest, res: NextApiResponse) {
   const downloadData: Prisma.DownloadCreateInput = req.body;
 
   // 验证必要字段
-  if (!downloadData.url || !downloadData.articleId) {
+  if (!downloadData.url) {
     return res.status(400).json({
-      error: '下载链接和游戏ID为必填项'
+      error: '下载链接为必填项'
     });
   }
 
@@ -95,8 +96,11 @@ async function handlePutRequest(req: NextApiRequest, res: NextApiResponse) {
     return res.status(400).json({ error: '下载ID为必填项' });
   }
 
-  const download = await updateDownload({ id: Number(id) }, downloadData);
-  
+  const download = await updateDownload(
+    { id: Number(id) },
+    downloadData
+  );
+
   res.status(200).json(download);
 }
 
@@ -113,22 +117,21 @@ async function handleDeleteRequest(req: NextApiRequest, res: NextApiResponse) {
 
 // 构建查询条件
 const buildWhereCondition = <T extends Prisma.DownloadWhereInput>(query: any): T => {
-  const where: Partial<T> = {};
+  const where = {} as T;
 
   // 基本字段过滤
-  if (query.name) where.name = { contains: query.name };
-  if (query.url) where.url = { contains: query.url };
-  if (query.articleId) where.articleId = Number(query.articleId);
-  if (query.type) where.type = query.type;
-  if (query.platform) where.platform = query.platform;
-  
+  if (query.articleId) where.articleId = Number(query.articleId) as any;
+  if (query.authorId) where.authorId = Number(query.authorId) as any;
+  if (query.status) where.status = query.status as any;
+  if (query.type) where.type = query.type as any;
+
   // 日期范围过滤
   if (query.startDate && query.endDate) {
     where.createdAt = {
       gte: new Date(query.startDate),
       lte: new Date(query.endDate)
-    };
+    } as any;
   }
 
-  return where as T;
+  return where;
 }; 
