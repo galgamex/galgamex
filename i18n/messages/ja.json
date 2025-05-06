@@ -7,7 +7,8 @@
   "Header": {
     "blogs": "ブログ",
     "about": "サイトについて",
-    "sourceCode": "ソースコード"
+    "sourceCode": "ソースコード",
+    "user": "ユーザーセンター"
   },
   "Footer": {
     "Copyright": "Copyright © {year} Next Forge. All rights reserved.",

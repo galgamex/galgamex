@@ -1,6 +1,6 @@
 // 服务器组件，不使用"use client"
 import prisma from "@/lib/prisma";
-import { findArticle } from "@/model/article";
+import { findArticle } from "@/model/content/article";
 import { Article } from "@/types/article";
 import { Metadata } from "next";
 import GameDetailClient from "./GameDetailClient";

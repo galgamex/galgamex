@@ -1,14 +1,25 @@
 import prisma from "@/lib/prisma"; // 导入 Prisma 客户端
-import { findCategory } from "@/model/category";
-import { findTags } from "@/model/tag";
+import { findCategory } from "@/model/content/category"; // 导入分类查询函数
+import { findTags } from "@/model/content/tag"; // 导入标签查询函数
 import { Article } from "@/types/article"; // 导入自定义 Article 类型
-import { Status, Type } from "@prisma/client";
 import { Metadata } from "next";
 import { unstable_cache } from "next/cache";
 import CategoryClient from "./CategoryClient";
 
 // 参数类型定义
 type Params = { params: Promise<{ id: number; locale: string }>; searchParams: { page?: string; size?: string } };
+
+// 为Status和Type定义枚举（由于导入错误）
+enum Status {
+  DRAFT = "DRAFT",
+  PUBLISH = "PUBLISH",
+  HIDDEN = "HIDDEN"
+}
+
+enum Type {
+  ARTICLE = "ARTICLE",
+  FORUM = "FORUM"
+}
 
 // 缓存获取分类数据的函数
 const getCategoryDataCached = unstable_cache(
@@ -28,7 +39,7 @@ const getTagsCached = unstable_cache(
       categoryId: id
     })
     // 处理为数组
-    return [{ name: '全部', id: 0 }, ...tags.map(tag => {
+    return [{ name: '全部', id: 0 }, ...tags.map((tag: any) => {
       return { name: tag.name, id: tag.id }
     })]
   },
@@ -178,7 +189,7 @@ async function getArticles(categoryId: number, page: number = 1, pageSize: numbe
     // 如果没有找到文章，直接使用模拟数据
     if (totalCount === 0 || !articlesData || articlesData.length === 0) {
       console.log('未找到文章或文章数据为空，使用模拟数据');
-      return getArticlesMock(categoryId, page, pageSize);
+      return getArticlesMock(String(categoryId), page, pageSize);
     }
 
     // 转换为自定义 Article 类型
@@ -199,7 +210,7 @@ async function getArticles(categoryId: number, page: number = 1, pageSize: numbe
   } catch (error) {
     console.error("获取文章列表失败:", error);
     // 发生错误时返回模拟数据
-    return getArticlesMock(categoryId, page, pageSize);
+    return getArticlesMock(String(categoryId), page, pageSize);
   }
 }
 
@@ -381,7 +392,7 @@ async function getTags() {
     }
 
     // 将标签名称提取为数组，并添加"全部"选项
-    return ["全部", ...tags.map((tag) => tag.name)];
+    return ["全部", ...tags.map((tag: any) => tag.name)];
   } catch (error) {
     console.error("获取标签失败:", error);
     // 发生错误时返回默认标签
@@ -396,7 +407,8 @@ function getDefaultTags() {
 
 // 修改筛选选项数据获取方式（使用缓存）
 async function getFilterOptions() {
-  const tags = await getTagsCached();
+  const categoryId = 1; // 默认分类ID，或者你可以根据实际需要设置
+  const tags = await getTagsCached(categoryId);
 
   // 生成年份数组（自动生成而不是硬编码）
   const currentYear = new Date().getFullYear();
