@@ -19,6 +19,10 @@ export const headerLinks = [
     href: "/blogs",
   },
   {
+    name: "user",
+    href: "/user",
+  },
+  {
     name: "about",
     href: "/about",
   },
@@ -44,15 +48,14 @@ const getCategories = async () => {
   });
 
   // 按类型分类
-  const articleCategories = categories.filter(c => c.type === 'ARTICLE');
-  const forumCategories = categories.filter(c => c.type === 'FORUM');
+  const articleCategories = categories.filter((c: any) => c.type === 'ARTICLE');
+  const forumCategories = categories.filter((c: any) => c.type === 'FORUM');
 
   return { articleCategories, forumCategories };
 }
 
 const HeaderLinks = async () => {
   const { articleCategories, forumCategories } = await getCategories();
-
   const allCategories = [...articleCategories, ...forumCategories];
 
   return (
@@ -64,13 +67,13 @@ const HeaderLinks = async () => {
             <NavigationMenuTrigger>文章</NavigationMenuTrigger>
             <NavigationMenuContent>
               <ul className="grid grid-cols-2 gap-3 p-4 md:w-[400px] lg:w-[500px]">
-                {articleCategories.map((category) => (
+                {articleCategories.map((category: any) => (
                   <li key={category.id}>
                     {category.children.length > 0 ? (
                       <div className="mb-2">
                         <h3 className="font-medium leading-none mb-2 text-sm">{category.name}</h3>
                         <ul className="space-y-1">
-                          {category.children.map((child) => (
+                          {category.children.map((child: any) => (
                             <li key={child.id}>
                               <ListItem
                                 href={`/category/${child.id}`}
@@ -100,13 +103,13 @@ const HeaderLinks = async () => {
             <NavigationMenuTrigger>社区</NavigationMenuTrigger>
             <NavigationMenuContent>
               <ul className="grid grid-cols-2 gap-3 p-4 md:w-[400px] lg:w-[500px]">
-                {forumCategories.map((category) => (
+                {forumCategories.map((category: any) => (
                   <li key={category.id}>
                     {category.children.length > 0 ? (
                       <div className="mb-2">
                         <h3 className="font-medium leading-none mb-2 text-sm">{category.name}</h3>
                         <ul className="space-y-1">
-                          {category.children.map((child) => (
+                          {category.children.map((child: any) => (
                             <li key={child.id}>
                               <ListItem
                                 href={`/category/${child.id}`}

@@ -59,7 +59,6 @@ model Article {
   recommendedTo Recommendation[] @relation("articleToArticle") // 推荐给其他文章
   recommendedBy Recommendation[] @relation("recommendedArticle") // 被其他文章推荐
   downloadLogs  DownloadLog[] // 下载记录
-  promotions    Promotion[] // 关联推广
   // Timestamps - 时间戳
   createdAt     DateTime?        @default(now()) // 创建时间
   updatedAt     DateTime?        @updatedAt // 最后更新时间
@@ -142,9 +141,6 @@ model User {
   downloadLogs     DownloadLog[] // 下载记录
   // Add new relations
   taskCompletions   TaskCompletion[]      // 用户完成的任务
-  promotions        Promotion[]           // 用户创建的推广
-  promotionRecords  PromotionRecord[]     // 用户的推广记录
-  referrals         PromotionRecord[]     @relation("Referrals") // 用户推荐的记录
   points            UserPoints?           // 用户积分
   // 用户等级系统相关
   levelProgress    UserLevelProgress?    // 用户等级进度
@@ -569,65 +565,19 @@ model Task {
 // 任务完成记录表
 model TaskCompletion {
   id        Int       @id @default(autoincrement()) // 记录ID
-  taskId    Int       // 关联的任务ID
+  taskId    Int // 任务ID
   task      Task      @relation(fields: [taskId], references: [id], onDelete: Cascade) // 关联任务
-  userId    Int       // 用户ID
+  userId    Int // 用户ID
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade) // 关联用户
-  progress  Int       @default(0) // 当前进度
-  completed Boolean   @default(false) // 是否已完成
-  rewarded  Boolean   @default(false) // 是否已发放奖励
-  data      String?   @db.Text // 任务相关数据(JSON格式)
+  progress  Int       @default(0) // 完成进度
+  completed Boolean   @default(false) // 是否完成
+  rewarded  Boolean   @default(false) // 是否已奖励
   // Timestamps
   createdAt DateTime? @default(now()) // 创建时间
   updatedAt DateTime? @updatedAt // 更新时间
   
   @@unique([taskId, userId]) // 用户任务唯一索引
   @@map("task_completion")
-}
-
-// 推广功能 - 推广活动表
-model Promotion {
-  id           Int            @id @default(autoincrement()) // 活动ID
-  title        String         // 活动标题
-  description  String?        @db.Text // 活动描述
-  code         String         @unique // 推广码
-  type         PromotionType  // 推广类型
-  reward       Int            // 推广奖励点数
-  rewardType   RewardType     // 奖励类型
-  maxUses      Int?           // 最大使用次数
-  usedCount    Int            @default(0) // 已使用次数
-  articleId    Int?           // 关联的文章/游戏ID
-  article      Article?       @relation(fields: [articleId], references: [id], onDelete: SetNull) // 关联文章
-  creatorId    Int            // 创建者ID
-  creator      User           @relation(fields: [creatorId], references: [id], onDelete: Cascade) // 关联创建者
-  startTime    DateTime?      // 活动开始时间
-  endTime      DateTime?      // 活动结束时间
-  status       Status         @default(PUBLISH) // 活动状态
-  records      PromotionRecord[] // 关联的推广记录
-  // Timestamps
-  createdAt    DateTime?      @default(now()) // 创建时间
-  updatedAt    DateTime?      @updatedAt // 更新时间
-
-  @@map("promotion")
-}
-
-// 推广记录表
-model PromotionRecord {
-  id          Int       @id @default(autoincrement()) // 记录ID
-  promotionId Int       // 推广活动ID
-  promotion   Promotion @relation(fields: [promotionId], references: [id], onDelete: Cascade) // 关联推广
-  userId      Int       // 用户ID
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade) // 关联用户
-  referrerId  Int?      // 推荐人ID
-  referrer    User?     @relation("Referrals", fields: [referrerId], references: [id], onDelete: SetNull) // 关联推荐人
-  ip          String?   @db.VarChar(50) // IP地址
-  ua          String?   @db.Text // 用户代理
-  rewarded    Boolean   @default(false) // 是否已发放奖励
-  // Timestamps
-  createdAt   DateTime? @default(now()) // 创建时间
-  updatedAt   DateTime? @updatedAt // 更新时间
-
-  @@map("promotion_record")
 }
 
 // 用户积分表
@@ -684,14 +634,6 @@ enum RepeatCycle {
   ONCE            // 一次性任务
 }
 
-// 推广类型枚举
-enum PromotionType {
-  REFERRAL        // 推荐注册
-  RESOURCE        // 资源推广
-  ACTIVITY        // 活动推广
-  AFFILIATE       // 联盟营销
-}
-
 // 奖励类型枚举
 enum RewardType {
   POINTS          // 积分奖励
@@ -703,9 +645,6 @@ enum RewardType {
 // 积分记录类型枚举
 enum PointLogType {
   TASK            // 任务奖励
-  PROMOTION       // 推广奖励
-  PURCHASE        // 购买消费
-  EXCHANGE        // 兑换消费
   ADMIN           // 管理员调整
   EXPIRED         // 积分过期
   REFUND          // 退款
@@ -771,6 +710,5 @@ enum LevelExpSource {
   UPLOAD          // 上传资源
   DOWNLOAD        // 资源被下载
   TASK            // 完成任务
-  PROMOTION       // 推广活动
   ADMIN           // 管理员调整
 }

@@ -141,5 +141,4 @@ const buildWhereCondition = <T extends Prisma.ArticleWhereInput>(query: any): T 
   }
 
   return where;
-
-};
+}; 
