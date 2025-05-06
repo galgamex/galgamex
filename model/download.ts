@@ -48,15 +48,15 @@ export const createDownload = async (data: Prisma.DownloadCreateInput) => {
 
 /**
  * 更新下载记录
- * @param params 查询条件（用于定位要更新的记录）
- * @param data 更新数据
+ * @param params 包含where条件(唯一标识)和data(更新数据)的对象
  * @returns 返回更新后的下载记录
  */
-export const updateDownload = async (
-  params: Prisma.DownloadWhereUniqueInput,
+export const updateDownload = async (params: {
+  where: Prisma.DownloadWhereUniqueInput,
   data: Prisma.DownloadUpdateInput
-) => {
-  return prisma.download.update({ where: params, data })
+}) => {
+  const { where, data } = params;
+  return prisma.download.update({ where, data })
 }
 
 /**
