@@ -5,7 +5,7 @@ import {
   findArticles,
   findArticlesCount,
   updateArticle
-} from '@/model/article';
+} from '@/model/content/article';
 
 // @ts-ignore - 忽略类型错误
 import { Prisma } from '@prisma/client';

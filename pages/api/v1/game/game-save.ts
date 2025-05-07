@@ -1,13 +1,4 @@
-import {
-  createGameSave,
-  deleteGameSave,
-  findGameSave,
-  findGameSaves,
-  findGameSavesCount,
-  updateGameSave
-} from '@/model/game-save';
-// @ts-ignore - 忽略类型错误
-import { Prisma } from '@prisma/client';
+import prisma from '@/lib/prisma';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 export default async function handler(
@@ -43,7 +34,9 @@ async function handleGetRequest(req: NextApiRequest, res: NextApiResponse) {
 
   // 获取单个游戏存档
   if (id) {
-    const gameSave = await findGameSave({ id: Number(id) });
+    const gameSave = await prisma.gameSave.findUnique({
+      where: { id: Number(id) }
+    });
     if (!gameSave) {
       return res.status(404).json({ error: '游戏存档不存在' });
     }
@@ -57,10 +50,15 @@ async function handleGetRequest(req: NextApiRequest, res: NextApiResponse) {
   delete query.limit;
 
   // 获取游戏存档列表
-  const where = buildWhereCondition<Prisma.GameSaveWhereInput>(query);
+  const where = buildWhereCondition(query);
   const [gameSaves, total] = await Promise.all([
-    findGameSaves(where),
-    findGameSavesCount(where)
+    prisma.gameSave.findMany({
+      where,
+      skip: (page - 1) * limit,
+      take: limit,
+      orderBy: { createdAt: 'desc' }
+    }),
+    prisma.gameSave.count({ where })
   ]);
 
   res.status(200).json({
@@ -75,7 +73,7 @@ async function handleGetRequest(req: NextApiRequest, res: NextApiResponse) {
 }
 
 async function handlePostRequest(req: NextApiRequest, res: NextApiResponse) {
-  const gameSaveData: Prisma.GameSaveCreateInput = req.body;
+  const gameSaveData = req.body;
 
   // 验证必要字段
   if (!gameSaveData.name || !gameSaveData.url || !gameSaveData.articleId || !gameSaveData.authorId) {
@@ -84,7 +82,9 @@ async function handlePostRequest(req: NextApiRequest, res: NextApiResponse) {
     });
   }
 
-  const gameSave = await createGameSave(gameSaveData);
+  const gameSave = await prisma.gameSave.create({
+    data: gameSaveData
+  });
   res.status(201).json(gameSave);
 }
 
@@ -96,10 +96,10 @@ async function handlePutRequest(req: NextApiRequest, res: NextApiResponse) {
     return res.status(400).json({ error: '存档ID为必填项' });
   }
 
-  const gameSave = await updateGameSave(
-    { id: Number(id) },
-    gameSaveData
-  );
+  const gameSave = await prisma.gameSave.update({
+    where: { id: Number(id) },
+    data: gameSaveData
+  });
 
   res.status(200).json(gameSave);
 }
@@ -111,31 +111,31 @@ async function handleDeleteRequest(req: NextApiRequest, res: NextApiResponse) {
     return res.status(400).json({ error: '存档ID为必填项' });
   }
 
-  await deleteGameSave({ id: Number(id) });
+  await prisma.gameSave.delete({ where: { id: Number(id) } });
   res.status(204).end();
 }
 
 // 构建查询条件
-const buildWhereCondition = <T extends Prisma.GameSaveWhereInput>(query: any): T => {
-  const where = {} as T;
+function buildWhereCondition(query: any) {
+  const where: any = {};
 
   // 基本字段过滤
-  if (query.name) where.name = { contains: query.name } as any;
-  if (query.articleId) where.articleId = Number(query.articleId) as any;
-  if (query.authorId) where.authorId = Number(query.authorId) as any;
-  if (query.status) where.status = query.status as any;
-  if (query.gameVersion) where.gameVersion = { contains: query.gameVersion } as any;
+  if (query.name) where.name = { contains: query.name };
+  if (query.articleId) where.articleId = Number(query.articleId);
+  if (query.authorId) where.authorId = Number(query.authorId);
+  if (query.status) where.status = query.status;
+  if (query.gameVersion) where.gameVersion = { contains: query.gameVersion };
 
   // 数值范围过滤
-  if (query.minRating) where.rating = { gte: Number(query.minRating) } as any;
-  if (query.maxRating) where.rating = { ...(where.rating || {}), lte: Number(query.maxRating) } as any;
+  if (query.minRating) where.rating = { gte: Number(query.minRating) };
+  if (query.maxRating) where.rating = { ...(where.rating || {}), lte: Number(query.maxRating) };
 
   // 日期范围过滤
   if (query.startDate && query.endDate) {
     where.createdAt = {
       gte: new Date(query.startDate),
       lte: new Date(query.endDate)
-    } as any;
+    };
   }
 
   return where;

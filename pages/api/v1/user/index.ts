@@ -1,13 +1,4 @@
-import {
-  createUser,
-  deleteUser,
-  findUser,
-  findUsers,
-  findUsersCount,
-  updateUser
-} from '@/model/user';
-// @ts-ignore - 忽略类型错误
-import { Prisma } from '@prisma/client';
+import prisma from '@/lib/prisma';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 export default async function handler(
@@ -43,7 +34,9 @@ async function handleGetRequest(req: NextApiRequest, res: NextApiResponse) {
 
   // 获取单个用户
   if (id) {
-    const user = await findUser({ id: Number(id) });
+    const user = await prisma.user.findUnique({
+      where: { id: Number(id) }
+    });
     if (!user) {
       return res.status(404).json({ error: '用户不存在' });
     }
@@ -60,15 +53,19 @@ async function handleGetRequest(req: NextApiRequest, res: NextApiResponse) {
   delete query.limit;
 
   // 获取用户列表
-  const where = buildWhereCondition<Prisma.UserWhereInput>(query);
+  const where = buildWhereCondition(query);
   const [users, total] = await Promise.all([
-    findUsers(where),
-    findUsersCount(where)
+    prisma.user.findMany({
+      where,
+      skip: (page - 1) * limit,
+      take: limit,
+      orderBy: { createdAt: 'desc' }
+    }),
+    prisma.user.count({ where })
   ]);
 
   // 移除所有用户的密码字段
   const safeUsers = users.map((user: any) => {
-    // @ts-ignore
     const { password, ...safeUserData } = user;
     return safeUserData;
   });
@@ -85,7 +82,7 @@ async function handleGetRequest(req: NextApiRequest, res: NextApiResponse) {
 }
 
 async function handlePostRequest(req: NextApiRequest, res: NextApiResponse) {
-  const userData: Prisma.UserCreateInput = req.body;
+  const userData = req.body;
 
   // 验证必要字段
   if (!userData.username || !userData.email || !userData.password) {
@@ -95,11 +92,13 @@ async function handlePostRequest(req: NextApiRequest, res: NextApiResponse) {
   }
 
   // 检查用户名和邮箱是否已存在
-  const existingUser = await findUser({
-    OR: [
-      { username: userData.username },
-      { email: userData.email }
-    ]
+  const existingUser = await prisma.user.findFirst({
+    where: {
+      OR: [
+        { username: userData.username },
+        { email: userData.email }
+      ]
+    }
   });
 
   if (existingUser) {
@@ -108,7 +107,9 @@ async function handlePostRequest(req: NextApiRequest, res: NextApiResponse) {
     });
   }
 
-  const user = await createUser(userData);
+  const user = await prisma.user.create({
+    data: userData
+  });
 
   // 移除敏感信息
   const { password, ...safeUserData } = user;
@@ -126,11 +127,15 @@ async function handlePutRequest(req: NextApiRequest, res: NextApiResponse) {
   // 不允许直接更新敏感字段
   if (userData.email) {
     // 检查邮箱是否已被其他用户使用
-    const existingUser = await findUser({
-      AND: [
-        { email: userData.email },
-        { NOT: { id: Number(id) } }
-      ]
+    const existingUser = await prisma.user.findFirst({
+      where: {
+        AND: [
+          { email: userData.email },
+          { 
+            NOT: { id: Number(id) } 
+          }
+        ]
+      }
     });
 
     if (existingUser) {
@@ -140,13 +145,12 @@ async function handlePutRequest(req: NextApiRequest, res: NextApiResponse) {
     }
   }
 
-  const user = await updateUser({
+  const user = await prisma.user.update({
     where: { id: Number(id) },
     data: userData
   });
 
   // 移除敏感信息
-  // @ts-ignore
   const { password, ...safeUserData } = user;
   res.status(200).json(safeUserData);
 }
@@ -158,31 +162,31 @@ async function handleDeleteRequest(req: NextApiRequest, res: NextApiResponse) {
     return res.status(400).json({ error: '用户ID为必填项' });
   }
 
-  await deleteUser({ id: Number(id) });
+  await prisma.user.delete({ where: { id: Number(id) } });
   res.status(204).end();
 }
 
 // 构建查询条件
-const buildWhereCondition = <T extends Prisma.UserWhereInput>(query: any): T => {
-  const where = {} as T;
+function buildWhereCondition(query: any): any {
+  const where: any = {};
 
   // 基本字段过滤
-  if (query.username) where.username = { contains: query.username } as any;
-  if (query.nickname) where.nickname = { contains: query.nickname } as any;
-  if (query.email) where.email = { contains: query.email } as any;
-  if (query.role) where.role = query.role as any;
+  if (query.username) where.username = { contains: query.username };
+  if (query.nickname) where.nickname = { contains: query.nickname };
+  if (query.email) where.email = { contains: query.email };
+  if (query.role) where.role = query.role;
 
   // 数字字段过滤
-  if (query.minArticles) where.articles = { gte: Number(query.minArticles) } as any;
-  if (query.maxArticles) where.articles = { ...(where.articles || {}), lte: Number(query.maxArticles) } as any;
+  if (query.minArticles) where.articles = { gte: Number(query.minArticles) };
+  if (query.maxArticles) where.articles = { ...(where.articles || {}), lte: Number(query.maxArticles) };
 
   // 日期范围过滤
   if (query.startDate && query.endDate) {
     where.createdAt = {
       gte: new Date(query.startDate),
       lte: new Date(query.endDate)
-    } as any;
+    };
   }
 
   return where;
-};
+}

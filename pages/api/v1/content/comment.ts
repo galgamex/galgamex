@@ -1,13 +1,4 @@
-import {
-  createComment,
-  deleteComment,
-  findComment,
-  findComments,
-  findCommentsCount,
-  updateComment
-} from '@/model/comment';
-// @ts-ignore - 忽略类型错误
-import { Prisma } from '@prisma/client';
+import prisma from '@/lib/prisma';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 export default async function handler(
@@ -43,7 +34,9 @@ async function handleGetRequest(req: NextApiRequest, res: NextApiResponse) {
 
   // 获取单条评论
   if (id) {
-    const comment = await findComment({ id: Number(id) });
+    const comment = await prisma.comment.findUnique({
+      where: { id: Number(id) }
+    });
     if (!comment) {
       return res.status(404).json({ error: 'Comment not found' });
     }
@@ -57,14 +50,15 @@ async function handleGetRequest(req: NextApiRequest, res: NextApiResponse) {
   delete query.limit;
 
   // 获取评论列表
-  const where = buildWhereCondition<Prisma.CommentWhereInput>(query);
+  const where = buildWhereCondition(query);
   const [comments, total] = await Promise.all([
-    findComments(where, {
+    prisma.comment.findMany({
+      where,
       skip: (page - 1) * limit,
       take: limit,
       orderBy: { createdAt: 'desc' }
     }),
-    findCommentsCount(where)
+    prisma.comment.count({ where })
   ]);
 
   res.status(200).json({
@@ -79,7 +73,7 @@ async function handleGetRequest(req: NextApiRequest, res: NextApiResponse) {
 }
 
 async function handlePostRequest(req: NextApiRequest, res: NextApiResponse) {
-  const commentData: Prisma.CommentCreateInput = req.body;
+  const commentData: any = req.body;
 
   // 验证必要字段
   if (!commentData.content || !commentData.articleId || !commentData.authorId) {
@@ -88,7 +82,9 @@ async function handlePostRequest(req: NextApiRequest, res: NextApiResponse) {
     });
   }
 
-  const comment = await createComment(commentData);
+  const comment = await prisma.comment.create({
+    data: commentData
+  });
   res.status(201).json(comment);
 }
 
@@ -100,7 +96,7 @@ async function handlePutRequest(req: NextApiRequest, res: NextApiResponse) {
     return res.status(400).json({ error: 'Comment ID is required' });
   }
 
-  const comment = await updateComment({
+  const comment = await prisma.comment.update({
     where: { id: Number(id) },
     data: commentData
   });
@@ -114,27 +110,27 @@ async function handleDeleteRequest(req: NextApiRequest, res: NextApiResponse) {
     return res.status(400).json({ error: 'Comment ID is required' });
   }
 
-  await deleteComment({ id: Number(id) });
+  await prisma.comment.delete({ where: { id: Number(id) } });
   res.status(204).end();
 }
 
 // 构建查询条件
-const buildWhereCondition = <T extends Prisma.CommentWhereInput>(query: any): T => {
-  const where = {} as T;
+const buildWhereCondition = (query: any): any => {
+  const where: any = {};
 
   // 基本字段过滤
-  if (query.content) where.content = { contains: query.content } as any;
-  if (query.articleId) where.articleId = Number(query.articleId) as any;
-  if (query.authorId) where.authorId = Number(query.authorId) as any;
-  if (query.parentId) where.parentId = Number(query.parentId) as any;
-  if (query.status) where.status = query.status as any;
+  if (query.content) where.content = { contains: query.content };
+  if (query.articleId) where.articleId = Number(query.articleId);
+  if (query.authorId) where.authorId = Number(query.authorId);
+  if (query.parentId) where.parentId = Number(query.parentId);
+  if (query.status) where.status = query.status;
 
   // 日期范围过滤
   if (query.startDate && query.endDate) {
     where.createdAt = {
       gte: new Date(query.startDate),
       lte: new Date(query.endDate)
-    } as any;
+    };
   }
 
   return where;

@@ -5,16 +5,16 @@ import { Article } from "@/types/article";
 import { Metadata } from "next";
 import GameDetailClient from "./GameDetailClient";
 
-// 1定义 Params 类型（用 Promise 包装）
+// 定义 Params 类型
 type Params = {
-  params: Promise<{ id: number }>;
+  params: { id: string };
 };
 
 // 生成元数据函数（用于SEO）
 export async function generateMetadata({
   params
 }: Params): Promise<Metadata> {
-  const { id } = await params;
+  const { id } = params;
 
   // 获取游戏数据
   const gameData = await prisma.article.findUnique({
@@ -22,7 +22,11 @@ export async function generateMetadata({
     include: {
       category: true,
       author: true,
-      tags: true,
+      tags: {
+        include: {
+          tag: true
+        }
+      },
       publisher: true,
       developer: true,
       character: true,
@@ -42,7 +46,7 @@ export async function generateMetadata({
     openGraph: {
       title: gameData?.title || '',
       description: gameData?.content?.substring(0, 160),
-      images: [{ url: "https://t.alcy.cc/pc", alt: gameData?.title ?? '' }],
+      images: [{ url: gameData?.avatar || "https://t.alcy.cc/pc", alt: gameData?.title ?? '' }],
       type: 'article',
     },
   };
@@ -52,15 +56,15 @@ export async function generateMetadata({
 
 // 主页面组件（服务器组件）
 export default async function ArticleDetailPage({ params }: Params) {
-  const { id } = await params;
+  const { id } = params;
+  
+  // 使用model层函数获取包含所有关联数据的文章信息
   const gameData: Article = await findArticle({
     id: Number(id),
   }) as unknown as Article;
 
-
-  // 如果没有找到游戏数据，可以处理错误情况
+  // 如果没有找到游戏数据，显示错误信息
   if (!gameData) {
-    // 这里可以选择重定向到404页面或显示错误信息
     return (
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-2xl font-bold">游戏不存在或已被删除</h1>
@@ -68,7 +72,6 @@ export default async function ArticleDetailPage({ params }: Params) {
     );
   }
 
-
-  // 服务器端渲染游戏的基本信息（对SEO友好）
+  // 服务器端渲染游戏的基本信息，将数据传递给客户端组件
   return <GameDetailClient gameData={gameData} />;
 }

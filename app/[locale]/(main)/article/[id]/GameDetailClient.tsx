@@ -18,8 +18,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { Article } from "@/types/article";
-import { Comment } from "@/types/comment";
-import { Prisma } from "@prisma/client";
+import { Character } from "@/types/content/character";
+import { GamePatch } from "@/types/content/game-patch";
+import { GameSave } from "@/types/content/game-save";
+import { articleAPI, characterAPI, commentAPI, downloadAPI, gamePatchAPI, gameSaveAPI } from "@/services/apiService";
 import { DialogClose } from "@radix-ui/react-dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 

@@ -1,4 +1,4 @@
-import { findUser, updateUser } from '@/model/user';
+import { findUser, updateUser } from '@/model/user/user';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 export default async function handler(

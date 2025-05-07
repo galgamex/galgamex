@@ -5,7 +5,7 @@ import {
   findPublisherCount,
   findPublishers,
   updatePublisher
-} from '@/model/publisher';
+} from '@/model/game/publisher';
 // @ts-ignore - 忽略类型错误
 import { Prisma } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';

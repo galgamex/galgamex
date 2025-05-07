@@ -5,7 +5,7 @@ import {
   findDeveloperCount,
   findDevelopers,
   updateDeveloper
-} from '@/model/developer';
+} from '@/model/game/developer';
 // @ts-ignore - 忽略类型错误
 import { Prisma } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';

@@ -59,6 +59,7 @@ model Article {
   recommendedTo Recommendation[] @relation("articleToArticle") // 推荐给其他文章
   recommendedBy Recommendation[] @relation("recommendedArticle") // 被其他文章推荐
   downloadLogs  DownloadLog[] // 下载记录
+  favoritedBy   Favorite[] // 被用户收藏
   // Timestamps - 时间戳
   createdAt     DateTime?        @default(now()) // 创建时间
   updatedAt     DateTime?        @updatedAt // 最后更新时间
@@ -142,6 +143,7 @@ model User {
   // Add new relations
   taskCompletions   TaskCompletion[]      // 用户完成的任务
   points            UserPoints?           // 用户积分
+  favorites         Favorite[]            // 用户收藏
   // 用户等级系统相关
   levelProgress    UserLevelProgress?    // 用户等级进度
   levelLogs        LevelLog[]            // 用户等级变更记录
@@ -648,6 +650,9 @@ enum PointLogType {
   ADMIN           // 管理员调整
   EXPIRED         // 积分过期
   REFUND          // 退款
+  PROMOTION       // 促销活动
+  PURCHASE        // 购买商品
+  EXCHANGE        // 兑换商品
 }
 
 // 用户等级表 - 存储等级配置
@@ -711,4 +716,18 @@ enum LevelExpSource {
   DOWNLOAD        // 资源被下载
   TASK            // 完成任务
   ADMIN           // 管理员调整
+}
+
+// 用户收藏表 - 存储用户收藏的文章/游戏
+model Favorite {
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  articleId Int
+  article   Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@id([userId, articleId])
+  @@map("favorite")
 }

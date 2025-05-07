@@ -1,5 +1,5 @@
-import prisma from '@/lib/prisma';
 import { NextApiRequest, NextApiResponse } from 'next';
+import { addFavorite, removeFavorite, getUserFavorites, checkFavorite } from '@/model/user/favorites';
 
 export default async function handler(
   req: NextApiRequest,
@@ -8,124 +8,77 @@ export default async function handler(
   try {
     // 为了演示，使用固定用户ID (1)
     // 实际应用中，应该从会话获取用户ID
-    const userId = 1;
-
-    const user = await prisma.user.findUnique({
-      where: { id: userId }
-    });
-
-    if (!user) {
-      return res.status(404).json({ error: '用户不存在' });
-    }
+    const userId = parseInt(req.query.userId as string) || 1;
+    const articleId = parseInt(req.query.articleId as string);
+    
+    // 获取分页参数
+    const page = parseInt(req.query.page as string) || 1;
+    const pageSize = parseInt(req.query.pageSize as string) || 10;
+    const skip = (page - 1) * pageSize;
 
     switch (req.method) {
       case 'GET':
-        // 获取用户收藏列表
-        const { page = '1', limit = '10', type } = req.query;
-        const pageNum = Math.max(1, Number(page));
-        const limitNum = Math.min(Math.max(1, Number(limit)), 50);
-
-        const where = type ? { type: String(type) } : {};
-
-        const [favorites, total] = await Promise.all([
-          prisma.userFavorite.findMany({
-            where: {
-              userId,
-              ...where
-            },
-            include: {
-              article: {
-                select: {
-                  id: true,
-                  title: true,
-                  cover: true,
-                  excerpt: true,
-                  createdAt: true,
-                  updatedAt: true
-                }
-              }
-            },
-            skip: (pageNum - 1) * limitNum,
-            take: limitNum,
-            orderBy: { createdAt: 'desc' }
-          }),
-          prisma.userFavorite.count({
-            where: {
-              userId,
-              ...where
-            }
-          })
-        ]);
-
+        // 如果有指定articleId，则检查是否已收藏
+        if (articleId) {
+          const result = await checkFavorite(userId, articleId);
+          if (!result.success) {
+            return res.status(500).json({ error: result.message });
+          }
+          return res.status(200).json(result);
+        }
+        
+        // 否则获取收藏列表
+        const favorites = await getUserFavorites(userId, {
+          skip,
+          take: pageSize,
+          orderBy: { createdAt: 'desc' }
+        });
+        
+        if (!favorites.success) {
+          return res.status(500).json({ error: favorites.message });
+        }
+        
         return res.status(200).json({
-          data: favorites,
+          data: favorites.data,
           pagination: {
-            page: pageNum,
-            limit: limitNum,
-            total,
-            totalPages: Math.ceil(total / limitNum)
+            total: favorites.total,
+            page,
+            pageSize,
+            pageCount: Math.ceil(favorites.total / pageSize)
           }
         });
 
       case 'POST':
         // 添加收藏
-        const { articleId, type: favType = 'ARTICLE' } = req.body;
-
         if (!articleId) {
-          return res.status(400).json({ error: '文章ID为必填项' });
+          return res.status(400).json({ error: '文章ID不能为空' });
         }
-
-        // 检查文章是否已收藏
-        const existingFavorite = await prisma.userFavorite.findFirst({
-          where: {
-            userId,
-            articleId: Number(articleId),
-            type: favType
-          }
-        });
-
-        if (existingFavorite) {
-          return res.status(409).json({ error: '已经收藏过该文章' });
+        
+        const addResult = await addFavorite(userId, articleId);
+        if (!addResult.success) {
+          return res.status(400).json({ error: addResult.message });
         }
-
-        // 添加收藏
-        const favorite = await prisma.userFavorite.create({
-          data: {
-            userId,
-            articleId: Number(articleId),
-            type: favType
-          }
+        
+        return res.status(201).json({
+          message: '收藏成功',
+          data: addResult.data
         });
-
-        return res.status(201).json(favorite);
 
       case 'DELETE':
         // 删除收藏
-        const { id: favId, articleId: artId } = req.query;
-
-        if (!favId && !artId) {
-          return res.status(400).json({ error: '收藏ID或文章ID为必填项' });
+        if (!articleId) {
+          return res.status(400).json({ error: '文章ID不能为空' });
         }
-
-        if (favId) {
-          // 通过收藏ID删除
-          await prisma.userFavorite.deleteMany({
-            where: {
-              id: Number(favId),
-              userId
-            }
-          });
-        } else {
-          // 通过文章ID删除
-          await prisma.userFavorite.deleteMany({
-            where: {
-              articleId: Number(artId),
-              userId
-            }
-          });
+        
+        const removeResult = await removeFavorite(userId, articleId);
+        if (!removeResult.success) {
+          return res.status(400).json({ error: removeResult.message });
         }
-
-        return res.status(204).end();
+        
+        return res.status(200).json({
+          message: '已取消收藏',
+          data: removeResult.data
+        });
 
       default:
         res.setHeader('Allow', ['GET', 'POST', 'DELETE']);
@@ -133,6 +86,6 @@ export default async function handler(
     }
   } catch (error) {
     console.error('API错误:', error);
-    res.status(500).json({ error: '服务器内部错误' });
+    res.status(500).json({ error: '服务器内部错误', details: error instanceof Error ? error.message : String(error) });
   }
 } 

@@ -5,7 +5,7 @@ import {
   findCharacterCount,
   findCharacters,
   updateCharacter
-} from '@/model/character';
+} from '@/model/content/character';
 // @ts-ignore - 忽略类型错误
 import { Prisma } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';

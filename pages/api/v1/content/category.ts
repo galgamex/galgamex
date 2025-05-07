@@ -5,7 +5,7 @@ import {
   findCategory,
   findCategoryCount,
   updateCategory
-} from '@/model/category';
+} from '@/model/content/category';
 // @ts-ignore - 忽略类型错误
 import { Prisma } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';

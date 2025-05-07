@@ -5,7 +5,7 @@ import {
   findDownloadCount,
   findDownloads,
   updateDownload
-} from '@/model/download';
+} from '@/model/game/download';
 
 // @ts-ignore - 忽略类型错误
 import { Prisma } from '@prisma/client';
