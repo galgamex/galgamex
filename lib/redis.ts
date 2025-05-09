@@ -1,38 +1,28 @@
-import Redis from 'ioredis';
+import Redis from 'ioredis'
 
-const redis = new Redis(process.env.REDIS_URL!);
+const KUN_PATCH_REDIS_PREFIX = 'kun:galgamex'
 
-export const setKey = async (key: string, value: string) => {
-  await redis.set(key, value);
-}
+export const redis = new Redis({
+  port: parseInt(process.env.REDIS_PORT!),
+  host: process.env.REDIS_HOST
+})
 
-export const getKey = async (key: string) => {
-  return await redis.get(key);
-}
-
-export const delKey = async (key: string) => {
-  await redis.del(key);
-}
-
-export const setKeyWithExpire = async (key: string, value: string, expire: number) => {
-  await redis.set(key, value, 'EX', expire || 86400);
-}
-
-// 序列化对象
-export const serialize = (obj: any) => {
-  try {
-    return JSON.stringify(obj);
-  } catch (e) {
-    return obj;
-  }
-}
-// 反序列化对象
-export const deserialize = (str: string) => {
-  try {
-    return JSON.parse(str);
-  } catch (e) {
-    return str;
+export const setKv = async (key: string, value: string, time?: number) => {
+  const keyString = `${KUN_PATCH_REDIS_PREFIX}:${key}`
+  if (time) {
+    await redis.setex(keyString, time, value)
+  } else {
+    await redis.set(keyString, value)
   }
 }
 
-export default redis;
+export const getKv = async (key: string) => {
+  const keyString = `${KUN_PATCH_REDIS_PREFIX}:${key}`
+  const value = await redis.get(keyString)
+  return value
+}
+
+export const delKv = async (key: string) => {
+  const keyString = `${KUN_PATCH_REDIS_PREFIX}:${key}`
+  await redis.del(keyString)
+}

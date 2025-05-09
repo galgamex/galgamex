@@ -1,146 +1,81 @@
-🌍 *[English](README.md) ∙ [简体中文](README_zh.md) ∙ [日本語](README_ja.md)*
+![kun-touchgal-next](./public/touchgal.avif)
 
-# Next Forge - Multilingual Next.js 15 Starter
+# TouchGal
 
-A feature-rich Next.js 15 multilingual starter template to help you quickly build globally-ready websites.
+TouchGal 是一个一站式 Galgame 文化社区。提供Galgame 论坛、Galgame 下载等服务。承诺永久免费, 高质量。为Galgame 爱好者提供一片净土！
 
-- [👉 Source Code](https://github.com/weijunext/nextjs-15-starter)
-- [👉 Live Demo](https://nextforge.dev/)
+## 错误反馈
 
-## ✨ Features
+如果要反馈错误, 请您加入 TouchGal 的官方 Telegram 群组
 
-- 🌐 Built-in i18n support (English, Chinese, Japanese)
-- 🎨 Modern UI design with Tailwind CSS
-- 🌙 Dark/Light theme toggle
-- 📱 Responsive layout
-- 📝 MDX blog system 
-- 🔍 SEO optimization
-- 📊 Integrated analytics tools
-  - Google Analytics
-  - Baidu Analytics
-  - Google Adsense
-  - Vercel Analytics
+https://t.me/+yPQQaPhgLbc5MGIx
 
-## 🚀 Quick Start
+## 开发联系
 
-1. Clone the repository:
-```bash
-git clone https://github.com/weijunext/nextjs-15-starter.git
+如果有对 Web 开发技术 (Node.js, Nuxt, Next.js, SvelteKit, SolidStart 等) 感兴趣的朋友们, 可以加入本项目的 Telegram 开发群组
+
+[https://t.me/KUNForum](https://t.me/KUNForum)
+
+## 如何运行
+
+确保本地安装有 Node.js, pnpm, PostgreSQL, Redis 环境
+
+- 使用 `git clone` 拉取本项目至本地目录
+- 参考项目根目录的 `.env.example` 文件，新建 `.env` 文件，并自行填写环境变量（`postgresql` 的本地连接配置）
+- 初次运行本项目，可执行 `pnpm prisma:push` 创建此项目所使用的本地数据库
+- 使用 `pnpm dev` 即可运行
+
+```env
+# 数据库 URL, 我们使用 psql
+KUN_DATABASE_URL = "postgresql://postgres:kunloveren@localhost:5432/touchgal?schema=public"
+
+# 网站 URL, 不变即可
+KUN_VISUAL_NOVEL_SITE_URL = "https://www.touchgal.io"
+
+# 开发环境 URL, 不变即可
+NEXT_PUBLIC_KUN_PATCH_ADDRESS_DEV = "http://127.0.0.1:3000"
+NEXT_PUBLIC_KUN_PATCH_ADDRESS_PROD = "https://image.touchgal.moyu.moe"
+
+# 本地 Redis 端口和地址, 一般无需变动
+REDIS_HOST = '127.0.0.1'
+REDIS_PORT = '6379'
+
+# jwt 配置, 开发环境无需变动
+JWT_ISS = 'touchgal'
+JWT_AUD = 'touchgal_admin'
+JWT_SECRET = 'moemoekungalgamekunisthecutest!chinorensukiazkhx'
+
+# NODE_ENV, 开发环境无需变动
+NODE_ENV = "development"
+
+# 邮件服务地址
+KUN_VISUAL_NOVEL_EMAIL_FROM = "鲲 Galgame 补丁"
+KUN_VISUAL_NOVEL_EMAIL_HOST = "moyu.moe"
+KUN_VISUAL_NOVEL_EMAIL_PORT = '587'
+KUN_VISUAL_NOVEL_EMAIL_ACCOUNT = "auth@moyu.moe"
+KUN_VISUAL_NOVEL_EMAIL_PASSWORD = "莲最可爱！"
+
+# S3 相关配置
+KUN_VISUAL_NOVEL_S3_STORAGE_ACCESS_KEY_ID = "kkkkkkkkkkkkkkkkkkkkkkkkkkkk"
+KUN_VISUAL_NOVEL_S3_STORAGE_SECRET_ACCESS_KEY = "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk"
+KUN_VISUAL_NOVEL_S3_STORAGE_BUCKET_NAME = "kun"
+KUN_VISUAL_NOVEL_S3_STORAGE_ENDPOINT = "https://moyu.moe"
+KUN_VISUAL_NOVEL_S3_STORAGE_REGION = "us-west-001"
+NEXT_PUBLIC_KUN_VISUAL_NOVEL_S3_STORAGE_URL = "https://touchgal-patch.moyu.moe"
+
+# 图床相关配置
+KUN_VISUAL_NOVEL_IMAGE_BED_HOST = "touchgal-image.moyu.moe"
+KUN_VISUAL_NOVEL_IMAGE_BED_URL = "https://touchgal-image.moyu.moe"
 ```
 
-2. Install dependencies:
-```bash
-npm install
-# or
-yarn
-# or
-pnpm install
-```
+## 贡献指南
 
-3. Copy environment variables:
-```bash
-cp .env.example .env
-```
+如果您的更改涉及到对项目源码的变动, **请务必在本地将项目运行成功, 自行测试无误后再 Pull Request**, 否则会严重阻碍代码审计工作
 
-4. Start the development server:
-```bash
-npm run dev
-```
+## 开源声明 / 开源协议
 
-Visit http://localhost:3000 to view your application.
+本项目由 [鲲 Galgame 补丁 - kun-galgame-patch-next](https://github.com/KUN1007/kun-galgame-patch-next) 修改而来, 原仓库地址
 
-## ⚙️ Configuration
+https://github.com/KUN1007/kun-galgame-patch-next
 
-1. Basic Setup
-   - Edit `config/site.ts` for website information
-   - Update icons and logo in `public/`
-   - Configure `app/sitemap.ts` for sitemap
-   - Update `app/robots.ts` for robots.txt
-
-2. i18n Setup
-   - Add/modify language files in `i18n/messages/`
-   - Configure supported languages in `i18n/routing.ts`
-   - Set up i18n routing in `middleware.ts`
-   - Create pages under `app/[locale]/`
-   - Use the `Link` component from `i18n/routing.ts` instead of Next.js default
-
-## 📝 Content Management
-
-### Blog Posts
-Create MDX files in `blogs/[locale]` with the following format:
-
-```markdown
----
-title: Post Title
-description: Post Description
-image: /image.png
-slug: /url-path
-tags: tag1,tag2
-date: 2025-02-20
-visible: published
-pin: true
----
-
-Post content...
-```
-
-Reference `types/blog.ts` for supported fields.
-
-### Static Pages
-Manage static page content in `content/[page]/[locale].mdx`.
-
-## 🔍 SEO Optimization
-
-Built-in comprehensive SEO features:
-   - Server-side rendering and static generation
-   - Automatic sitemap.xml generation
-   - robots.txt configuration
-   - Optimized metadata
-   - Open Graph support
-   - Multilingual SEO support
-
-## 📊 Analytics
-
-Enable analytics by adding IDs in `.env`:
-```
-NEXT_PUBLIC_GOOGLE_ANALYTICS=
-NEXT_PUBLIC_BAIDU_TONGJI=
-NEXT_PUBLIC_GOOGLE_ADSENSE=
-```
-
-## 🛠️ Tech Stack
-
-- Next.js 15
-- TypeScript
-- Tailwind CSS
-- Shadcn/ui
-- next-intl
-- MDX
-- Zustand
-- Vercel
-
-## One-Click Deploy
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/weijunext/nextjs-15-starter&project-name=&repository-name=nextjs-15-starter&demo-title=Nextjs15Starter&demo-description=Nextjs%2015%20starter.&demo-url=https://nextforge.dev&demo-image=https://nextforge.dev/og.png)
-
-## 📄 License
-
-MIT
-
-## 🤝 Contributing
-
-Issues and Pull Requests are welcome!
-
-## About the Author
-
-Next.js full-stack specialist providing expert services in project development, performance optimization, and SEO improvement.
-
-For consulting and training opportunities, reach out at weijunext@gmail.com
-
-- [Github](https://github.com/weijunext)
-- [Bento](https://bento.me/weijunext)
-- [Twitter/X](https://twitter.com/judewei_dev)
-
-<a href="https://www.buymeacoffee.com/weijunext" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
-
-[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/G2G6TWWMG)
+本项目遵从 `AGPL-3.0` 开源协议, 进行任何的修改分发时请注明原始仓库与作者地址
