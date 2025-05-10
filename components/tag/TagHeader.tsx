@@ -18,19 +18,7 @@ export const TagHeader = ({ setNewTag }: Props) => {
 
   return (
     <>
-      <KunHeader
-        name="标签列表"
-        description="这里是本站 Galgame 中的所有标签"
-        headerEndContent={
-          <>
-            {user.role > 2 && (
-              <Button color="primary" onPress={onOpen} startContent={<Plus />}>
-                创建标签
-              </Button>
-            )}
-          </>
-        }
-      />
+
 
       <CreateTagModal
         isOpen={isOpen}

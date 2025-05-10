@@ -37,7 +37,7 @@ export const HomeContainer = ({ galgames, resources }: Props) => {
 
       <section className="space-y-6">
         <div className="flex items-center space-x-4">
-          <h2 className="text-lg font-bold sm:text-2xl">最新 Galgame</h2>
+          <h2 className="text-lg font-bold sm:text-2xl">最新更新</h2>
           <Button
             variant="light"
             as={Link}
@@ -61,26 +61,7 @@ export const HomeContainer = ({ galgames, resources }: Props) => {
         </KunMasonryGrid>
       </section>
 
-      <section className="space-y-6">
-        <div className="flex items-center space-x-4">
-          <h2 className="text-lg font-bold sm:text-2xl">最新补丁资源下载</h2>
-          <Button
-            variant="light"
-            as={Link}
-            color="primary"
-            endContent={<ChevronRight className="size-4" />}
-            href="/resource"
-          >
-            查看更多
-          </Button>
-        </div>
 
-        <div className="grid grid-cols-1 gap-2 sm:gap-6 md:grid-cols-2">
-          {resources.map((resource) => (
-            <ResourceCard key={resource.id} resource={resource} />
-          ))}
-        </div>
-      </section>
     </div>
   )
 }

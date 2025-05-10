@@ -63,10 +63,7 @@ export const CardContainer = ({ initialComments, initialTotal }: Props) => {
 
   return (
     <div className="container mx-auto my-4 space-y-6">
-      <KunHeader
-        name="Galgame 评论"
-        description="这里展示了所有的 Galgame 评论"
-      />
+
 
       <FilterBar
         sortField={sortField}
