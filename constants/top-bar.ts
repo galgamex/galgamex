@@ -1,3 +1,5 @@
+import { createUrl } from '~/utils/createUrl'
+
 export interface KunNavItem {
   name: string
   href: string
@@ -6,31 +8,30 @@ export interface KunNavItem {
 export const kunNavItem: KunNavItem[] = [
   {
     name: '游戏下载',
-    href: '/galgame'
+    href: createUrl('/galgame')
   },
   {
     name: '游戏标签',
-    href: '/tag'
+    href: createUrl('/tag')
   },
   {
     name: '补丁和存档',
-    href: '/resource'
+    href: createUrl('/resource')
   },
   {
     name: '帮助文档',
-    href: '/doc'
+    href: createUrl('/doc')
   },
   {
     name: '评论列表',
-    href: '/comment'
+    href: createUrl('/comment')
   }
-
 ]
 
 export const kunMobileNavItem: KunNavItem[] = [
   ...kunNavItem,
   {
     name: '联系我们',
-    href: '/doc/notice/feedback'
+    href: createUrl('/doc/notice/feedback')
   }
 ]

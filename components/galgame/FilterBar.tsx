@@ -146,11 +146,14 @@ export const FilterBar = ({
   setSelectedYears,
   selectedMonths,
   setSelectedMonths,
-  selectedTags = [],
+  selectedTags,
   setSelectedTags,
   availableTags = []
 }: Props) => {
   const [showAdvanced, setShowAdvanced] = useState(false)
+
+  // 强制selectedTags为数组
+  const safeSelectedTags = Array.isArray(selectedTags) ? selectedTags : [];
 
   // 检查是否有任何筛选器被设置为非默认值
   const hasActiveFilters =
@@ -159,7 +162,7 @@ export const FilterBar = ({
     selectedPlatform !== 'all' ||
     !selectedYears.includes('all') ||
     !selectedMonths.includes('all') ||
-    (Array.isArray(selectedTags) && selectedTags.length > 0)
+    safeSelectedTags.length > 0
 
   const resetFilters = () => {
     setSelectedType('all')
@@ -338,17 +341,17 @@ export const FilterBar = ({
                 <Chip
                   as="button"
                   variant="flat"
-                  color={selectedTags.length > 0 ? "primary" : "default"}
+                  color={safeSelectedTags.length > 0 ? "primary" : "default"}
                   startContent={<Filter className="size-3.5" />}
                   endContent={<ChevronDown className="size-3.5" />}
                   className="px-3 h-8"
                 >
-                  {selectedTags.length > 0 ? `已选${selectedTags.length}个标签` : "标签筛选"}
+                  {safeSelectedTags.length > 0 ? `已选${safeSelectedTags.length}个标签` : "标签筛选"}
                 </Chip>
               </DropdownTrigger>
               <DropdownMenu
                 aria-label="标签筛选"
-                selectedKeys={selectedTags}
+                selectedKeys={safeSelectedTags}
                 selectionMode="multiple"
                 onSelectionChange={(keys) => {
                   setSelectedTags(Array.from(keys) as string[])
@@ -358,7 +361,7 @@ export const FilterBar = ({
               >
                 {availableTags.map((tag) => {
                   const tagId = tag.id.toString();
-                  const isSelected = selectedTags.includes(tagId);
+                  const isSelected = safeSelectedTags.includes(tagId);
                   return (
                     <DropdownItem
                       key={tagId}
@@ -575,10 +578,10 @@ export const FilterBar = ({
               )}
 
               {/* 选中的标签展示区 */}
-              {selectedTags.length > 0 && showAdvanced && Array.isArray(availableTags) && (
+              {safeSelectedTags.length > 0 && showAdvanced && Array.isArray(availableTags) && (
                 <div className="flex flex-wrap gap-1 mt-1">
                   {availableTags
-                    .filter(tag => selectedTags.includes(tag.id.toString()))
+                    .filter(tag => safeSelectedTags.includes(tag.id.toString()))
                     .map(tag => (
                       <Chip
                         key={`tag-${tag.id}`}
@@ -586,7 +589,7 @@ export const FilterBar = ({
                         color="secondary"
                         size="sm"
                         onClose={() => {
-                          setSelectedTags(selectedTags.filter(id => id !== tag.id.toString()))
+                          setSelectedTags(safeSelectedTags.filter(id => id !== tag.id.toString()))
                         }}
                       >
                         {tag.name}

@@ -3,13 +3,14 @@
 import { kunMoyuMoe } from '~/config/moyu-moe'
 import Link from 'next/link'
 import Image from 'next/image'
+import { createUrl } from '~/utils/createUrl'
 
 export const KunFooter = () => {
   return (
     <footer className="w-full mt-8 text-sm border-t border-divider">
       <div className="px-2 mx-auto sm:px-6 max-w-7xl">
         <div className="flex flex-wrap justify-center gap-4 py-6 md:justify-between">
-          <Link href="/" className="flex items-center space-x-2">
+          <Link href={createUrl('/')} className="flex items-center space-x-2">
             <Image
               src="/favicon.webp"
               alt={kunMoyuMoe.titleShort}
@@ -20,7 +21,7 @@ export const KunFooter = () => {
           </Link>
 
           <div className="flex space-x-8">
-            <Link href="/doc" className="flex items-center">
+            <Link href={createUrl('/doc')} className="flex items-center">
               使用指南
             </Link>
             <Link
@@ -31,7 +32,7 @@ export const KunFooter = () => {
               导航页面
             </Link>
 
-            <Link href="/friend-link" className="flex items-center">
+            <Link href={createUrl('/friend-link')} className="flex items-center">
               友情链接
             </Link>
 

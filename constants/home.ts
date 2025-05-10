@@ -1,15 +1,12 @@
-import { Tags, MessageSquare, FileText } from 'lucide-react'
+import { FileText, MessageSquare, Tags } from 'lucide-react'
 import { kunMoyuMoe } from '~/config/moyu-moe'
-import type { LucideProps } from 'lucide-react'
-import type { ForwardRefExoticComponent, RefAttributes } from 'react'
+import { createUrl } from '~/utils/createUrl'
 
-interface HomeNavItem {
-  icon: ForwardRefExoticComponent<
-    Omit<LucideProps, 'ref'> & RefAttributes<SVGSVGElement>
-  >
+export interface HomeNavItem {
+  icon: any
   label: string
   href: string
-  color: 'primary' | 'secondary' | 'success'
+  color: 'primary' | 'secondary' | 'success' | 'warning' | 'danger'
   isExternal: boolean
 }
 
@@ -17,7 +14,7 @@ export const homeNavigationItems: HomeNavItem[] = [
   {
     icon: Tags,
     label: '标签',
-    href: '/tag',
+    href: createUrl('/tag'),
     color: 'primary',
     isExternal: false
   },
@@ -31,7 +28,7 @@ export const homeNavigationItems: HomeNavItem[] = [
   {
     icon: FileText,
     label: '文档',
-    href: '/doc',
+    href: createUrl('/doc'),
     color: 'success',
     isExternal: false
   }
