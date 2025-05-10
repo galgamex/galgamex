@@ -20,8 +20,13 @@ export const KunMasonryGrid = ({
   const containerRef = useRef<HTMLDivElement>(null)
   const [columns, setColumns] = useState(1)
   const [isLoaded, setIsLoaded] = useState(false)
+  const [isMounted, setIsMounted] = useState(false)
 
   const { width: containerWidth } = useResizeObserver(containerRef)
+
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
 
   useEffect(() => {
     const calculateColumns = () => {
@@ -63,6 +68,23 @@ export const KunMasonryGrid = ({
     return columnItems
   }
 
+  // 只在客户端渲染时设置动态样式
+  const gridStyle = isMounted
+    ? {
+      gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
+      gap: `${gap}px`,
+      maxWidth: '100%'
+    }
+    : {
+      // 使用初始静态样式，避免水合不匹配
+      display: 'grid',
+      maxWidth: '100%'
+    };
+
+  const columnStyle = isMounted
+    ? { gap: `${gap}px` }
+    : {}; // 服务器端初始渲染时不设置column间距样式
+
   return (
     <div
       ref={containerRef}
@@ -71,17 +93,13 @@ export const KunMasonryGrid = ({
         isLoaded ? 'opacity-100' : 'opacity-0',
         className
       )}
-      style={{
-        gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
-        gap: `${gap}px`,
-        maxWidth: '100%'
-      }}
+      style={gridStyle}
     >
       {distributeItems().map((column, columnIndex) => (
         <div
           key={columnIndex}
           className="flex flex-col"
-          style={{ gap: `${gap}px` }}
+          style={columnStyle}
         >
           {column.map((item, itemIndex) => (
             <div key={itemIndex} className="w-full">

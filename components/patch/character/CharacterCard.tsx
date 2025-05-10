@@ -28,17 +28,16 @@ export const CharacterCard = ({ character, onClick }: Props) => {
     return (
         <Card
             isPressable
-            className="w-full h-full group border border-default-100 dark:border-default-200 overflow-hidden hover:shadow-md transition-all duration-300"
+            className="w-full h-full border border-default-100 dark:border-default-200 overflow-hidden hover:shadow-md"
             onClick={onClick}
         >
             <CardBody className="p-0 overflow-hidden">
-                <div className="relative pt-[133%]">
+                <div className="relative pt-[150%]">
                     {/* 加载状态背景 - 总是显示，只改变透明度 */}
                     <div
                         className={cn(
                             'absolute inset-0 bg-default-100',
-                            (imageLoaded && !imgError) ? 'animate-none opacity-0' : 'animate-pulse opacity-90',
-                            'transition-opacity duration-300'
+                            (imageLoaded && !imgError) ? 'opacity-0' : 'opacity-90'
                         )}
                     />
 
@@ -46,9 +45,8 @@ export const CharacterCard = ({ character, onClick }: Props) => {
                     <img
                         alt={character.name}
                         className={cn(
-                            'absolute top-0 left-0 w-full h-full object-cover transition-all duration-500',
-                            (imageLoaded && !imgError) ? 'opacity-100' : 'opacity-0',
-                            'group-hover:scale-[1.03]'
+                            'absolute top-0 left-0 w-full h-full object-cover',
+                            (imageLoaded && !imgError) ? 'opacity-100' : 'opacity-0'
                         )}
                         src={character.image}
                         onLoad={() => setImageLoaded(true)}
@@ -62,8 +60,8 @@ export const CharacterCard = ({ character, onClick }: Props) => {
                         </div>
                     )}
 
-                    {/* 角色信息悬浮层 - 移动端可见，桌面端鼠标悬浮显示 */}
-                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3 text-white transform translate-y-0 md:translate-y-[calc(100%-36px)] group-hover:translate-y-0 transition-transform duration-300">
+                    {/* 角色信息悬浮层 - 固定显示在底部 */}
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3 text-white">
                         <h3 className="text-md font-semibold line-clamp-1 mb-1 flex items-center">
                             {character.name}
                             {character.alias && character.alias.length > 0 && (
@@ -74,7 +72,7 @@ export const CharacterCard = ({ character, onClick }: Props) => {
                         </h3>
 
                         {/* 角色属性信息 */}
-                        <div className="flex flex-col gap-1 text-xs opacity-0 md:opacity-100 group-hover:opacity-100 transition-opacity duration-300">
+                        <div className="flex flex-col gap-1 text-xs">
                             {/* 角色类型和声优信息 */}
                             {(character.roleType || character.voiceActor) && (
                                 <div className="flex items-center gap-2 text-white/90">

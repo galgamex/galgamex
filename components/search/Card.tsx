@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { Card, CardBody } from '@nextui-org/card'
-import { Image } from '@nextui-org/image'
+import Image from 'next/image'
 import { KunCardStats } from '~/components/kun/CardStats'
 import { KunPatchAttribute } from '~/components/kun/PatchAttribute'
 
@@ -28,7 +28,8 @@ export const SearchCard = ({ patch }: Props) => {
               }
               alt={patch.name}
               className="object-cover rounded-lg size-full"
-              radius="lg"
+              fill={true}
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 300px, 160px"
             />
           </div>
           <div className="flex-1 space-y-3">

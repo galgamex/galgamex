@@ -49,7 +49,7 @@ export const ResourceLinksInput = ({
     if (!links.length || size) {
       return
     }
-    if (links.some((link) => link.includes('pan.touchgal.net/s/'))) {
+    if (links.some((link) => link.includes('pan.galgamex.com/s/'))) {
       checkLinkSize(links[0])
     }
   }, [links, setSize])
@@ -68,7 +68,7 @@ export const ResourceLinksInput = ({
           <Chip color="primary" variant="flat">
             {
               SUPPORTED_RESOURCE_LINK_MAP[
-                storage as keyof typeof SUPPORTED_RESOURCE_LINK_MAP
+              storage as keyof typeof SUPPORTED_RESOURCE_LINK_MAP
               ]
             }
           </Chip>

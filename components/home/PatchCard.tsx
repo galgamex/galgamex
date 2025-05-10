@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { Card, CardBody } from '@nextui-org/card'
-import { Image } from '@nextui-org/image'
+import Image from 'next/image'
 import { KunCardStats } from '~/components/kun/CardStats'
 
 interface Props {
@@ -18,11 +18,12 @@ export const PatchCard = ({ patch }: Props) => {
       <CardBody>
         <div className="relative w-full pb-[56.25%]">
           <Image
-            removeWrapper
             src={patch.banner.replace(/\.avif$/, '-mini.avif')}
             alt={patch.name}
             className="absolute inset-0 object-cover rounded-lg size-full"
-            radius="lg"
+            fill={true}
+            priority={true}
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
           />
         </div>
         <div className="mt-3 space-y-3">

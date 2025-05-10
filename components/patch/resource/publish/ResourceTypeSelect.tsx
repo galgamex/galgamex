@@ -27,9 +27,9 @@ export const ResourceTypeSelect = ({ section, control, errors }: Props) => {
       return ['s3', 'user']
     }
     if (user.role > 1 && section === 'patch') {
-      return ['touchgal']
+      return ['galgamex']
     }
-    return ['s3', 'touchgal']
+    return ['s3', 'galgamex']
   }
 
   return (

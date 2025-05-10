@@ -32,7 +32,7 @@ export const kunCMTheme = () => {
   return EditorView.theme({
     '&': {
       backgroundColor: colors.backgroundAlpha,
-      borderRadius: '0.75rem',
+      borderRadius: '0.2rem',
       lineHeight: '1.5',
       scrollbarWidth: 'none',
       minHeight: '256px'

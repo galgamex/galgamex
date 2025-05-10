@@ -1,6 +1,6 @@
 import { Chip } from '@nextui-org/chip'
 import { Card, CardBody } from '@nextui-org/card'
-import { Image } from '@nextui-org/image'
+import Image from 'next/image'
 import { formatDistanceToNow } from '~/utils/formatDistanceToNow'
 import Link from 'next/link'
 import { KunPatchAttribute } from '~/components/kun/PatchAttribute'
@@ -30,7 +30,9 @@ export const UserResourceCard = ({ resource }: Props) => {
               src={bannerImageSrc}
               alt={resource.patchName}
               className="object-cover rounded-lg size-full max-h-52"
-              radius="lg"
+              width={160}
+              height={240}
+              sizes="(max-width: 640px) 100vw, 160px"
             />
           </div>
           <div className="flex-1 space-y-3">

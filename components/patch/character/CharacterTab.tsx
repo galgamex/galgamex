@@ -63,7 +63,7 @@ export const CharacterTab = ({ patchId }: Props) => {
                 />
             </CardHeader>
             <CardBody className="p-4">
-                <div className="min-h-[350px]">
+                <div className="min-h-[250px]">
                     {loading ? (
                         <div className="flex items-center justify-center h-[350px]">
                             <KunLoading hint="正在加载角色数据..." />

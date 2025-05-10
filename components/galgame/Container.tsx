@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback, memo } from 'react'
 import { kunFetchGet } from '~/utils/kunFetch'
 import { GalgameCard } from './Card'
 import { FilterBar } from './FilterBar'
@@ -9,7 +9,11 @@ import { KunHeader } from '../kun/Header'
 import { KunPagination } from '../kun/Pagination'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { KunMasonryGrid } from '../kun/MasonryGrid'
+import dynamic from 'next/dynamic'
 import type { SortField, SortOrder } from './_sort'
+
+// 使用React.memo优化卡片组件渲染
+const MemoizedGalgameCard = memo(GalgameCard)
 
 interface Props {
   initialGalgames: GalgameCard[]
@@ -40,10 +44,10 @@ export const CardContainer = ({ initialGalgames, initialTotal }: Props) => {
     (searchParams.get('sortOrder') as SortOrder) || 'desc'
   )
   const [selectedYears, setSelectedYears] = useState<string[]>(
-    JSON.parse(searchParams.get('selectedYears') as string) || ['all']
+    JSON.parse(searchParams.get('selectedYears') as string || '["all"]')
   )
   const [selectedMonths, setSelectedMonths] = useState<string[]>(
-    JSON.parse(searchParams.get('selectedMonths') as string) || ['all']
+    JSON.parse(searchParams.get('selectedMonths') as string || '["all"]')
   )
   const [selectedTags, setSelectedTags] = useState<string[]>(() => {
     try {
@@ -56,15 +60,34 @@ export const CardContainer = ({ initialGalgames, initialTotal }: Props) => {
   })
   const [availableTags, setAvailableTags] = useState<Array<{ id: number; name: string }>>([])
   const [page, setPage] = useState(Number(searchParams.get('page')) || 1)
-  const [windowWidth, setWindowWidth] = useState(640)
+  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 640)
+
+  const updateUrl = useCallback((params: Record<string, string>) => {
+    const urlParams = new URLSearchParams()
+    Object.entries(params).forEach(([key, value]) => {
+      urlParams.set(key, value)
+    })
+    const queryString = urlParams.toString()
+    const url = queryString ? `?${queryString}` : ''
+    router.push(url)
+  }, [router])
+
+  // 防抖函数，减少不必要的URL更新
+  const debounce = (func: Function, delay: number) => {
+    let timeoutId: NodeJS.Timeout
+    return (...args: any[]) => {
+      clearTimeout(timeoutId)
+      timeoutId = setTimeout(() => func(...args), delay)
+    }
+  }
+
+  const debouncedUpdateUrl = useCallback(debounce(updateUrl, 300), [updateUrl])
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      setWindowWidth(window.innerWidth)
-
-      const handleResize = () => {
+      const handleResize = debounce(() => {
         setWindowWidth(window.innerWidth)
-      }
+      }, 100)
 
       window.addEventListener('resize', handleResize)
       return () => window.removeEventListener('resize', handleResize)
@@ -75,22 +98,20 @@ export const CardContainer = ({ initialGalgames, initialTotal }: Props) => {
     if (!isMounted) {
       return
     }
-    const params = new URLSearchParams()
 
-    params.set('type', selectedType)
-    params.set('language', selectedLanguage)
-    params.set('platform', selectedPlatform)
-    params.set('sortField', sortField)
-    params.set('sortOrder', sortOrder)
-    params.set('selectedYears', JSON.stringify(selectedYears))
-    params.set('selectedMonths', JSON.stringify(selectedMonths))
-    params.set('selectedTags', JSON.stringify(selectedTags))
-    params.set('page', page.toString())
+    const params = {
+      type: selectedType,
+      language: selectedLanguage,
+      platform: selectedPlatform,
+      sortField,
+      sortOrder,
+      selectedYears: JSON.stringify(selectedYears),
+      selectedMonths: JSON.stringify(selectedMonths),
+      selectedTags: JSON.stringify(selectedTags),
+      page: page.toString()
+    }
 
-    const queryString = params.toString()
-    const url = queryString ? `?${queryString}` : ''
-
-    router.push(url)
+    debouncedUpdateUrl(params)
   }, [
     selectedType,
     selectedLanguage,
@@ -102,11 +123,11 @@ export const CardContainer = ({ initialGalgames, initialTotal }: Props) => {
     selectedTags,
     page,
     isMounted,
-    router
+    debouncedUpdateUrl
   ])
 
-  // 获取可用标签列表
-  const fetchTags = async () => {
+  // 获取可用标签列表 - 使用useCallback优化
+  const fetchTags = useCallback(async () => {
     try {
       const response = await kunFetchGet<{
         tags: Array<{ id: number; name: string; count: number }>
@@ -119,53 +140,47 @@ export const CardContainer = ({ initialGalgames, initialTotal }: Props) => {
     } catch (error) {
       console.error('获取标签列表失败', error)
     }
-  }
+  }, [])
 
   useEffect(() => {
     if (isMounted) {
       fetchTags()
     }
-  }, [isMounted])
+  }, [isMounted, fetchTags])
 
-  const fetchPatches = async () => {
+  // 优化游戏数据获取 - 使用useCallback减少重复创建函数
+  const fetchPatches = useCallback(async () => {
     setLoading(true)
 
-    // 添加调试日志
-    console.log('标签筛选:', selectedTags);
-
-    // 由于使用了toString()，标签ID可能是字符串格式，需要转换回数字
+    // 处理标签ID
     const processedTagIds = selectedTags.length > 0
       ? JSON.stringify(selectedTags.map(id => Number(id)))
       : '';
 
-    console.log('处理后的标签ID:', processedTagIds);
+    try {
+      const { galgames, total } = await kunFetchGet<{
+        galgames: GalgameCard[]
+        total: number
+      }>('/galgame', {
+        selectedType,
+        selectedLanguage,
+        selectedPlatform,
+        sortField,
+        sortOrder,
+        page,
+        limit: 24,
+        yearString: JSON.stringify(selectedYears),
+        monthString: JSON.stringify(selectedMonths),
+        tagIds: processedTagIds
+      })
 
-    const { galgames, total } = await kunFetchGet<{
-      galgames: GalgameCard[]
-      total: number
-    }>('/galgame', {
-      selectedType,
-      selectedLanguage,
-      selectedPlatform,
-      sortField,
-      sortOrder,
-      page,
-      limit: 24,
-      yearString: JSON.stringify(selectedYears),
-      monthString: JSON.stringify(selectedMonths),
-      tagIds: processedTagIds
-    })
-
-    setGalgames(galgames)
-    setTotal(total)
-    setLoading(false)
-  }
-
-  useEffect(() => {
-    if (!isMounted) {
-      return
+      setGalgames(galgames)
+      setTotal(total)
+    } catch (error) {
+      console.error('获取游戏列表失败', error)
+    } finally {
+      setLoading(false)
     }
-    fetchPatches()
   }, [
     sortField,
     sortOrder,
@@ -177,6 +192,19 @@ export const CardContainer = ({ initialGalgames, initialTotal }: Props) => {
     selectedMonths,
     selectedTags
   ])
+
+  useEffect(() => {
+    if (!isMounted) {
+      return
+    }
+
+    // 使用防抖来减少API调用频率
+    const handler = setTimeout(() => {
+      fetchPatches()
+    }, 300)
+
+    return () => clearTimeout(handler)
+  }, [fetchPatches, isMounted])
 
   return (
     <div className="container mx-auto my-4 space-y-6">
@@ -207,7 +235,7 @@ export const CardContainer = ({ initialGalgames, initialTotal }: Props) => {
           className="mx-auto"
         >
           {galgames.map((pa) => (
-            <GalgameCard key={pa.id} patch={pa} />
+            <MemoizedGalgameCard key={pa.id} patch={pa} />
           ))}
         </KunMasonryGrid>
       </div>

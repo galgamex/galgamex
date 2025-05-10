@@ -19,13 +19,13 @@ export const PatchTag = ({ patchId, initialTags }: Props) => {
 
   return (
     <div className="mt-4 space-y-4">
-      <h2 className="pt-8 mt-12 text-2xl border-t border-default-200">
+      <h2 className="pt-8  text-2xl border-t border-default-200">
         游戏标签
       </h2>
 
       <div className="flex flex-wrap gap-2">
         {selectedTags.map((tag) => (
-          <Tooltip key={tag.id} content={`${tag.count} 个 Galgame 使用此标签`}>
+          <Tooltip key={tag.id} content={`${tag.count} 个 资源 使用此标签`}>
             <Link href={`/tag/${tag.id}`}>
               <Chip color="secondary" variant="flat">
                 {tag.name}
@@ -35,7 +35,7 @@ export const PatchTag = ({ patchId, initialTags }: Props) => {
           </Tooltip>
         ))}
 
-        {!initialTags.length && <Chip>{'这个 Galgame 暂时没有标签'}</Chip>}
+        {!initialTags.length && <Chip>{'这个 资源 暂时没有标签'}</Chip>}
       </div>
 
       {user.role > 2 && (

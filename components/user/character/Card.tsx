@@ -31,18 +31,18 @@ export const CharacterCard = ({ character }: CharacterCardProps) => {
     const isViewable = character.status === 1;
 
     return (
-        <Card className={`w-full hover:shadow-md transition-shadow ${isViewable ? 'cursor-pointer' : 'cursor-default'}`}>
+        <Card className={`w-full hover:shadow-md ${isViewable ? 'cursor-pointer' : 'cursor-default'}`}>
             <Link href={isViewable ? viewUrl : '#'} className={!isViewable ? 'pointer-events-none' : ''}>
                 <CardBody className="p-0 overflow-hidden">
-                    <div className="relative group">
+                    <div className="relative aspect-[5/6]">
                         <Image
                             src={character.image || '/images/placeholder-character.jpg'}
                             alt={character.name}
-                            className="w-full object-cover aspect-[3/4] group-hover:scale-105 transition-transform duration-300"
+                            className="w-full h-full object-cover"
                             removeWrapper
                         />
                         {isViewable && (
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent">
                                 <div className="absolute bottom-2 inset-x-0 flex justify-center items-center gap-1 text-white">
                                     <Eye className="size-3.5" />
                                     <span className="text-sm">查看角色</span>

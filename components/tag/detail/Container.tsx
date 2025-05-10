@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback, memo, useMemo } from 'react'
 import { kunFetchGet } from '~/utils/kunFetch'
 import { Chip } from '@nextui-org/chip'
 import { Button } from '@nextui-org/button'
@@ -23,6 +23,9 @@ import { FilterBar } from './FilterBar'
 import { KunPagination } from '~/components/kun/Pagination'
 import type { SortField } from './_sort'
 
+// 使用React.memo优化卡片组件渲染性能
+const MemoizedGalgameCard = memo(GalgameCard)
+
 interface Props {
   initialTag: TagDetail
   initialPatches: GalgameCard[]
@@ -32,7 +35,7 @@ interface Props {
 export const TagDetailContainer = ({
   initialTag,
   initialPatches,
-  total
+  total: initialTotal
 }: Props) => {
   const isMounted = useMounted()
   const user = useUserStore((state) => state.user)
@@ -45,47 +48,88 @@ export const TagDetailContainer = ({
 
   const [tag, setTag] = useState(initialTag)
   const [patches, setPatches] = useState<GalgameCard[]>(initialPatches)
+  const [total, setTotal] = useState(initialTotal)
   const [loading, setLoading] = useState(false)
   const { isOpen, onOpen, onClose } = useDisclosure()
 
-  const fetchPatches = async () => {
+  // 防抖函数 - 减少不必要的操作
+  const debounce = useCallback((func: Function, delay: number) => {
+    let timeoutId: NodeJS.Timeout
+    return (...args: any[]) => {
+      clearTimeout(timeoutId)
+      timeoutId = setTimeout(() => func(...args), delay)
+    }
+  }, [])
+
+  // 使用useCallback优化游戏数据获取函数，避免不必要的重新创建
+  const fetchPatches = useCallback(async () => {
     setLoading(true)
+    try {
+      const response = await kunFetchGet<{
+        galgames: GalgameCard[]
+        total: number
+      }>('/tag/galgame', {
+        tagId: tag.id,
+        page,
+        limit: 24,
+        sortField
+      })
 
-    const { galgames } = await kunFetchGet<{
-      galgames: GalgameCard[]
-      total: number
-    }>('/tag/galgame', {
-      tagId: tag.id,
-      page,
-      limit: 24,
-      sortField
-    })
-
-    setPatches(galgames)
-    setLoading(false)
-  }
-
-  useEffect(() => {
-    if (!isMounted) {
-      return
+      setPatches(response.galgames)
+      setTotal(response.total)
+    } catch (error) {
+      console.error('获取标签游戏数据失败', error)
+    } finally {
+      setLoading(false)
     }
-    fetchPatches()
-  }, [page])
+  }, [tag.id, page, sortField])
 
-  useEffect(() => {
-    if (!isMounted) {
-      return
-    }
+  // 使用useMemo缓存别名展示，避免不必要的重新渲染
+  const aliasChips = useMemo(() => {
+    return tag.alias.map((alias, index) => (
+      <Chip key={index} variant="flat" color="secondary">
+        {alias}
+      </Chip>
+    ))
+  }, [tag.alias])
 
+  // 更新URL参数的函数
+  const updateUrlParams = useCallback(() => {
     const params = new URLSearchParams()
+    params.set('page', page.toString())
     params.set('sortField', sortField)
 
     const queryString = params.toString()
     const url = queryString ? `?${queryString}` : ''
     router.push(url)
+  }, [page, sortField, router])
 
-    fetchPatches()
-  }, [sortField])
+  // 监听页面变化，获取对应页的游戏数据
+  useEffect(() => {
+    if (!isMounted) return
+
+    // 使用防抖减少频繁请求
+    const handler = setTimeout(() => {
+      fetchPatches()
+    }, 200)
+
+    return () => clearTimeout(handler)
+  }, [page, fetchPatches, isMounted])
+
+  // 监听排序变化，更新URL并获取新数据
+  useEffect(() => {
+    if (!isMounted) return
+
+    // 更新URL
+    updateUrlParams()
+
+    // 重置到第一页并获取新数据
+    if (page !== 1) {
+      setPage(1)
+    } else {
+      fetchPatches()
+    }
+  }, [sortField, isMounted, updateUrlParams, fetchPatches, page])
 
   return (
     <div className="w-full my-4 space-y-6">
@@ -94,7 +138,7 @@ export const TagDetailContainer = ({
         description={tag.introduction}
         headerEndContent={
           <Chip size="lg" color="primary">
-            {tag.count} 个 Galgame
+            {tag.count} 个 资源
           </Chip>
         }
         endContent={
@@ -143,11 +187,7 @@ export const TagDetailContainer = ({
         <div>
           <h2 className="mb-4 text-lg font-semibold">别名</h2>
           <div className="flex flex-wrap gap-2">
-            {tag.alias.map((alias, index) => (
-              <Chip key={index} variant="flat" color="secondary">
-                {alias}
-              </Chip>
-            ))}
+            {aliasChips}
           </div>
         </div>
       )}
@@ -158,7 +198,7 @@ export const TagDetailContainer = ({
         <>
           <div className="grid grid-cols-2 gap-2 mx-auto sm:gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {patches.map((pa) => (
-              <GalgameCard key={pa.id} patch={pa} />
+              <MemoizedGalgameCard key={pa.id} patch={pa} />
             ))}
           </div>
 

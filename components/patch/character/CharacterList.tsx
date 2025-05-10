@@ -16,9 +16,9 @@ export const CharacterList = ({ characters, patchId, onUpdate, onDelete }: Props
 
     return (
         <>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-5 min-h-[350px]">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-5 min-h-[250px]">
                 {characters.map((character) => (
-                    <div key={character.id} className="transform transition-transform hover:-translate-y-1 duration-300">
+                    <div key={character.id}>
                         <CharacterCard
                             character={character}
                             onClick={() => setSelectedCharacter(character)}

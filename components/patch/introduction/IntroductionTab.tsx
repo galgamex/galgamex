@@ -35,6 +35,20 @@ export const IntroductionTab = ({ intro, patchId }: Props) => {
       return
     }
 
+    // 隐藏所有图片元素
+    const imgElements = contentRef.current.querySelectorAll('img')
+    imgElements.forEach((element) => {
+      element.style.display = 'none'
+    })
+
+    // 隐藏图片容器（通常是<p>标签包围图片）
+    imgElements.forEach((element) => {
+      const parentElement = element.parentElement
+      if (parentElement && parentElement.tagName === 'P' && parentElement.childNodes.length === 1) {
+        parentElement.style.display = 'none'
+      }
+    })
+
     const externalLinkElements = contentRef.current.querySelectorAll(
       '[data-kun-external-link]'
     )
@@ -82,10 +96,34 @@ export const IntroductionTab = ({ intro, patchId }: Props) => {
     })
   }, [isMounted])
 
+  const handleGalleryClick = (e: React.MouseEvent) => {
+    e.preventDefault()
+    window.history.pushState(null, '', '#gallery')
+    // 寻找并选中画廊标签
+    const galleryTab = document.querySelector('[data-key="gallery"]') as HTMLElement
+    if (galleryTab) {
+      galleryTab.click()
+    }
+  }
+
   return (
     <Card className="border-none shadow-sm min-h-[450px]">
-      <CardHeader className="px-5 pt-4 pb-0">
+      <CardHeader className="px-5 pt-4 pb-0 flex justify-between items-center">
         <h2 className="text-xl font-semibold">游戏信息</h2>
+        <div className="text-sm text-default-500">
+          <a
+            href="#gallery"
+            className="text-primary hover:underline flex items-center gap-1"
+            onClick={handleGalleryClick}
+          >
+            <span>查看画廊</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+              <polyline points="15 3 21 3 21 9"></polyline>
+              <line x1="10" y1="14" x2="21" y2="3"></line>
+            </svg>
+          </a>
+        </div>
       </CardHeader>
       <CardBody className="p-4">
         <div
@@ -93,10 +131,10 @@ export const IntroductionTab = ({ intro, patchId }: Props) => {
           dangerouslySetInnerHTML={{
             __html: DOMPurify.sanitize(intro.introduction)
           }}
-          className="kun-prose max-w-none"
+          className="kun-prose max-w-none introduction-no-images"
         />
 
-        <div className="pt-4 border-t border-default-100">
+        <div className="pt-4 ">
           <PatchTag patchId={patchId} initialTags={intro.tag} />
         </div>
       </CardBody>

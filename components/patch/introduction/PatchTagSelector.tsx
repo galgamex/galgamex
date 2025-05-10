@@ -210,7 +210,7 @@ export const PatchTagSelector = ({
         scrollBehavior="inside"
       >
         <ModalContent>
-          <ModalHeader>更改这个 Galgame 的标签</ModalHeader>
+          <ModalHeader>更改这个 资源 的标签</ModalHeader>
           <ModalBody>
             <SearchTags
               query={query}

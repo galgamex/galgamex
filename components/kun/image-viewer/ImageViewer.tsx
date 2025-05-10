@@ -15,9 +15,10 @@ interface Props {
     height?: number
   }[]
   children: (openLightbox: () => void) => ReactNode
+  initialIndex?: number
 }
 
-export const KunImageViewer = ({ images, children }: Props) => {
+export const KunImageViewer = ({ images, children, initialIndex = 0 }: Props) => {
   const [index, setIndex] = useState(-1)
   const lightboxImages = images.map(({ src, width, height }) => ({
     src,
@@ -25,11 +26,11 @@ export const KunImageViewer = ({ images, children }: Props) => {
     height
   }))
 
-  const openLightbox = (index: number) => setIndex(index)
+  const openLightbox = (idx: number = initialIndex) => setIndex(idx)
 
   return (
     <>
-      {children(() => openLightbox(0))}
+      {children(() => openLightbox())}
       <Lightbox
         index={index}
         slides={lightboxImages}

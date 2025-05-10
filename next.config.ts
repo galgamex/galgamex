@@ -38,26 +38,69 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**'
       }
-    ]
+    ],
+    formats: ['image/avif', 'image/webp'],
+    minimumCacheTTL: 60 * 60 * 24 * 7,
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
   },
 
   output: 'standalone',
+  swcMinify: true,
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production' ? { exclude: ['error', 'warn'] } : false,
+  },
   experimental: {
-    // turbotrace: {
-    //   logLevel: 'error',
-    //   logDetail: false,
-    //   contextDirectory: path.join(__dirname, '/'),
-    //   memoryLimit: 1024
-    // }
+    optimizeCss: true,
     serverActions: {
       allowedOrigins: ["www.galgamex.net", "www.galgamex.net:443"]
-    }
+    },
+    optimizePackageImports: [
+      '@nextui-org/react',
+      '@tabler/icons-react',
+      'framer-motion',
+      'react-hot-toast',
+      'lucide-react'
+    ],
   },
-  webpack: (config) => {
+  webpack: (config, { dev, isServer }) => {
     config.resolve.alias = {
       ...config.resolve.alias,
       '@': path.resolve(__dirname),
     }
+
+    if (!dev && !isServer) {
+      config.optimization = {
+        ...config.optimization,
+        splitChunks: {
+          chunks: 'all',
+          cacheGroups: {
+            default: false,
+            vendors: false,
+            nextui: {
+              name: 'nextui',
+              test: /[\\/]node_modules[\\/](@nextui-org)[\\/]/,
+              chunks: 'all',
+              priority: 20,
+            },
+            framework: {
+              chunks: 'all',
+              name: 'framework',
+              test: /[\\/]node_modules[\\/](react|react-dom|framer-motion)[\\/]/,
+              priority: 10,
+            },
+            commons: {
+              name: 'commons',
+              minChunks: 2,
+              priority: 5,
+              reuseExistingChunk: true,
+            },
+          },
+        },
+      }
+
+      config.output.filename = '[name].[contenthash:8].js'
+    }
+
     return config
   }
 }

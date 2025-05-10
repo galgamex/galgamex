@@ -9,3 +9,15 @@
     }
   }
 }
+
+/* 添加样式来隐藏introduction-no-images类中的图片 */
+.introduction-no-images {
+  img {
+    display: none !important;
+  }
+
+  /* 隐藏只包含图片的段落 */
+  p:has(> img:only-child) {
+    display: none !important;
+  }
+}

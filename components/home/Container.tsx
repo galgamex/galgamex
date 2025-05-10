@@ -32,7 +32,7 @@ export const HomeContainer = ({ galgames, resources }: Props) => {
   }, [])
 
   return (
-    <div className="mx-auto space-y-4 max-w-[1500px]">
+    <div className="mx-auto space-y-2 max-w-[1500px]">
       <LoginBanner />
 
       <section className="space-y-6">

@@ -3,6 +3,7 @@ import { IntroductionTab } from '~/components/patch/introduction/IntroductionTab
 import { ResourceTab } from '~/components/patch/resource/ResourceTab'
 import { CommentTab } from '~/components/patch/comment/CommentTab'
 import { CharacterTab } from '~/components/patch/character/CharacterTab'
+import { GalleryTab } from '~/components/patch/gallery/GalleryTab'
 import type { PatchIntroduction } from '~/types/api/patch'
 import type { Dispatch, SetStateAction } from 'react'
 
@@ -29,6 +30,11 @@ export const PatchHeaderTabs = ({
           if (value === 'galgame' || value === 'patch') {
             window.scroll(0, 400)
           }
+          if (value === 'gallery') {
+            window.history.pushState(null, '', `#${value}`)
+          } else {
+            window.history.pushState(null, '', window.location.pathname)
+          }
           setSelected(value.toString())
         }}
         selectedKey={selected}
@@ -43,6 +49,10 @@ export const PatchHeaderTabs = ({
       >
         <Tab key="introduction" title="游戏信息">
           <IntroductionTab intro={intro} patchId={Number(id)} />
+        </Tab>
+
+        <Tab key="gallery" title="游戏画廊">
+          <GalleryTab intro={intro} />
         </Tab>
 
         <Tab key="characters" title="角色列表">
