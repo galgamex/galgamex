@@ -1,5 +1,3 @@
-![galgamex-next](./public/galgamex.avif)
-
 # Galgamex
 
 Galgamex 是一个一站式 Galgame 文化社区。提供 Galgame 论坛、Galgame 下载等服务。承诺永久免费, 高质量。为 Galgame 爱好者提供一片净土！

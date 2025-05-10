@@ -49,6 +49,9 @@ const nextConfig: NextConfig = {
     //   contextDirectory: path.join(__dirname, '/'),
     //   memoryLimit: 1024
     // }
+    serverActions: {
+      allowedOrigins: ["www.galgamex.net", "www.galgamex.net:443"]
+    }
   },
   webpack: (config) => {
     config.resolve.alias = {
