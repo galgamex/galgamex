@@ -17,6 +17,9 @@ export const getStatus = async (uid: number | undefined) => {
     data: { last_login_time: { set: Date.now().toString() } }
   })
 
+  // 使用类型断言处理claimed_tasks字段
+  const userWithClaims = user as any;
+
   const redirectConfig = await getRedirectConfig()
   const responseData: UserState = {
     uid: user.id,
@@ -29,6 +32,7 @@ export const getStatus = async (uid: number | undefined) => {
     dailyImageLimit: user.daily_image_count,
     dailyUploadLimit: user.daily_upload_size,
     enableEmailNotice: user.enable_email_notice,
+    claimed_tasks: Array.isArray(userWithClaims.claimed_tasks) ? userWithClaims.claimed_tasks : [],
     ...redirectConfig
   }
 

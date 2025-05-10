@@ -16,7 +16,8 @@ export const UserActivity = ({ id }: UserActivityProps) => {
   const tabs = [
     { key: 'comment', title: '评论', href: `/user/${id}/comment` },
     { key: 'favorite', title: '收藏夹', href: `/user/${id}/favorite` },
-    { key: 'resource', title: '发布补丁', href: `/user/${id}/resource` }
+    { key: 'resource', title: '发布补丁', href: `/user/${id}/resource` },
+    { key: 'character', title: '角色管理', href: `/user/${id}/character` }
   ]
 
   return (

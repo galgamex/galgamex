@@ -24,18 +24,18 @@ export const KunTopBar = () => {
 
   return (
     <Navbar
-      maxWidth="xl"
+      maxWidth="full"
       isMenuOpen={isMenuOpen}
       onMenuOpenChange={setIsMenuOpen}
       classNames={{
-        wrapper: 'px-3 sm:px-6',
+        wrapper: 'px-3 sm:px-6 max-w-[1500px] mx-auto',
         base: 'bg-background/80 backdrop-blur-md border-b border-divider',
+        content: 'gap-6',
+        menu: 'bg-background/80 backdrop-blur-md'
       }}
     >
       <NavbarContent className="sm:hidden" justify="start">
-        <li className="h-full">
-          <NavbarMenuToggle className="text-foreground/80 hover:text-foreground transition-colors" />
-        </li>
+        <NavbarMenuToggle className="text-foreground/80 hover:text-foreground" />
       </NavbarContent>
 
       <KunTopBarBrand />
@@ -44,9 +44,9 @@ export const KunTopBar = () => {
         {kunNavItem.map((item) => (
           <NavbarItem key={item.href} isActive={pathname === item.href}>
             <Link
-              className={`relative px-1 py-2 text-sm font-medium transition-colors hover:text-primary ${pathname === item.href
-                ? 'text-primary after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-full after:bg-primary after:transition-all'
-                : 'text-foreground/80'
+              className={`text-sm font-medium transition-colors duration-200 ${pathname === item.href
+                ? 'text-primary'
+                : 'text-foreground/80 hover:text-foreground'
                 }`}
               href={item.href}
             >

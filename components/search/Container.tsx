@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { KunLoading } from '~/components/kun/Loading'
-import { kunFetchPost } from '~/utils/kunFetch'
+import { kunFetchPost, kunFetchGet } from '~/utils/kunFetch'
 import { KunHeader } from '~/components/kun/Header'
 import { KunNull } from '~/components/kun/Null'
 import { GalgameCard } from '~/components/galgame/Card'
@@ -39,10 +39,32 @@ export const SearchPage = () => {
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc')
   const [selectedYears, setSelectedYears] = useState<string[]>(['all'])
   const [selectedMonths, setSelectedMonths] = useState<string[]>(['all'])
+  const [selectedTags, setSelectedTags] = useState<string[]>([])
+  const [availableTags, setAvailableTags] = useState<Array<{ id: number; name: string }>>([])
 
   const [showHistory, setShowHistory] = useState(false)
   const searchData = useSearchStore((state) => state.data)
   const setSearchData = useSearchStore((state) => state.setData)
+
+  // 获取可用标签列表
+  useEffect(() => {
+    const fetchTags = async () => {
+      try {
+        const response = await kunFetchGet<{
+          tags: Array<{ id: number; name: string; count: number }>
+          total: number
+        }>('/tag/all', { page: 1, limit: 30 })
+
+        if (response.tags) {
+          setAvailableTags(response.tags)
+        }
+      } catch (error) {
+        console.error('获取标签列表失败', error)
+      }
+    }
+
+    fetchTags()
+  }, [])
 
   const addToHistory = (searchQuery: string) => {
     if (!searchQuery.trim()) {
@@ -65,6 +87,11 @@ export const SearchPage = () => {
     setShowHistory(false)
     setShowSuggestions(false)
 
+    // 处理标签ID，确保它们是数字形式
+    const processedTagIds = selectedTags.length > 0
+      ? JSON.stringify(selectedTags.map(id => Number(id)))
+      : ''
+
     const { galgames, total } = await kunFetchPost<{
       galgames: GalgameCard[]
       total: number
@@ -84,7 +111,8 @@ export const SearchPage = () => {
       sortField,
       sortOrder,
       selectedYears,
-      selectedMonths
+      selectedMonths,
+      tagIds: processedTagIds
     })
 
     setPatches(galgames)
@@ -119,6 +147,7 @@ export const SearchPage = () => {
     sortOrder,
     selectedYears,
     selectedMonths,
+    selectedTags,
     selectedSuggestions,
     searchData.searchInAlias,
     searchData.searchInIntroduction,
@@ -166,6 +195,9 @@ export const SearchPage = () => {
         setSelectedYears={setSelectedYears}
         selectedMonths={selectedMonths}
         setSelectedMonths={setSelectedMonths}
+        selectedTags={selectedTags}
+        setSelectedTags={setSelectedTags}
+        availableTags={availableTags}
       />
 
       {loading ? (

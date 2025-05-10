@@ -41,7 +41,8 @@ export const getPatchById = async (
         select: {
           favorite_folder: true,
           resource: true,
-          comment: true
+          comment: true,
+          characters: true
         }
       },
       favorite_folder: {
@@ -87,7 +88,12 @@ export const getPatchById = async (
     },
     created: String(patch.created),
     updated: String(patch.updated),
-    _count: patch._count
+    _count: {
+      favorite_folder: patch._count.favorite_folder,
+      resource: patch._count.resource,
+      comment: patch._count.comment,
+      characters: patch._count.characters
+    }
   }
 
   await setKv(

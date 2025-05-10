@@ -8,18 +8,17 @@ import { kunMobileNavItem } from '~/constants/top-bar'
 
 export const KunMobileMenu = () => {
   return (
-    <NavbarMenu className="space-y-6 bg-background/95 backdrop-blur-md">
+    <NavbarMenu className="space-y-4">
       <NavbarMenuItem>
-        <Link className="flex items-center p-2 rounded-lg hover:bg-default-100 transition-colors" href="/">
+        <Link className="flex items-center" href="/">
           <Image
             src="/favicon.webp"
             alt={kunMoyuMoe.titleShort}
-            width={40}
-            height={40}
+            width={50}
+            height={50}
             priority
-            className="rounded-lg"
           />
-          <p className="ml-3 text-xl font-semibold">
+          <p className="ml-4 mr-2 text-3xl font-bold">
             {kunMoyuMoe.creator.name}
           </p>
         </Link>
@@ -27,10 +26,7 @@ export const KunMobileMenu = () => {
 
       {kunMobileNavItem.map((item, index) => (
         <NavbarMenuItem key={index}>
-          <Link
-            className="w-full px-4 py-2 text-base font-medium rounded-lg hover:bg-default-100 transition-colors"
-            href={item.href}
-          >
+          <Link className="w-full font-semibold" href={item.href}>
             {item.name}
           </Link>
         </NavbarMenuItem>

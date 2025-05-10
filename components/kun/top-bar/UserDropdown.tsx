@@ -24,7 +24,8 @@ import {
   Settings,
   ArrowLeftRight,
   Sparkles,
-  UserRound
+  UserRound,
+  Medal
 } from 'lucide-react'
 import { useUserStore } from '~/store/userStore'
 import { useEffect, useState } from 'react'
@@ -138,6 +139,20 @@ export const UserDropdown = () => {
             startContent={<UserRound className="size-4" />}
           >
             用户主页
+          </DropdownItem>
+          <DropdownItem
+            key="tasks"
+            onPress={() => router.push('/tasks')}
+            startContent={<Medal className="size-4" />}
+            endContent={
+              <div className="flex items-center gap-1">
+                <span className="text-xs px-1.5 py-0.5 bg-primary-100 text-primary-600 rounded-full">
+                  任务
+                </span>
+              </div>
+            }
+          >
+            任务中心
           </DropdownItem>
           <DropdownItem
             key="settings"

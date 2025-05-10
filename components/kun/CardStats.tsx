@@ -19,8 +19,8 @@ export const KunCardStats = ({
   return (
     <div
       className={cn(
-        'flex space-x-2 justify-between text-sm sm:space-x-4 text-default-500',
-        isMobile ? 'sm:justify-start' : '',
+        'flex space-x-2 justify-center text-sm sm:space-x-4 text-default-500',
+        isMobile ? 'sm:justify-center' : '',
         className
       )}
     >

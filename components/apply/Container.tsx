@@ -90,12 +90,7 @@ export const ApplyContainer = ({ count }: Props) => {
             <div>
               <h3 className="mb-2 text-lg font-semibold">申请条件</h3>
               <p className="text-default-500">在本站合法发布三个补丁</p>
-              <p className="text-default-500">
-                详细信息请查看文档{' '}
-                <Link href="/doc/notice/creator">
-                  关于 {kunMoyuMoe.titleShort} 创作者
-                </Link>
-              </p>
+
             </div>
 
             <div>

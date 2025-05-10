@@ -2,7 +2,8 @@
 
 import { Snippet } from '@nextui-org/snippet'
 import { Chip } from '@nextui-org/chip'
-import { Cloud, Link as LinkIcon, Database } from 'lucide-react'
+import { Button } from '@nextui-org/button'
+import { Cloud, Link as LinkIcon, Database, Download } from 'lucide-react'
 import { Microsoft } from '~/components/kun/icons/Microsoft'
 import { SUPPORTED_RESOURCE_LINK_MAP } from '~/constants/resource'
 import { kunFetchPut } from '~/utils/kunFetch'
@@ -21,11 +22,14 @@ interface Props {
 }
 
 export const ResourceDownloadCard = ({ resource }: Props) => {
-  const handleClickDownload = async () => {
+  const handleClickDownload = async (link: string) => {
     await kunFetchPut<KunResponse<{}>>('/patch/resource/download', {
       patchId: resource.patchId,
       resourceId: resource.id
     })
+
+    // 在记录下载后打开链接
+    window.open(link, '_blank')
   }
 
   return (
@@ -38,7 +42,7 @@ export const ResourceDownloadCard = ({ resource }: Props) => {
         >
           {
             SUPPORTED_RESOURCE_LINK_MAP[
-              resource.storage as 's3' | 'onedrive' | 'user'
+            resource.storage as 's3' | 'onedrive' | 'user'
             ]
           }
         </Chip>
@@ -47,17 +51,19 @@ export const ResourceDownloadCard = ({ resource }: Props) => {
         </Chip>
       </div>
 
-      <p className="text-sm text-default-500">点击下面的链接以下载</p>
+      <p className="text-sm text-default-500">点击下方按钮直接下载资源</p>
 
-      {resource.content.split(',').map((link) => (
+      {resource.content.split(',').map((link, index) => (
         <div key={Math.random()} className="space-y-2">
-          <KunExternalLink
-            onPress={handleClickDownload}
-            underline="always"
-            link={link}
+          <Button
+            color="primary"
+            variant="flat"
+            startContent={<Download className="size-4" />}
+            onClick={() => handleClickDownload(link)}
+            className="w-full"
           >
-            {link}
-          </KunExternalLink>
+            下载资源 {resource.content.split(',').length > 1 ? `#${index + 1}` : ''}
+          </Button>
 
           {resource.storage === 's3' && (
             <>

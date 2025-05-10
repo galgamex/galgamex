@@ -6,6 +6,7 @@ import type { NextConfig } from 'next'
 // import rehypeSlug from 'rehype-slug'
 // import rehypeAutolinkHeadings from 'rehype-autolink-headings'
 // import rehypePrettyCode from 'rehype-pretty-code'
+import path from 'path'
 
 // const __filename = fileURLToPath(import.meta.url)
 // const __dirname = path.dirname(__filename)
@@ -48,6 +49,13 @@ const nextConfig: NextConfig = {
     //   contextDirectory: path.join(__dirname, '/'),
     //   memoryLimit: 1024
     // }
+  },
+  webpack: (config) => {
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@': path.resolve(__dirname),
+    }
+    return config
   }
 }
 

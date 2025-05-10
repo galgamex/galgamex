@@ -32,6 +32,7 @@ export const PatchHeaderInfo = ({
 }: PatchHeaderInfoProps) => {
   const [aspectRatio, setAspectRatio] = useState<'portrait' | 'landscape'>('portrait')
   const processedBannerRef = useRef<string | null>(null)
+  const [imageLoaded, setImageLoaded] = useState(false)
 
   // 预先加载图片并静默确定比例
   useEffect(() => {
@@ -51,13 +52,20 @@ export const PatchHeaderInfo = ({
     img.src = patch.banner
   }, [patch.banner]) // 保持依赖数组不变
 
+  // 设定响应式布局的类名
   const imageSectionClass = aspectRatio === 'portrait'
-    ? 'w-full md:w-1/4 aspect-[3/4]'
-    : 'w-full md:w-1/3 aspect-[4/3]'
+    ? 'w-full md:w-1/4 md:max-w-[300px]'
+    : 'w-full md:w-1/3 md:max-w-[400px]'
 
   const contentSectionClass = aspectRatio === 'landscape'
     ? 'md:w-2/3'
     : 'md:w-3/4'
+
+  // 图片容器比例样式
+  const imageContainerStyle = {
+    aspectRatio: aspectRatio === 'portrait' ? '2/3' : '4/3',
+    transition: 'aspect-ratio 0.5s ease'
+  }
 
   return (
     <Card className="overflow-hidden shadow-sm border-none">
@@ -65,18 +73,36 @@ export const PatchHeaderInfo = ({
         <div className="flex flex-col md:flex-row">
           <div
             className={`relative transition-all duration-500 ${imageSectionClass} p-4`}
-            style={{ transition: 'width 0.5s ease, aspect-ratio 0.5s ease' }}
+            style={{ transition: 'width 0.5s ease' }}
           >
-            <div className="relative w-full h-full overflow-hidden rounded-xl shadow-md">
+            <div
+              className="relative w-full h-full overflow-hidden rounded-xl shadow-md"
+              style={imageContainerStyle}
+            >
+              <div
+                className={`absolute inset-0 animate-pulse bg-default-100 ${imageLoaded ? 'opacity-0' : 'opacity-90'
+                  } transition-opacity duration-300`}
+              />
               <Image
                 src={patch.banner}
                 alt={patch.name}
-                className="object-cover"
+                className={`object-cover transition-all duration-500 ${imageLoaded ? 'scale-100 opacity-100' : 'scale-105 opacity-0'
+                  }`}
                 fill
-                sizes="(max-width: 768px) 100vw, 25vw"
+                sizes="(max-width: 768px) 100vw, 33vw"
                 priority
+                onLoad={() => setImageLoaded(true)}
                 unoptimized
               />
+              <Tooltip content={GALGAME_AGE_LIMIT_DETAIL[patch.contentLimit]}>
+                <Chip
+                  color={patch.contentLimit === 'sfw' ? 'success' : 'danger'}
+                  variant="flat"
+                  className="absolute top-2 right-2 z-10 backdrop-blur-sm bg-background/40"
+                >
+                  {GALGAME_AGE_LIMIT_MAP[patch.contentLimit]}
+                </Chip>
+              </Tooltip>
               <EditBanner patch={patch} />
             </div>
           </div>
@@ -90,17 +116,7 @@ export const PatchHeaderInfo = ({
                 <h1 className="text-2xl font-bold sm:text-3xl">
                   {patch.name}
                 </h1>
-                <Tooltip content={GALGAME_AGE_LIMIT_DETAIL[patch.contentLimit]}>
-                  <Chip
-                    color={patch.contentLimit === 'sfw' ? 'success' : 'danger'}
-                    variant="flat"
-                  >
-                    {GALGAME_AGE_LIMIT_MAP[patch.contentLimit]}
-                  </Chip>
-                </Tooltip>
               </div>
-
-
 
               {intro.alias.length > 0 && (
                 <div className="mt-3">
@@ -112,7 +128,6 @@ export const PatchHeaderInfo = ({
                   </div>
                 </div>
               )}
-
 
               <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 mt-3">
                 <div className="flex items-center gap-2 text-sm text-default-500">
@@ -136,8 +151,6 @@ export const PatchHeaderInfo = ({
                   </div>
                 )}
               </div>
-
-
             </div>
 
             <Divider className="my-2" />

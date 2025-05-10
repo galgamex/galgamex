@@ -25,11 +25,19 @@ export const kunNavItem: KunNavItem[] = [
   {
     name: '评论列表',
     href: createUrl('/comment')
+  },
+  {
+    name: '排行榜',
+    href: createUrl('/leaderboard')
   }
 ]
 
 export const kunMobileNavItem: KunNavItem[] = [
   ...kunNavItem,
+  {
+    name: '任务中心',
+    href: createUrl('/tasks')
+  },
   {
     name: '联系我们',
     href: createUrl('/doc/notice/feedback')

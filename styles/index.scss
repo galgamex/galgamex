@@ -1,6 +1,7 @@
 @use './tailwind.scss';
 @use './blog.scss';
 @use './prose.scss';
+@use './custom.scss';
 
 [data-overlay-container='true'] {
   height: 100%;

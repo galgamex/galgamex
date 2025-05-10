@@ -17,6 +17,7 @@ import { EditResourceDialog } from './edit/EditResourceDialog'
 import { ResourceList } from './ResourceList'
 import { KunLoading } from '~/components/kun/Loading'
 import toast from 'react-hot-toast'
+import { useUserStore } from '~/store/userStore'
 import type { PatchResource } from '~/types/api/patch'
 
 interface Props {
@@ -27,6 +28,8 @@ interface Props {
 export const Resources = ({ id, section }: Props) => {
   const [loading, setLoading] = useState(false)
   const [resources, setResources] = useState<PatchResource[]>([])
+  const user = useUserStore((state) => state.user)
+
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true)
@@ -76,18 +79,23 @@ export const Resources = ({ id, section }: Props) => {
     toast.success('删除资源链接成功')
   }
 
+  // 普通用户（角色小于3）且当前是游戏资源（galgame）时不显示添加按钮
+  const shouldShowAddButton = !(user.role < 3 && section === 'galgame')
+
   return (
     <div className="mt-4 space-y-4">
-      <div className="flex justify-end">
-        <Button
-          color="primary"
-          variant="flat"
-          startContent={<Plus className="size-4" />}
-          onPress={onOpenCreate}
-        >
-          添加资源
-        </Button>
-      </div>
+      {shouldShowAddButton && (
+        <div className="flex justify-end">
+          <Button
+            color="primary"
+            variant="flat"
+            startContent={<Plus className="size-4" />}
+            onPress={onOpenCreate}
+          >
+            添加资源
+          </Button>
+        </div>
+      )}
 
       {loading ? (
         <KunLoading hint={`正在获取 ${section === 'galgame' ? 'Galgame 资源' : 'Galgame 补丁'}数据...`} />

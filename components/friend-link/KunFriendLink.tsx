@@ -54,29 +54,7 @@ export const KunFriendLink = () => {
         ))}
       </div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        <div className="mt-16">
-          <h2 className="mb-4 text-2xl text-center text-default-800">
-            加入我们
-          </h2>
-          <p className="mb-12 text-center text-default-500">
-            要加入我们, 请加入我们的{' '}
-            <Link
-              isExternal
-              showAnchorIcon
-              href={kunMoyuMoe.domain.telegram_group}
-              rel="noopener noreferrer"
-            >
-              Telegram 群组
-            </Link>
-            联系我们
-          </p>
-        </div>
-      </motion.div>
+
     </div>
   )
 }

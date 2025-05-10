@@ -78,7 +78,7 @@ export const EditResourceDialog = ({
             setContent={(content) => setValue('content', content)}
             setSize={(size) => setValue('size', size)}
           />
-          <ResourceDetailsForm control={control} errors={errors} />
+          <ResourceDetailsForm control={control} errors={errors} section={resource.section} />
         </form>
       </ModalBody>
 

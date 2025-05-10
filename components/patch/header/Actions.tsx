@@ -70,15 +70,7 @@ export const PatchHeaderActions = ({
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:items-center justify-between">
       <div className="flex flex-wrap gap-2">
-        <Button
-          color="primary"
-          variant="flat"
-          startContent={<Download className="size-4" />}
-          onPress={handleClickDownloadNav}
-          size="sm"
-        >
-          下载
-        </Button>
+
 
         <FavoriteButton patchId={patch.id} isFavorite={patch.isFavorite} />
 

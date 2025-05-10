@@ -6,5 +6,5 @@ export default async function Kun({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-  redirect(`/user/${id}/resource`)
+  redirect(`/user/${id}/character`)
 }

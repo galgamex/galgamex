@@ -66,7 +66,7 @@ export const RewritePatchBanner = ({ patchId, onClose }: Props) => {
                   src={previewUrl}
                   alt="Banner Preview"
                   className="w-full object-cover"
-                  style={{ maxHeight: "200px" }}
+                  style={{ maxHeight: "300px" }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-4">
                   <p className="text-white text-sm">已选择新图片，点击下方按钮应用更改</p>
@@ -87,9 +87,9 @@ export const RewritePatchBanner = ({ patchId, onClose }: Props) => {
         )}
 
         <KunImageCropper
-          aspect={{ x: 16, y: 9 }}
+          aspect={null}
           initialImage={previewUrl}
-          description="您的预览图片将会被固定为 1920 × 1080 分辨率，请选择清晰度较高的图片以获得最佳显示效果"
+          description="您可以自由设置图片比例。系统会保留您上传的原始比例，宽大于高的横版图片和高大于宽的竖版图片会有不同的展示方式。"
           onImageComplete={onImageComplete}
           removeImage={removeBanner}
         />

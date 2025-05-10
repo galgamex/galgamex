@@ -20,6 +20,7 @@ model user {
   register_time DateTime @default(now())
   moemoepoint   Int      @default(0)
   bio           String   @default("") @db.VarChar(107)
+  claimed_tasks String[] @default([]) // 已领取奖励的任务
 
   enable_email_notice Boolean @default(true)
   daily_image_count   Int     @default(0)

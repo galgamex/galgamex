@@ -20,7 +20,7 @@ export const homeNavigationItems: HomeNavItem[] = [
   },
   {
     icon: MessageSquare,
-    label: '论坛',
+    label: 'TG频道',
     href: kunMoyuMoe.domain.forum,
     color: 'secondary',
     isExternal: true

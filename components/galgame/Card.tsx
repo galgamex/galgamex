@@ -38,65 +38,6 @@ export const GalgameCard = ({ patch }: Props) => {
       : '/touchgal.avif'
   }, [patch.banner]) // 保持依赖数组不变
 
-  // 横向卡片(宽大于高)
-  if (aspectRatio === 'landscape') {
-    return (
-      <Card
-        isPressable
-        as={Link}
-        href={`/${patch.uniqueId}`}
-        target="_blank"
-        className="w-full border border-default-100 dark:border-default-200 hover:border-primary/50 transition-all duration-300"
-        radius="none"
-      >
-        <div className="relative w-full overflow-hidden group">
-          <div
-            className={cn(
-              'absolute inset-0 animate-pulse bg-default-100',
-              imageLoaded ? 'opacity-0' : 'opacity-90',
-              'transition-opacity duration-300'
-            )}
-            style={{
-              aspectRatio: '4/3',
-              transition: 'aspect-ratio 0.3s ease-in-out'
-            }}
-          />
-          <Image
-            radius="none"
-            alt={patch.name}
-            className={cn(
-              'size-full object-cover transition-all duration-500',
-              imageLoaded ? 'scale-100 opacity-100' : 'scale-105 opacity-0',
-              'group-hover:scale-105'
-            )}
-            removeWrapper={true}
-            src={
-              patch.banner
-                ? patch.banner.replace(/\.avif$/, '-mini.avif')
-                : '/touchgal.avif'
-            }
-            style={{
-              aspectRatio: '4/3',
-              transition: 'aspect-ratio 0.3s ease-in-out'
-            }}
-            onLoad={() => setImageLoaded(true)}
-          />
-        </div>
-        <CardBody className="px-3 pt-3 pb-2">
-          <h2 className="font-medium text-medium line-clamp-2 group-hover:text-primary transition-colors">
-            {patch.name}
-          </h2>
-        </CardBody>
-        <Divider className="opacity-50" />
-        <CardFooter className="px-3 py-2 flex-col items-start gap-2">
-          <KunCardStats patch={patch} isMobile={true} className="text-xs w-full" />
-          <KunPatchAttribute types={patch.type} size="sm" className="mt-1" />
-        </CardFooter>
-      </Card>
-    )
-  }
-
-  // 纵向卡片(高大于宽)
   return (
     <Card
       isPressable
@@ -113,32 +54,41 @@ export const GalgameCard = ({ patch }: Props) => {
             imageLoaded ? 'opacity-0' : 'opacity-90',
             'transition-opacity duration-300'
           )}
-          style={{
-            aspectRatio: '4/6',
-            transition: 'aspect-ratio 0.3s ease-in-out'
-          }}
         />
-        <Image
-          radius="none"
-          alt={patch.name}
-          className={cn(
-            'size-full object-cover transition-all duration-500',
-            imageLoaded ? 'scale-100 opacity-100' : 'scale-105 opacity-0',
-            'group-hover:scale-105'
-          )}
-          removeWrapper={true}
-          src={
-            patch.banner
-              ? patch.banner.replace(/\.avif$/, '-mini.avif')
-              : '/touchgal.avif'
-          }
+        {/* 图片容器，固定宽度但高度根据比例变化 */}
+        <div
+          className="relative w-full"
           style={{
-            aspectRatio: '4/6',
-            transition: 'aspect-ratio 0.3s ease-in-out'
+            aspectRatio: aspectRatio === 'landscape' ? '4/3' : '4/6',
           }}
-          onLoad={() => setImageLoaded(true)}
-        />
+        >
+          <Image
+            radius="none"
+            alt={patch.name}
+            className={cn(
+              'size-full object-cover transition-all duration-500',
+              imageLoaded ? 'scale-100 opacity-100' : 'scale-105 opacity-0',
+              'group-hover:scale-105'
+            )}
+            removeWrapper={true}
+            src={
+              patch.banner
+                ? patch.banner.replace(/\.avif$/, '-mini.avif')
+                : '/touchgal.avif'
+            }
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              position: 'absolute',
+              top: 0,
+              left: 0
+            }}
+            onLoad={() => setImageLoaded(true)}
+          />
+        </div>
       </div>
+
       <CardBody className="px-3 pt-3 pb-2">
         <h2 className="font-medium text-medium line-clamp-2 group-hover:text-primary transition-colors">
           {patch.name}

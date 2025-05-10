@@ -163,7 +163,7 @@ export const PublishResource = ({
             />
           )}
 
-          <ResourceDetailsForm control={control} errors={errors} />
+          <ResourceDetailsForm control={control} errors={errors} section={watch().section} />
         </form>
       </ModalBody>
 

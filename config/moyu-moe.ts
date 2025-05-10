@@ -10,9 +10,9 @@ const KUN_SITE_DESCRIPTION =
   'Galgamex 是一个一站式 Galgame 文化社区。提供Galgame 论坛、Galgame 下载等服务。承诺永久免费, 高质量。为Galgame 爱好者提供一片净土！'
 const KUN_SITE_URL = 'https://www.galgamex.io'
 const KUN_SITE_ARCHIVE = 'https://archive.galgamex.co/'
-const KUN_SITE_FORUM = 'https://bbs.galgamex.co/'
+const KUN_SITE_FORUM = 'https://t.me/galgamex'
 const KUN_SITE_NAV = 'https://gal.red'
-const KUN_SITE_TELEGRAM_GROUP = 'https://s.miku.cyou/2'
+const KUN_SITE_TELEGRAM_GROUP = 'https://t.me/galgamex'
 const KUN_SITE_LIST = [
   { name: KUN_SITE_NAME, url: 'https://www.galgamex.net' },
   { name: KUN_SITE_NAME, url: 'https://www.galgamex.moe' },
@@ -26,7 +26,7 @@ const KUN_SITE_KEYWORDS = [
   'GalgamexGAL',
   'Gal',
   'Galgame',
-  '论坛',
+  'TG频道',
   '网站',
   'Galgame 下载',
   'Galgame 资源',

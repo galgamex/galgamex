@@ -42,13 +42,13 @@ export const HomeHero = () => {
               <div className="flex items-center gap-2">
                 <Sparkles className="w-5 h-5 text-primary-500" />
                 <Chip color="primary" variant="flat">
-                  欢迎来到 TouchGal
+                  欢迎来到 Galgamex
                 </Chip>
               </div>
 
               <div className="space-y-4">
                 <h1 className="py-1 text-3xl font-bold text-transparent xl:text-4xl bg-gradient-to-r from-primary-500 to-secondary-500 bg-clip-text">
-                  一站式 Galgame 文化社区！
+                  一站式Galgame文化社区！
                 </h1>
                 <p className="text-md text-default-600">
                   免费, 高质量的 Galgame 资源下载站

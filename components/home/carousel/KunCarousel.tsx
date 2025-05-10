@@ -133,11 +133,10 @@ export const KunCarousel = ({ posts }: KunCarouselProps) => {
         {posts.map((_, index) => (
           <button
             key={index}
-            className={`w-1.5 h-1.5 rounded-full transition-all ${
-              index === currentSlide
+            className={`w-1.5 h-1.5 rounded-full transition-all ${index === currentSlide
                 ? 'bg-primary w-4'
                 : 'bg-foreground/20 hover:bg-foreground/40'
-            }`}
+              }`}
             onClick={() => {
               setDirection(index > currentSlide ? 1 : -1)
               setCurrentSlide(index)

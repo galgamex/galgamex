@@ -6,9 +6,9 @@ import { GalgameCard } from '~/components/galgame/Card'
 import { ResourceCard } from '~/components/resource/ResourceCard'
 import { KunMasonryGrid } from '~/components/kun/MasonryGrid'
 import Link from 'next/link'
-import { HomeHero } from './hero/HomeHero'
 import { useEffect, useState } from 'react'
 import type { HomeResource } from '~/types/api/home'
+import { LoginBanner } from './LoginBanner'
 
 interface Props {
   galgames: GalgameCard[]
@@ -32,8 +32,8 @@ export const HomeContainer = ({ galgames, resources }: Props) => {
   }, [])
 
   return (
-    <div className="mx-auto space-y-8 max-w-7xl">
-      <HomeHero />
+    <div className="mx-auto space-y-4 max-w-[1500px]">
+      <LoginBanner />
 
       <section className="space-y-6">
         <div className="flex items-center space-x-4">
