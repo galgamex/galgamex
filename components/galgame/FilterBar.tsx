@@ -146,9 +146,9 @@ export const FilterBar = ({
   setSelectedYears,
   selectedMonths,
   setSelectedMonths,
-  selectedTags,
+  selectedTags = [],
   setSelectedTags,
-  availableTags
+  availableTags = []
 }: Props) => {
   const [showAdvanced, setShowAdvanced] = useState(false)
 
@@ -159,7 +159,7 @@ export const FilterBar = ({
     selectedPlatform !== 'all' ||
     !selectedYears.includes('all') ||
     !selectedMonths.includes('all') ||
-    selectedTags.length > 0
+    (Array.isArray(selectedTags) && selectedTags.length > 0)
 
   const resetFilters = () => {
     setSelectedType('all')
@@ -332,7 +332,7 @@ export const FilterBar = ({
           </Dropdown>
 
           {/* 标签筛选 */}
-          {availableTags && availableTags.length > 0 && (
+          {Array.isArray(availableTags) && availableTags.length > 0 && (
             <Dropdown className="w-full sm:w-auto">
               <DropdownTrigger>
                 <Chip
@@ -575,10 +575,10 @@ export const FilterBar = ({
               )}
 
               {/* 选中的标签展示区 */}
-              {selectedTags.length > 0 && showAdvanced && (
+              {selectedTags.length > 0 && showAdvanced && Array.isArray(availableTags) && (
                 <div className="flex flex-wrap gap-1 mt-1">
                   {availableTags
-                    ?.filter(tag => selectedTags.includes(tag.id.toString()))
+                    .filter(tag => selectedTags.includes(tag.id.toString()))
                     .map(tag => (
                       <Chip
                         key={`tag-${tag.id}`}
