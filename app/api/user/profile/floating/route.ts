@@ -20,7 +20,8 @@ export const getUserFloatingProfile = async (
         select: {
           follower: true,
           patch: true,
-          patch_resource: true
+          patch_resource: true,
+          patch_character: true
         }
       },
       following: true
