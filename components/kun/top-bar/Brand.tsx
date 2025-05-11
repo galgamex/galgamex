@@ -12,6 +12,7 @@ export const KunTopBarBrand = () => {
           alt={kunMoyuMoe.titleShort}
           width={32}
           height={32}
+          priority={false}
           className="shrink-0"
         />
         <p className="ml-4 mr-2 font-bold text-inherit">

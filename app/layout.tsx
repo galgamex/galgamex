@@ -1,24 +1,13 @@
 import { Toaster } from 'react-hot-toast'
 import { Providers } from './providers'
-import dynamic from 'next/dynamic'
+import { KunTopBar } from '~/components/kun/top-bar/TopBar'
+import { KunFooter } from '~/components/kun/Footer'
+import { KunNavigationBreadcrumb } from '~/components/kun/NavigationBreadcrumb'
 import { generateKunMetadata, kunViewport } from './metadata'
+import { KunBackToTop } from '~/components/kun/BackToTop'
 import type { Metadata, Viewport } from 'next'
 import '~/styles/index.scss'
 import './actions'
-
-// 动态导入组件以解决生产环境中的类型错误
-const KunTopBar = dynamic(() => import('~/components/kun/top-bar/TopBar').then(mod => mod.KunTopBar), {
-  ssr: true
-})
-const KunNavigationBreadcrumb = dynamic(() => import('~/components/kun/NavigationBreadcrumb').then(mod => mod.KunNavigationBreadcrumb), {
-  ssr: true
-})
-const KunBackToTop = dynamic(() => import('~/components/kun/BackToTop').then(mod => mod.KunBackToTop), {
-  ssr: true
-})
-const KunFooter = dynamic(() => import('~/components/kun/Footer').then(mod => mod.KunFooter), {
-  ssr: true
-})
 
 export const viewport: Viewport = kunViewport
 export const metadata: Metadata = generateKunMetadata()
