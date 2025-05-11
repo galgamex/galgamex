@@ -25,10 +25,24 @@ try {
     )
   }
 
-  execSync(
-    'git pull && pnpm prisma:push && pnpm build && pnpm stop && pnpm start',
-    { stdio: 'inherit' }
-  )
+  // 执行git pull
+  execSync('git pull', { stdio: 'inherit' })
+
+  // 执行prisma数据库推送
+  execSync('pnpm prisma:push', { stdio: 'inherit' })
+
+  // 构建应用
+  execSync('pnpm build', { stdio: 'inherit' })
+
+  // 尝试停止已存在的PM2进程，忽略错误
+  try {
+    execSync('pnpm stop', { stdio: 'inherit' })
+  } catch (error) {
+    console.log('No existing process found or failed to stop, continuing with startup...')
+  }
+
+  // 启动应用
+  execSync('pnpm start', { stdio: 'inherit' })
 } catch (e) {
   console.error('Invalid environment variables')
   process.exit(1)

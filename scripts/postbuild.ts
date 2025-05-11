@@ -1,9 +1,20 @@
 import { exec } from 'child_process'
-import { mkdir, readdir, copyFile } from 'fs/promises'
+import { mkdir, readdir, copyFile, access } from 'fs/promises'
+import { constants } from 'fs'
 import path from 'path'
 import os from 'os'
 
 const isWindows: boolean = os.platform() === 'win32'
+
+// 检查目录是否存在
+const directoryExists = async (dirPath: string): Promise<boolean> => {
+  try {
+    await access(dirPath, constants.F_OK)
+    return true
+  } catch {
+    return false
+  }
+}
 
 const copyDirectory = async (src: string, dest: string): Promise<void> => {
   try {
@@ -36,6 +47,14 @@ const copyFiles = async () => {
     if (stderr) console.error(stderr)
 
     try {
+      // 检查是否存在standalone目录（是否使用standalone输出模式）
+      const standaloneExists = await directoryExists('.next/standalone')
+
+      if (!standaloneExists) {
+        console.log('Standalone output is disabled, skipping file copying step.')
+        return
+      }
+
       if (isWindows) {
         console.log('Detected Windows OS. Using fs module for copying files.')
 
