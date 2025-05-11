@@ -126,7 +126,7 @@ export class PrismaClient<
    */
 
   constructor(optionsArg ?: Prisma.Subset<ClientOptions, Prisma.PrismaClientOptions>);
-  $on<V extends U>(eventType: V, callback: (event: V extends 'query' ? Prisma.QueryEvent : Prisma.LogEvent) => void): void;
+  $on<V extends U>(eventType: V, callback: (event: V extends 'query' ? Prisma.QueryEvent : Prisma.LogEvent) => void): PrismaClient;
 
   /**
    * Connect with the database
@@ -210,9 +210,9 @@ export class PrismaClient<
   $transaction<R>(fn: (prisma: Omit<PrismaClient, runtime.ITXClientDenyList>) => $Utils.JsPromise<R>, options?: { maxWait?: number, timeout?: number, isolationLevel?: Prisma.TransactionIsolationLevel }): $Utils.JsPromise<R>
 
 
-  $extends: $Extensions.ExtendsHook<"extends", Prisma.TypeMapCb, ExtArgs, $Utils.Call<Prisma.TypeMapCb, {
+  $extends: $Extensions.ExtendsHook<"extends", Prisma.TypeMapCb<ClientOptions>, ExtArgs, $Utils.Call<Prisma.TypeMapCb<ClientOptions>, {
     extArgs: ExtArgs
-  }>, ClientOptions>
+  }>>
 
       /**
    * `prisma.user`: Exposes CRUD operations for the **user** model.
@@ -403,7 +403,7 @@ export namespace Prisma {
   export type DecimalJsLike = runtime.DecimalJsLike
 
   /**
-   * Metrics 
+   * Metrics
    */
   export type Metrics = runtime.Metrics
   export type Metric<T> = runtime.Metric<T>
@@ -421,14 +421,14 @@ export namespace Prisma {
   export import Exact = $Public.Exact
 
   /**
-   * Prisma Client JS version: 6.2.1
-   * Query Engine version: 4123509d24aa4dede1e864b46351bf2790323b69
+   * Prisma Client JS version: 6.7.0
+   * Query Engine version: 3cff47a7f5d65c3ea74883f1d736e41d68ce91ed
    */
   export type PrismaVersion = {
     client: string
   }
 
-  export const prismaVersion: PrismaVersion 
+  export const prismaVersion: PrismaVersion
 
   /**
    * Utility Types
@@ -444,15 +444,15 @@ export namespace Prisma {
 
   /**
    * Types of the values used to represent different kinds of `null` values when working with JSON fields.
-   * 
+   *
    * @see https://www.prisma.io/docs/concepts/components/prisma-client/working-with-fields/working-with-json-fields#filtering-on-a-json-field
    */
   namespace NullTypes {
     /**
     * Type of `Prisma.DbNull`.
-    * 
+    *
     * You cannot use other instances of this class. Please use the `Prisma.DbNull` value.
-    * 
+    *
     * @see https://www.prisma.io/docs/concepts/components/prisma-client/working-with-fields/working-with-json-fields#filtering-on-a-json-field
     */
     class DbNull {
@@ -462,9 +462,9 @@ export namespace Prisma {
 
     /**
     * Type of `Prisma.JsonNull`.
-    * 
+    *
     * You cannot use other instances of this class. Please use the `Prisma.JsonNull` value.
-    * 
+    *
     * @see https://www.prisma.io/docs/concepts/components/prisma-client/working-with-fields/working-with-json-fields#filtering-on-a-json-field
     */
     class JsonNull {
@@ -474,9 +474,9 @@ export namespace Prisma {
 
     /**
     * Type of `Prisma.AnyNull`.
-    * 
+    *
     * You cannot use other instances of this class. Please use the `Prisma.AnyNull` value.
-    * 
+    *
     * @see https://www.prisma.io/docs/concepts/components/prisma-client/working-with-fields/working-with-json-fields#filtering-on-a-json-field
     */
     class AnyNull {
@@ -487,21 +487,21 @@ export namespace Prisma {
 
   /**
    * Helper for filtering JSON entries that have `null` on the database (empty on the db)
-   * 
+   *
    * @see https://www.prisma.io/docs/concepts/components/prisma-client/working-with-fields/working-with-json-fields#filtering-on-a-json-field
    */
   export const DbNull: NullTypes.DbNull
 
   /**
    * Helper for filtering JSON entries that have JSON `null` values (not empty on the db)
-   * 
+   *
    * @see https://www.prisma.io/docs/concepts/components/prisma-client/working-with-fields/working-with-json-fields#filtering-on-a-json-field
    */
   export const JsonNull: NullTypes.JsonNull
 
   /**
    * Helper for filtering JSON entries that are `Prisma.DbNull` or `Prisma.JsonNull`
-   * 
+   *
    * @see https://www.prisma.io/docs/concepts/components/prisma-client/working-with-fields/working-with-json-fields#filtering-on-a-json-field
    */
   export const AnyNull: NullTypes.AnyNull
@@ -689,7 +689,7 @@ export namespace Prisma {
   type AtLeast<O extends object, K extends string> = NoExpand<
     O extends unknown
     ? | (K extends keyof O ? { [P in K]: O[P] } & O : O)
-      | {[P in keyof O as P extends K ? K : never]-?: O[P]} & O
+      | {[P in keyof O as P extends K ? P : never]-?: O[P]} & O
     : never>;
 
   type _Strict<U, _U = U> = U extends unknown ? U & OptionalFlat<_Record<Exclude<Keys<_U>, keyof U>, never>> : never;
@@ -827,11 +827,14 @@ export namespace Prisma {
     db?: Datasource
   }
 
-  interface TypeMapCb extends $Utils.Fn<{extArgs: $Extensions.InternalArgs, clientOptions: PrismaClientOptions }, $Utils.Record<string, any>> {
-    returns: Prisma.TypeMap<this['params']['extArgs'], this['params']['clientOptions']>
+  interface TypeMapCb<ClientOptions = {}> extends $Utils.Fn<{extArgs: $Extensions.InternalArgs }, $Utils.Record<string, any>> {
+    returns: Prisma.TypeMap<this['params']['extArgs'], ClientOptions extends { omit: infer OmitOptions } ? OmitOptions : {}>
   }
 
-  export type TypeMap<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> = {
+  export type TypeMap<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> = {
+    globalOmitOptions: {
+      omit: GlobalOmitOptions
+    }
     meta: {
       modelProps: "user" | "admin_log" | "user_follow_relation" | "user_message" | "user_patch_favorite_folder" | "user_patch_favorite_folder_relation" | "user_patch_comment_like_relation" | "user_patch_resource_like_relation" | "patch" | "patch_alias" | "patch_tag" | "patch_tag_relation" | "patch_resource" | "patch_comment" | "patch_character"
       txIsolationLevel: Prisma.TransactionIsolationLevel
@@ -2998,7 +3001,7 @@ export namespace Prisma {
       select?: UserCountAggregateInputType | true
     }
 
-  export interface userDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> {
+  export interface userDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
     [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['user'], meta: { name: 'user' } }
     /**
      * Find zero or one User that matches the filter.
@@ -3011,7 +3014,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUnique<T extends userFindUniqueArgs>(args: SelectSubset<T, userFindUniqueArgs<ExtArgs>>): Prisma__userClient<$Result.GetResult<Prisma.$userPayload<ExtArgs>, T, "findUnique", ClientOptions> | null, null, ExtArgs, ClientOptions>
+    findUnique<T extends userFindUniqueArgs>(args: SelectSubset<T, userFindUniqueArgs<ExtArgs>>): Prisma__userClient<$Result.GetResult<Prisma.$userPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find one User that matches the filter or throw an error with `error.code='P2025'`
@@ -3025,7 +3028,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUniqueOrThrow<T extends userFindUniqueOrThrowArgs>(args: SelectSubset<T, userFindUniqueOrThrowArgs<ExtArgs>>): Prisma__userClient<$Result.GetResult<Prisma.$userPayload<ExtArgs>, T, "findUniqueOrThrow", ClientOptions>, never, ExtArgs, ClientOptions>
+    findUniqueOrThrow<T extends userFindUniqueOrThrowArgs>(args: SelectSubset<T, userFindUniqueOrThrowArgs<ExtArgs>>): Prisma__userClient<$Result.GetResult<Prisma.$userPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find the first User that matches the filter.
@@ -3040,7 +3043,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirst<T extends userFindFirstArgs>(args?: SelectSubset<T, userFindFirstArgs<ExtArgs>>): Prisma__userClient<$Result.GetResult<Prisma.$userPayload<ExtArgs>, T, "findFirst", ClientOptions> | null, null, ExtArgs, ClientOptions>
+    findFirst<T extends userFindFirstArgs>(args?: SelectSubset<T, userFindFirstArgs<ExtArgs>>): Prisma__userClient<$Result.GetResult<Prisma.$userPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find the first User that matches the filter or
@@ -3056,7 +3059,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirstOrThrow<T extends userFindFirstOrThrowArgs>(args?: SelectSubset<T, userFindFirstOrThrowArgs<ExtArgs>>): Prisma__userClient<$Result.GetResult<Prisma.$userPayload<ExtArgs>, T, "findFirstOrThrow", ClientOptions>, never, ExtArgs, ClientOptions>
+    findFirstOrThrow<T extends userFindFirstOrThrowArgs>(args?: SelectSubset<T, userFindFirstOrThrowArgs<ExtArgs>>): Prisma__userClient<$Result.GetResult<Prisma.$userPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find zero or more Users that matches the filter.
@@ -3074,7 +3077,7 @@ export namespace Prisma {
      * const userWithIdOnly = await prisma.user.findMany({ select: { id: true } })
      * 
      */
-    findMany<T extends userFindManyArgs>(args?: SelectSubset<T, userFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$userPayload<ExtArgs>, T, "findMany", ClientOptions>>
+    findMany<T extends userFindManyArgs>(args?: SelectSubset<T, userFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$userPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
 
     /**
      * Create a User.
@@ -3088,7 +3091,7 @@ export namespace Prisma {
      * })
      * 
      */
-    create<T extends userCreateArgs>(args: SelectSubset<T, userCreateArgs<ExtArgs>>): Prisma__userClient<$Result.GetResult<Prisma.$userPayload<ExtArgs>, T, "create", ClientOptions>, never, ExtArgs, ClientOptions>
+    create<T extends userCreateArgs>(args: SelectSubset<T, userCreateArgs<ExtArgs>>): Prisma__userClient<$Result.GetResult<Prisma.$userPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Create many Users.
@@ -3126,7 +3129,7 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * 
      */
-    createManyAndReturn<T extends userCreateManyAndReturnArgs>(args?: SelectSubset<T, userCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$userPayload<ExtArgs>, T, "createManyAndReturn", ClientOptions>>
+    createManyAndReturn<T extends userCreateManyAndReturnArgs>(args?: SelectSubset<T, userCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$userPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Delete a User.
@@ -3140,7 +3143,7 @@ export namespace Prisma {
      * })
      * 
      */
-    delete<T extends userDeleteArgs>(args: SelectSubset<T, userDeleteArgs<ExtArgs>>): Prisma__userClient<$Result.GetResult<Prisma.$userPayload<ExtArgs>, T, "delete", ClientOptions>, never, ExtArgs, ClientOptions>
+    delete<T extends userDeleteArgs>(args: SelectSubset<T, userDeleteArgs<ExtArgs>>): Prisma__userClient<$Result.GetResult<Prisma.$userPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Update one User.
@@ -3157,7 +3160,7 @@ export namespace Prisma {
      * })
      * 
      */
-    update<T extends userUpdateArgs>(args: SelectSubset<T, userUpdateArgs<ExtArgs>>): Prisma__userClient<$Result.GetResult<Prisma.$userPayload<ExtArgs>, T, "update", ClientOptions>, never, ExtArgs, ClientOptions>
+    update<T extends userUpdateArgs>(args: SelectSubset<T, userUpdateArgs<ExtArgs>>): Prisma__userClient<$Result.GetResult<Prisma.$userPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Delete zero or more Users.
@@ -3220,7 +3223,7 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * 
      */
-    updateManyAndReturn<T extends userUpdateManyAndReturnArgs>(args: SelectSubset<T, userUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$userPayload<ExtArgs>, T, "updateManyAndReturn", ClientOptions>>
+    updateManyAndReturn<T extends userUpdateManyAndReturnArgs>(args: SelectSubset<T, userUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$userPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one User.
@@ -3239,7 +3242,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    upsert<T extends userUpsertArgs>(args: SelectSubset<T, userUpsertArgs<ExtArgs>>): Prisma__userClient<$Result.GetResult<Prisma.$userPayload<ExtArgs>, T, "upsert", ClientOptions>, never, ExtArgs, ClientOptions>
+    upsert<T extends userUpsertArgs>(args: SelectSubset<T, userUpsertArgs<ExtArgs>>): Prisma__userClient<$Result.GetResult<Prisma.$userPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
 
     /**
@@ -3379,21 +3382,21 @@ export namespace Prisma {
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
-  export interface Prisma__userClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> extends Prisma.PrismaPromise<T> {
+  export interface Prisma__userClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    admin_log<T extends user$admin_logArgs<ExtArgs> = {}>(args?: Subset<T, user$admin_logArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$admin_logPayload<ExtArgs>, T, "findMany", ClientOptions> | Null>
-    patch_tag<T extends user$patch_tagArgs<ExtArgs> = {}>(args?: Subset<T, user$patch_tagArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$patch_tagPayload<ExtArgs>, T, "findMany", ClientOptions> | Null>
-    patch_comment_like<T extends user$patch_comment_likeArgs<ExtArgs> = {}>(args?: Subset<T, user$patch_comment_likeArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$user_patch_comment_like_relationPayload<ExtArgs>, T, "findMany", ClientOptions> | Null>
-    patch_resource_like<T extends user$patch_resource_likeArgs<ExtArgs> = {}>(args?: Subset<T, user$patch_resource_likeArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$user_patch_resource_like_relationPayload<ExtArgs>, T, "findMany", ClientOptions> | Null>
-    patch_favorite_folder<T extends user$patch_favorite_folderArgs<ExtArgs> = {}>(args?: Subset<T, user$patch_favorite_folderArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$user_patch_favorite_folderPayload<ExtArgs>, T, "findMany", ClientOptions> | Null>
-    following<T extends user$followingArgs<ExtArgs> = {}>(args?: Subset<T, user$followingArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$user_follow_relationPayload<ExtArgs>, T, "findMany", ClientOptions> | Null>
-    follower<T extends user$followerArgs<ExtArgs> = {}>(args?: Subset<T, user$followerArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$user_follow_relationPayload<ExtArgs>, T, "findMany", ClientOptions> | Null>
-    patch<T extends user$patchArgs<ExtArgs> = {}>(args?: Subset<T, user$patchArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$patchPayload<ExtArgs>, T, "findMany", ClientOptions> | Null>
-    patch_comment<T extends user$patch_commentArgs<ExtArgs> = {}>(args?: Subset<T, user$patch_commentArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$patch_commentPayload<ExtArgs>, T, "findMany", ClientOptions> | Null>
-    patch_resource<T extends user$patch_resourceArgs<ExtArgs> = {}>(args?: Subset<T, user$patch_resourceArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$patch_resourcePayload<ExtArgs>, T, "findMany", ClientOptions> | Null>
-    patch_character<T extends user$patch_characterArgs<ExtArgs> = {}>(args?: Subset<T, user$patch_characterArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$patch_characterPayload<ExtArgs>, T, "findMany", ClientOptions> | Null>
-    send_message<T extends user$send_messageArgs<ExtArgs> = {}>(args?: Subset<T, user$send_messageArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$user_messagePayload<ExtArgs>, T, "findMany", ClientOptions> | Null>
-    receive_message<T extends user$receive_messageArgs<ExtArgs> = {}>(args?: Subset<T, user$receive_messageArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$user_messagePayload<ExtArgs>, T, "findMany", ClientOptions> | Null>
+    admin_log<T extends user$admin_logArgs<ExtArgs> = {}>(args?: Subset<T, user$admin_logArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$admin_logPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    patch_tag<T extends user$patch_tagArgs<ExtArgs> = {}>(args?: Subset<T, user$patch_tagArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$patch_tagPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    patch_comment_like<T extends user$patch_comment_likeArgs<ExtArgs> = {}>(args?: Subset<T, user$patch_comment_likeArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$user_patch_comment_like_relationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    patch_resource_like<T extends user$patch_resource_likeArgs<ExtArgs> = {}>(args?: Subset<T, user$patch_resource_likeArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$user_patch_resource_like_relationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    patch_favorite_folder<T extends user$patch_favorite_folderArgs<ExtArgs> = {}>(args?: Subset<T, user$patch_favorite_folderArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$user_patch_favorite_folderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    following<T extends user$followingArgs<ExtArgs> = {}>(args?: Subset<T, user$followingArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$user_follow_relationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    follower<T extends user$followerArgs<ExtArgs> = {}>(args?: Subset<T, user$followerArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$user_follow_relationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    patch<T extends user$patchArgs<ExtArgs> = {}>(args?: Subset<T, user$patchArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$patchPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    patch_comment<T extends user$patch_commentArgs<ExtArgs> = {}>(args?: Subset<T, user$patch_commentArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$patch_commentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    patch_resource<T extends user$patch_resourceArgs<ExtArgs> = {}>(args?: Subset<T, user$patch_resourceArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$patch_resourcePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    patch_character<T extends user$patch_characterArgs<ExtArgs> = {}>(args?: Subset<T, user$patch_characterArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$patch_characterPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    send_message<T extends user$send_messageArgs<ExtArgs> = {}>(args?: Subset<T, user$send_messageArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$user_messagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    receive_message<T extends user$receive_messageArgs<ExtArgs> = {}>(args?: Subset<T, user$receive_messageArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$user_messagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3421,7 +3424,7 @@ export namespace Prisma {
 
   /**
    * Fields of the user model
-   */ 
+   */
   interface userFieldRefs {
     readonly id: FieldRef<"user", 'Int'>
     readonly name: FieldRef<"user", 'String'>
@@ -3731,6 +3734,10 @@ export namespace Prisma {
      * Filter which users to update
      */
     where?: userWhereInput
+    /**
+     * Limit how many users to update.
+     */
+    limit?: number
   }
 
   /**
@@ -3753,6 +3760,10 @@ export namespace Prisma {
      * Filter which users to update
      */
     where?: userWhereInput
+    /**
+     * Limit how many users to update.
+     */
+    limit?: number
   }
 
   /**
@@ -3815,6 +3826,10 @@ export namespace Prisma {
      * Filter which users to delete
      */
     where?: userWhereInput
+    /**
+     * Limit how many users to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -4440,7 +4455,7 @@ export namespace Prisma {
       select?: Admin_logCountAggregateInputType | true
     }
 
-  export interface admin_logDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> {
+  export interface admin_logDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
     [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['admin_log'], meta: { name: 'admin_log' } }
     /**
      * Find zero or one Admin_log that matches the filter.
@@ -4453,7 +4468,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUnique<T extends admin_logFindUniqueArgs>(args: SelectSubset<T, admin_logFindUniqueArgs<ExtArgs>>): Prisma__admin_logClient<$Result.GetResult<Prisma.$admin_logPayload<ExtArgs>, T, "findUnique", ClientOptions> | null, null, ExtArgs, ClientOptions>
+    findUnique<T extends admin_logFindUniqueArgs>(args: SelectSubset<T, admin_logFindUniqueArgs<ExtArgs>>): Prisma__admin_logClient<$Result.GetResult<Prisma.$admin_logPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find one Admin_log that matches the filter or throw an error with `error.code='P2025'`
@@ -4467,7 +4482,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUniqueOrThrow<T extends admin_logFindUniqueOrThrowArgs>(args: SelectSubset<T, admin_logFindUniqueOrThrowArgs<ExtArgs>>): Prisma__admin_logClient<$Result.GetResult<Prisma.$admin_logPayload<ExtArgs>, T, "findUniqueOrThrow", ClientOptions>, never, ExtArgs, ClientOptions>
+    findUniqueOrThrow<T extends admin_logFindUniqueOrThrowArgs>(args: SelectSubset<T, admin_logFindUniqueOrThrowArgs<ExtArgs>>): Prisma__admin_logClient<$Result.GetResult<Prisma.$admin_logPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find the first Admin_log that matches the filter.
@@ -4482,7 +4497,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirst<T extends admin_logFindFirstArgs>(args?: SelectSubset<T, admin_logFindFirstArgs<ExtArgs>>): Prisma__admin_logClient<$Result.GetResult<Prisma.$admin_logPayload<ExtArgs>, T, "findFirst", ClientOptions> | null, null, ExtArgs, ClientOptions>
+    findFirst<T extends admin_logFindFirstArgs>(args?: SelectSubset<T, admin_logFindFirstArgs<ExtArgs>>): Prisma__admin_logClient<$Result.GetResult<Prisma.$admin_logPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find the first Admin_log that matches the filter or
@@ -4498,7 +4513,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirstOrThrow<T extends admin_logFindFirstOrThrowArgs>(args?: SelectSubset<T, admin_logFindFirstOrThrowArgs<ExtArgs>>): Prisma__admin_logClient<$Result.GetResult<Prisma.$admin_logPayload<ExtArgs>, T, "findFirstOrThrow", ClientOptions>, never, ExtArgs, ClientOptions>
+    findFirstOrThrow<T extends admin_logFindFirstOrThrowArgs>(args?: SelectSubset<T, admin_logFindFirstOrThrowArgs<ExtArgs>>): Prisma__admin_logClient<$Result.GetResult<Prisma.$admin_logPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find zero or more Admin_logs that matches the filter.
@@ -4516,7 +4531,7 @@ export namespace Prisma {
      * const admin_logWithIdOnly = await prisma.admin_log.findMany({ select: { id: true } })
      * 
      */
-    findMany<T extends admin_logFindManyArgs>(args?: SelectSubset<T, admin_logFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$admin_logPayload<ExtArgs>, T, "findMany", ClientOptions>>
+    findMany<T extends admin_logFindManyArgs>(args?: SelectSubset<T, admin_logFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$admin_logPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
 
     /**
      * Create a Admin_log.
@@ -4530,7 +4545,7 @@ export namespace Prisma {
      * })
      * 
      */
-    create<T extends admin_logCreateArgs>(args: SelectSubset<T, admin_logCreateArgs<ExtArgs>>): Prisma__admin_logClient<$Result.GetResult<Prisma.$admin_logPayload<ExtArgs>, T, "create", ClientOptions>, never, ExtArgs, ClientOptions>
+    create<T extends admin_logCreateArgs>(args: SelectSubset<T, admin_logCreateArgs<ExtArgs>>): Prisma__admin_logClient<$Result.GetResult<Prisma.$admin_logPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Create many Admin_logs.
@@ -4568,7 +4583,7 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * 
      */
-    createManyAndReturn<T extends admin_logCreateManyAndReturnArgs>(args?: SelectSubset<T, admin_logCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$admin_logPayload<ExtArgs>, T, "createManyAndReturn", ClientOptions>>
+    createManyAndReturn<T extends admin_logCreateManyAndReturnArgs>(args?: SelectSubset<T, admin_logCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$admin_logPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Delete a Admin_log.
@@ -4582,7 +4597,7 @@ export namespace Prisma {
      * })
      * 
      */
-    delete<T extends admin_logDeleteArgs>(args: SelectSubset<T, admin_logDeleteArgs<ExtArgs>>): Prisma__admin_logClient<$Result.GetResult<Prisma.$admin_logPayload<ExtArgs>, T, "delete", ClientOptions>, never, ExtArgs, ClientOptions>
+    delete<T extends admin_logDeleteArgs>(args: SelectSubset<T, admin_logDeleteArgs<ExtArgs>>): Prisma__admin_logClient<$Result.GetResult<Prisma.$admin_logPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Update one Admin_log.
@@ -4599,7 +4614,7 @@ export namespace Prisma {
      * })
      * 
      */
-    update<T extends admin_logUpdateArgs>(args: SelectSubset<T, admin_logUpdateArgs<ExtArgs>>): Prisma__admin_logClient<$Result.GetResult<Prisma.$admin_logPayload<ExtArgs>, T, "update", ClientOptions>, never, ExtArgs, ClientOptions>
+    update<T extends admin_logUpdateArgs>(args: SelectSubset<T, admin_logUpdateArgs<ExtArgs>>): Prisma__admin_logClient<$Result.GetResult<Prisma.$admin_logPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Delete zero or more Admin_logs.
@@ -4662,7 +4677,7 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * 
      */
-    updateManyAndReturn<T extends admin_logUpdateManyAndReturnArgs>(args: SelectSubset<T, admin_logUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$admin_logPayload<ExtArgs>, T, "updateManyAndReturn", ClientOptions>>
+    updateManyAndReturn<T extends admin_logUpdateManyAndReturnArgs>(args: SelectSubset<T, admin_logUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$admin_logPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one Admin_log.
@@ -4681,7 +4696,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    upsert<T extends admin_logUpsertArgs>(args: SelectSubset<T, admin_logUpsertArgs<ExtArgs>>): Prisma__admin_logClient<$Result.GetResult<Prisma.$admin_logPayload<ExtArgs>, T, "upsert", ClientOptions>, never, ExtArgs, ClientOptions>
+    upsert<T extends admin_logUpsertArgs>(args: SelectSubset<T, admin_logUpsertArgs<ExtArgs>>): Prisma__admin_logClient<$Result.GetResult<Prisma.$admin_logPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
 
     /**
@@ -4821,9 +4836,9 @@ export namespace Prisma {
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
-  export interface Prisma__admin_logClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> extends Prisma.PrismaPromise<T> {
+  export interface Prisma__admin_logClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    user<T extends userDefaultArgs<ExtArgs> = {}>(args?: Subset<T, userDefaultArgs<ExtArgs>>): Prisma__userClient<$Result.GetResult<Prisma.$userPayload<ExtArgs>, T, "findUniqueOrThrow", ClientOptions> | Null, Null, ExtArgs, ClientOptions>
+    user<T extends userDefaultArgs<ExtArgs> = {}>(args?: Subset<T, userDefaultArgs<ExtArgs>>): Prisma__userClient<$Result.GetResult<Prisma.$userPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -4851,7 +4866,7 @@ export namespace Prisma {
 
   /**
    * Fields of the admin_log model
-   */ 
+   */
   interface admin_logFieldRefs {
     readonly id: FieldRef<"admin_log", 'Int'>
     readonly type: FieldRef<"admin_log", 'String'>
@@ -5153,6 +5168,10 @@ export namespace Prisma {
      * Filter which admin_logs to update
      */
     where?: admin_logWhereInput
+    /**
+     * Limit how many admin_logs to update.
+     */
+    limit?: number
   }
 
   /**
@@ -5175,6 +5194,10 @@ export namespace Prisma {
      * Filter which admin_logs to update
      */
     where?: admin_logWhereInput
+    /**
+     * Limit how many admin_logs to update.
+     */
+    limit?: number
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -5241,6 +5264,10 @@ export namespace Prisma {
      * Filter which admin_logs to delete
      */
     where?: admin_logWhereInput
+    /**
+     * Limit how many admin_logs to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -5513,7 +5540,7 @@ export namespace Prisma {
       select?: User_follow_relationCountAggregateInputType | true
     }
 
-  export interface user_follow_relationDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> {
+  export interface user_follow_relationDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
     [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['user_follow_relation'], meta: { name: 'user_follow_relation' } }
     /**
      * Find zero or one User_follow_relation that matches the filter.
@@ -5526,7 +5553,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUnique<T extends user_follow_relationFindUniqueArgs>(args: SelectSubset<T, user_follow_relationFindUniqueArgs<ExtArgs>>): Prisma__user_follow_relationClient<$Result.GetResult<Prisma.$user_follow_relationPayload<ExtArgs>, T, "findUnique", ClientOptions> | null, null, ExtArgs, ClientOptions>
+    findUnique<T extends user_follow_relationFindUniqueArgs>(args: SelectSubset<T, user_follow_relationFindUniqueArgs<ExtArgs>>): Prisma__user_follow_relationClient<$Result.GetResult<Prisma.$user_follow_relationPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find one User_follow_relation that matches the filter or throw an error with `error.code='P2025'`
@@ -5540,7 +5567,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUniqueOrThrow<T extends user_follow_relationFindUniqueOrThrowArgs>(args: SelectSubset<T, user_follow_relationFindUniqueOrThrowArgs<ExtArgs>>): Prisma__user_follow_relationClient<$Result.GetResult<Prisma.$user_follow_relationPayload<ExtArgs>, T, "findUniqueOrThrow", ClientOptions>, never, ExtArgs, ClientOptions>
+    findUniqueOrThrow<T extends user_follow_relationFindUniqueOrThrowArgs>(args: SelectSubset<T, user_follow_relationFindUniqueOrThrowArgs<ExtArgs>>): Prisma__user_follow_relationClient<$Result.GetResult<Prisma.$user_follow_relationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find the first User_follow_relation that matches the filter.
@@ -5555,7 +5582,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirst<T extends user_follow_relationFindFirstArgs>(args?: SelectSubset<T, user_follow_relationFindFirstArgs<ExtArgs>>): Prisma__user_follow_relationClient<$Result.GetResult<Prisma.$user_follow_relationPayload<ExtArgs>, T, "findFirst", ClientOptions> | null, null, ExtArgs, ClientOptions>
+    findFirst<T extends user_follow_relationFindFirstArgs>(args?: SelectSubset<T, user_follow_relationFindFirstArgs<ExtArgs>>): Prisma__user_follow_relationClient<$Result.GetResult<Prisma.$user_follow_relationPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find the first User_follow_relation that matches the filter or
@@ -5571,7 +5598,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirstOrThrow<T extends user_follow_relationFindFirstOrThrowArgs>(args?: SelectSubset<T, user_follow_relationFindFirstOrThrowArgs<ExtArgs>>): Prisma__user_follow_relationClient<$Result.GetResult<Prisma.$user_follow_relationPayload<ExtArgs>, T, "findFirstOrThrow", ClientOptions>, never, ExtArgs, ClientOptions>
+    findFirstOrThrow<T extends user_follow_relationFindFirstOrThrowArgs>(args?: SelectSubset<T, user_follow_relationFindFirstOrThrowArgs<ExtArgs>>): Prisma__user_follow_relationClient<$Result.GetResult<Prisma.$user_follow_relationPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find zero or more User_follow_relations that matches the filter.
@@ -5589,7 +5616,7 @@ export namespace Prisma {
      * const user_follow_relationWithIdOnly = await prisma.user_follow_relation.findMany({ select: { id: true } })
      * 
      */
-    findMany<T extends user_follow_relationFindManyArgs>(args?: SelectSubset<T, user_follow_relationFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$user_follow_relationPayload<ExtArgs>, T, "findMany", ClientOptions>>
+    findMany<T extends user_follow_relationFindManyArgs>(args?: SelectSubset<T, user_follow_relationFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$user_follow_relationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
 
     /**
      * Create a User_follow_relation.
@@ -5603,7 +5630,7 @@ export namespace Prisma {
      * })
      * 
      */
-    create<T extends user_follow_relationCreateArgs>(args: SelectSubset<T, user_follow_relationCreateArgs<ExtArgs>>): Prisma__user_follow_relationClient<$Result.GetResult<Prisma.$user_follow_relationPayload<ExtArgs>, T, "create", ClientOptions>, never, ExtArgs, ClientOptions>
+    create<T extends user_follow_relationCreateArgs>(args: SelectSubset<T, user_follow_relationCreateArgs<ExtArgs>>): Prisma__user_follow_relationClient<$Result.GetResult<Prisma.$user_follow_relationPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Create many User_follow_relations.
@@ -5641,7 +5668,7 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * 
      */
-    createManyAndReturn<T extends user_follow_relationCreateManyAndReturnArgs>(args?: SelectSubset<T, user_follow_relationCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$user_follow_relationPayload<ExtArgs>, T, "createManyAndReturn", ClientOptions>>
+    createManyAndReturn<T extends user_follow_relationCreateManyAndReturnArgs>(args?: SelectSubset<T, user_follow_relationCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$user_follow_relationPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Delete a User_follow_relation.
@@ -5655,7 +5682,7 @@ export namespace Prisma {
      * })
      * 
      */
-    delete<T extends user_follow_relationDeleteArgs>(args: SelectSubset<T, user_follow_relationDeleteArgs<ExtArgs>>): Prisma__user_follow_relationClient<$Result.GetResult<Prisma.$user_follow_relationPayload<ExtArgs>, T, "delete", ClientOptions>, never, ExtArgs, ClientOptions>
+    delete<T extends user_follow_relationDeleteArgs>(args: SelectSubset<T, user_follow_relationDeleteArgs<ExtArgs>>): Prisma__user_follow_relationClient<$Result.GetResult<Prisma.$user_follow_relationPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Update one User_follow_relation.
@@ -5672,7 +5699,7 @@ export namespace Prisma {
      * })
      * 
      */
-    update<T extends user_follow_relationUpdateArgs>(args: SelectSubset<T, user_follow_relationUpdateArgs<ExtArgs>>): Prisma__user_follow_relationClient<$Result.GetResult<Prisma.$user_follow_relationPayload<ExtArgs>, T, "update", ClientOptions>, never, ExtArgs, ClientOptions>
+    update<T extends user_follow_relationUpdateArgs>(args: SelectSubset<T, user_follow_relationUpdateArgs<ExtArgs>>): Prisma__user_follow_relationClient<$Result.GetResult<Prisma.$user_follow_relationPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Delete zero or more User_follow_relations.
@@ -5735,7 +5762,7 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * 
      */
-    updateManyAndReturn<T extends user_follow_relationUpdateManyAndReturnArgs>(args: SelectSubset<T, user_follow_relationUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$user_follow_relationPayload<ExtArgs>, T, "updateManyAndReturn", ClientOptions>>
+    updateManyAndReturn<T extends user_follow_relationUpdateManyAndReturnArgs>(args: SelectSubset<T, user_follow_relationUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$user_follow_relationPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one User_follow_relation.
@@ -5754,7 +5781,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    upsert<T extends user_follow_relationUpsertArgs>(args: SelectSubset<T, user_follow_relationUpsertArgs<ExtArgs>>): Prisma__user_follow_relationClient<$Result.GetResult<Prisma.$user_follow_relationPayload<ExtArgs>, T, "upsert", ClientOptions>, never, ExtArgs, ClientOptions>
+    upsert<T extends user_follow_relationUpsertArgs>(args: SelectSubset<T, user_follow_relationUpsertArgs<ExtArgs>>): Prisma__user_follow_relationClient<$Result.GetResult<Prisma.$user_follow_relationPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
 
     /**
@@ -5894,10 +5921,10 @@ export namespace Prisma {
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
-  export interface Prisma__user_follow_relationClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> extends Prisma.PrismaPromise<T> {
+  export interface Prisma__user_follow_relationClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    follower<T extends userDefaultArgs<ExtArgs> = {}>(args?: Subset<T, userDefaultArgs<ExtArgs>>): Prisma__userClient<$Result.GetResult<Prisma.$userPayload<ExtArgs>, T, "findUniqueOrThrow", ClientOptions> | Null, Null, ExtArgs, ClientOptions>
-    following<T extends userDefaultArgs<ExtArgs> = {}>(args?: Subset<T, userDefaultArgs<ExtArgs>>): Prisma__userClient<$Result.GetResult<Prisma.$userPayload<ExtArgs>, T, "findUniqueOrThrow", ClientOptions> | Null, Null, ExtArgs, ClientOptions>
+    follower<T extends userDefaultArgs<ExtArgs> = {}>(args?: Subset<T, userDefaultArgs<ExtArgs>>): Prisma__userClient<$Result.GetResult<Prisma.$userPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    following<T extends userDefaultArgs<ExtArgs> = {}>(args?: Subset<T, userDefaultArgs<ExtArgs>>): Prisma__userClient<$Result.GetResult<Prisma.$userPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -5925,7 +5952,7 @@ export namespace Prisma {
 
   /**
    * Fields of the user_follow_relation model
-   */ 
+   */
   interface user_follow_relationFieldRefs {
     readonly id: FieldRef<"user_follow_relation", 'Int'>
     readonly follower_id: FieldRef<"user_follow_relation", 'Int'>
@@ -6223,6 +6250,10 @@ export namespace Prisma {
      * Filter which user_follow_relations to update
      */
     where?: user_follow_relationWhereInput
+    /**
+     * Limit how many user_follow_relations to update.
+     */
+    limit?: number
   }
 
   /**
@@ -6245,6 +6276,10 @@ export namespace Prisma {
      * Filter which user_follow_relations to update
      */
     where?: user_follow_relationWhereInput
+    /**
+     * Limit how many user_follow_relations to update.
+     */
+    limit?: number
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -6311,6 +6346,10 @@ export namespace Prisma {
      * Filter which user_follow_relations to delete
      */
     where?: user_follow_relationWhereInput
+    /**
+     * Limit how many user_follow_relations to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -6659,7 +6698,7 @@ export namespace Prisma {
       select?: User_messageCountAggregateInputType | true
     }
 
-  export interface user_messageDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> {
+  export interface user_messageDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
     [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['user_message'], meta: { name: 'user_message' } }
     /**
      * Find zero or one User_message that matches the filter.
@@ -6672,7 +6711,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUnique<T extends user_messageFindUniqueArgs>(args: SelectSubset<T, user_messageFindUniqueArgs<ExtArgs>>): Prisma__user_messageClient<$Result.GetResult<Prisma.$user_messagePayload<ExtArgs>, T, "findUnique", ClientOptions> | null, null, ExtArgs, ClientOptions>
+    findUnique<T extends user_messageFindUniqueArgs>(args: SelectSubset<T, user_messageFindUniqueArgs<ExtArgs>>): Prisma__user_messageClient<$Result.GetResult<Prisma.$user_messagePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find one User_message that matches the filter or throw an error with `error.code='P2025'`
@@ -6686,7 +6725,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUniqueOrThrow<T extends user_messageFindUniqueOrThrowArgs>(args: SelectSubset<T, user_messageFindUniqueOrThrowArgs<ExtArgs>>): Prisma__user_messageClient<$Result.GetResult<Prisma.$user_messagePayload<ExtArgs>, T, "findUniqueOrThrow", ClientOptions>, never, ExtArgs, ClientOptions>
+    findUniqueOrThrow<T extends user_messageFindUniqueOrThrowArgs>(args: SelectSubset<T, user_messageFindUniqueOrThrowArgs<ExtArgs>>): Prisma__user_messageClient<$Result.GetResult<Prisma.$user_messagePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find the first User_message that matches the filter.
@@ -6701,7 +6740,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirst<T extends user_messageFindFirstArgs>(args?: SelectSubset<T, user_messageFindFirstArgs<ExtArgs>>): Prisma__user_messageClient<$Result.GetResult<Prisma.$user_messagePayload<ExtArgs>, T, "findFirst", ClientOptions> | null, null, ExtArgs, ClientOptions>
+    findFirst<T extends user_messageFindFirstArgs>(args?: SelectSubset<T, user_messageFindFirstArgs<ExtArgs>>): Prisma__user_messageClient<$Result.GetResult<Prisma.$user_messagePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find the first User_message that matches the filter or
@@ -6717,7 +6756,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirstOrThrow<T extends user_messageFindFirstOrThrowArgs>(args?: SelectSubset<T, user_messageFindFirstOrThrowArgs<ExtArgs>>): Prisma__user_messageClient<$Result.GetResult<Prisma.$user_messagePayload<ExtArgs>, T, "findFirstOrThrow", ClientOptions>, never, ExtArgs, ClientOptions>
+    findFirstOrThrow<T extends user_messageFindFirstOrThrowArgs>(args?: SelectSubset<T, user_messageFindFirstOrThrowArgs<ExtArgs>>): Prisma__user_messageClient<$Result.GetResult<Prisma.$user_messagePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find zero or more User_messages that matches the filter.
@@ -6735,7 +6774,7 @@ export namespace Prisma {
      * const user_messageWithIdOnly = await prisma.user_message.findMany({ select: { id: true } })
      * 
      */
-    findMany<T extends user_messageFindManyArgs>(args?: SelectSubset<T, user_messageFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$user_messagePayload<ExtArgs>, T, "findMany", ClientOptions>>
+    findMany<T extends user_messageFindManyArgs>(args?: SelectSubset<T, user_messageFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$user_messagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
 
     /**
      * Create a User_message.
@@ -6749,7 +6788,7 @@ export namespace Prisma {
      * })
      * 
      */
-    create<T extends user_messageCreateArgs>(args: SelectSubset<T, user_messageCreateArgs<ExtArgs>>): Prisma__user_messageClient<$Result.GetResult<Prisma.$user_messagePayload<ExtArgs>, T, "create", ClientOptions>, never, ExtArgs, ClientOptions>
+    create<T extends user_messageCreateArgs>(args: SelectSubset<T, user_messageCreateArgs<ExtArgs>>): Prisma__user_messageClient<$Result.GetResult<Prisma.$user_messagePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Create many User_messages.
@@ -6787,7 +6826,7 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * 
      */
-    createManyAndReturn<T extends user_messageCreateManyAndReturnArgs>(args?: SelectSubset<T, user_messageCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$user_messagePayload<ExtArgs>, T, "createManyAndReturn", ClientOptions>>
+    createManyAndReturn<T extends user_messageCreateManyAndReturnArgs>(args?: SelectSubset<T, user_messageCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$user_messagePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Delete a User_message.
@@ -6801,7 +6840,7 @@ export namespace Prisma {
      * })
      * 
      */
-    delete<T extends user_messageDeleteArgs>(args: SelectSubset<T, user_messageDeleteArgs<ExtArgs>>): Prisma__user_messageClient<$Result.GetResult<Prisma.$user_messagePayload<ExtArgs>, T, "delete", ClientOptions>, never, ExtArgs, ClientOptions>
+    delete<T extends user_messageDeleteArgs>(args: SelectSubset<T, user_messageDeleteArgs<ExtArgs>>): Prisma__user_messageClient<$Result.GetResult<Prisma.$user_messagePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Update one User_message.
@@ -6818,7 +6857,7 @@ export namespace Prisma {
      * })
      * 
      */
-    update<T extends user_messageUpdateArgs>(args: SelectSubset<T, user_messageUpdateArgs<ExtArgs>>): Prisma__user_messageClient<$Result.GetResult<Prisma.$user_messagePayload<ExtArgs>, T, "update", ClientOptions>, never, ExtArgs, ClientOptions>
+    update<T extends user_messageUpdateArgs>(args: SelectSubset<T, user_messageUpdateArgs<ExtArgs>>): Prisma__user_messageClient<$Result.GetResult<Prisma.$user_messagePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Delete zero or more User_messages.
@@ -6881,7 +6920,7 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * 
      */
-    updateManyAndReturn<T extends user_messageUpdateManyAndReturnArgs>(args: SelectSubset<T, user_messageUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$user_messagePayload<ExtArgs>, T, "updateManyAndReturn", ClientOptions>>
+    updateManyAndReturn<T extends user_messageUpdateManyAndReturnArgs>(args: SelectSubset<T, user_messageUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$user_messagePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one User_message.
@@ -6900,7 +6939,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    upsert<T extends user_messageUpsertArgs>(args: SelectSubset<T, user_messageUpsertArgs<ExtArgs>>): Prisma__user_messageClient<$Result.GetResult<Prisma.$user_messagePayload<ExtArgs>, T, "upsert", ClientOptions>, never, ExtArgs, ClientOptions>
+    upsert<T extends user_messageUpsertArgs>(args: SelectSubset<T, user_messageUpsertArgs<ExtArgs>>): Prisma__user_messageClient<$Result.GetResult<Prisma.$user_messagePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
 
     /**
@@ -7040,10 +7079,10 @@ export namespace Prisma {
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
-  export interface Prisma__user_messageClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> extends Prisma.PrismaPromise<T> {
+  export interface Prisma__user_messageClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    sender<T extends user_message$senderArgs<ExtArgs> = {}>(args?: Subset<T, user_message$senderArgs<ExtArgs>>): Prisma__userClient<$Result.GetResult<Prisma.$userPayload<ExtArgs>, T, "findUniqueOrThrow", ClientOptions> | null, null, ExtArgs, ClientOptions>
-    recipient<T extends user_message$recipientArgs<ExtArgs> = {}>(args?: Subset<T, user_message$recipientArgs<ExtArgs>>): Prisma__userClient<$Result.GetResult<Prisma.$userPayload<ExtArgs>, T, "findUniqueOrThrow", ClientOptions> | null, null, ExtArgs, ClientOptions>
+    sender<T extends user_message$senderArgs<ExtArgs> = {}>(args?: Subset<T, user_message$senderArgs<ExtArgs>>): Prisma__userClient<$Result.GetResult<Prisma.$userPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    recipient<T extends user_message$recipientArgs<ExtArgs> = {}>(args?: Subset<T, user_message$recipientArgs<ExtArgs>>): Prisma__userClient<$Result.GetResult<Prisma.$userPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -7071,7 +7110,7 @@ export namespace Prisma {
 
   /**
    * Fields of the user_message model
-   */ 
+   */
   interface user_messageFieldRefs {
     readonly id: FieldRef<"user_message", 'Int'>
     readonly type: FieldRef<"user_message", 'String'>
@@ -7375,6 +7414,10 @@ export namespace Prisma {
      * Filter which user_messages to update
      */
     where?: user_messageWhereInput
+    /**
+     * Limit how many user_messages to update.
+     */
+    limit?: number
   }
 
   /**
@@ -7397,6 +7440,10 @@ export namespace Prisma {
      * Filter which user_messages to update
      */
     where?: user_messageWhereInput
+    /**
+     * Limit how many user_messages to update.
+     */
+    limit?: number
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -7463,6 +7510,10 @@ export namespace Prisma {
      * Filter which user_messages to delete
      */
     where?: user_messageWhereInput
+    /**
+     * Limit how many user_messages to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -7815,7 +7866,7 @@ export namespace Prisma {
       select?: User_patch_favorite_folderCountAggregateInputType | true
     }
 
-  export interface user_patch_favorite_folderDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> {
+  export interface user_patch_favorite_folderDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
     [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['user_patch_favorite_folder'], meta: { name: 'user_patch_favorite_folder' } }
     /**
      * Find zero or one User_patch_favorite_folder that matches the filter.
@@ -7828,7 +7879,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUnique<T extends user_patch_favorite_folderFindUniqueArgs>(args: SelectSubset<T, user_patch_favorite_folderFindUniqueArgs<ExtArgs>>): Prisma__user_patch_favorite_folderClient<$Result.GetResult<Prisma.$user_patch_favorite_folderPayload<ExtArgs>, T, "findUnique", ClientOptions> | null, null, ExtArgs, ClientOptions>
+    findUnique<T extends user_patch_favorite_folderFindUniqueArgs>(args: SelectSubset<T, user_patch_favorite_folderFindUniqueArgs<ExtArgs>>): Prisma__user_patch_favorite_folderClient<$Result.GetResult<Prisma.$user_patch_favorite_folderPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find one User_patch_favorite_folder that matches the filter or throw an error with `error.code='P2025'`
@@ -7842,7 +7893,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUniqueOrThrow<T extends user_patch_favorite_folderFindUniqueOrThrowArgs>(args: SelectSubset<T, user_patch_favorite_folderFindUniqueOrThrowArgs<ExtArgs>>): Prisma__user_patch_favorite_folderClient<$Result.GetResult<Prisma.$user_patch_favorite_folderPayload<ExtArgs>, T, "findUniqueOrThrow", ClientOptions>, never, ExtArgs, ClientOptions>
+    findUniqueOrThrow<T extends user_patch_favorite_folderFindUniqueOrThrowArgs>(args: SelectSubset<T, user_patch_favorite_folderFindUniqueOrThrowArgs<ExtArgs>>): Prisma__user_patch_favorite_folderClient<$Result.GetResult<Prisma.$user_patch_favorite_folderPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find the first User_patch_favorite_folder that matches the filter.
@@ -7857,7 +7908,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirst<T extends user_patch_favorite_folderFindFirstArgs>(args?: SelectSubset<T, user_patch_favorite_folderFindFirstArgs<ExtArgs>>): Prisma__user_patch_favorite_folderClient<$Result.GetResult<Prisma.$user_patch_favorite_folderPayload<ExtArgs>, T, "findFirst", ClientOptions> | null, null, ExtArgs, ClientOptions>
+    findFirst<T extends user_patch_favorite_folderFindFirstArgs>(args?: SelectSubset<T, user_patch_favorite_folderFindFirstArgs<ExtArgs>>): Prisma__user_patch_favorite_folderClient<$Result.GetResult<Prisma.$user_patch_favorite_folderPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find the first User_patch_favorite_folder that matches the filter or
@@ -7873,7 +7924,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirstOrThrow<T extends user_patch_favorite_folderFindFirstOrThrowArgs>(args?: SelectSubset<T, user_patch_favorite_folderFindFirstOrThrowArgs<ExtArgs>>): Prisma__user_patch_favorite_folderClient<$Result.GetResult<Prisma.$user_patch_favorite_folderPayload<ExtArgs>, T, "findFirstOrThrow", ClientOptions>, never, ExtArgs, ClientOptions>
+    findFirstOrThrow<T extends user_patch_favorite_folderFindFirstOrThrowArgs>(args?: SelectSubset<T, user_patch_favorite_folderFindFirstOrThrowArgs<ExtArgs>>): Prisma__user_patch_favorite_folderClient<$Result.GetResult<Prisma.$user_patch_favorite_folderPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find zero or more User_patch_favorite_folders that matches the filter.
@@ -7891,7 +7942,7 @@ export namespace Prisma {
      * const user_patch_favorite_folderWithIdOnly = await prisma.user_patch_favorite_folder.findMany({ select: { id: true } })
      * 
      */
-    findMany<T extends user_patch_favorite_folderFindManyArgs>(args?: SelectSubset<T, user_patch_favorite_folderFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$user_patch_favorite_folderPayload<ExtArgs>, T, "findMany", ClientOptions>>
+    findMany<T extends user_patch_favorite_folderFindManyArgs>(args?: SelectSubset<T, user_patch_favorite_folderFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$user_patch_favorite_folderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
 
     /**
      * Create a User_patch_favorite_folder.
@@ -7905,7 +7956,7 @@ export namespace Prisma {
      * })
      * 
      */
-    create<T extends user_patch_favorite_folderCreateArgs>(args: SelectSubset<T, user_patch_favorite_folderCreateArgs<ExtArgs>>): Prisma__user_patch_favorite_folderClient<$Result.GetResult<Prisma.$user_patch_favorite_folderPayload<ExtArgs>, T, "create", ClientOptions>, never, ExtArgs, ClientOptions>
+    create<T extends user_patch_favorite_folderCreateArgs>(args: SelectSubset<T, user_patch_favorite_folderCreateArgs<ExtArgs>>): Prisma__user_patch_favorite_folderClient<$Result.GetResult<Prisma.$user_patch_favorite_folderPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Create many User_patch_favorite_folders.
@@ -7943,7 +7994,7 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * 
      */
-    createManyAndReturn<T extends user_patch_favorite_folderCreateManyAndReturnArgs>(args?: SelectSubset<T, user_patch_favorite_folderCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$user_patch_favorite_folderPayload<ExtArgs>, T, "createManyAndReturn", ClientOptions>>
+    createManyAndReturn<T extends user_patch_favorite_folderCreateManyAndReturnArgs>(args?: SelectSubset<T, user_patch_favorite_folderCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$user_patch_favorite_folderPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Delete a User_patch_favorite_folder.
@@ -7957,7 +8008,7 @@ export namespace Prisma {
      * })
      * 
      */
-    delete<T extends user_patch_favorite_folderDeleteArgs>(args: SelectSubset<T, user_patch_favorite_folderDeleteArgs<ExtArgs>>): Prisma__user_patch_favorite_folderClient<$Result.GetResult<Prisma.$user_patch_favorite_folderPayload<ExtArgs>, T, "delete", ClientOptions>, never, ExtArgs, ClientOptions>
+    delete<T extends user_patch_favorite_folderDeleteArgs>(args: SelectSubset<T, user_patch_favorite_folderDeleteArgs<ExtArgs>>): Prisma__user_patch_favorite_folderClient<$Result.GetResult<Prisma.$user_patch_favorite_folderPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Update one User_patch_favorite_folder.
@@ -7974,7 +8025,7 @@ export namespace Prisma {
      * })
      * 
      */
-    update<T extends user_patch_favorite_folderUpdateArgs>(args: SelectSubset<T, user_patch_favorite_folderUpdateArgs<ExtArgs>>): Prisma__user_patch_favorite_folderClient<$Result.GetResult<Prisma.$user_patch_favorite_folderPayload<ExtArgs>, T, "update", ClientOptions>, never, ExtArgs, ClientOptions>
+    update<T extends user_patch_favorite_folderUpdateArgs>(args: SelectSubset<T, user_patch_favorite_folderUpdateArgs<ExtArgs>>): Prisma__user_patch_favorite_folderClient<$Result.GetResult<Prisma.$user_patch_favorite_folderPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Delete zero or more User_patch_favorite_folders.
@@ -8037,7 +8088,7 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * 
      */
-    updateManyAndReturn<T extends user_patch_favorite_folderUpdateManyAndReturnArgs>(args: SelectSubset<T, user_patch_favorite_folderUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$user_patch_favorite_folderPayload<ExtArgs>, T, "updateManyAndReturn", ClientOptions>>
+    updateManyAndReturn<T extends user_patch_favorite_folderUpdateManyAndReturnArgs>(args: SelectSubset<T, user_patch_favorite_folderUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$user_patch_favorite_folderPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one User_patch_favorite_folder.
@@ -8056,7 +8107,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    upsert<T extends user_patch_favorite_folderUpsertArgs>(args: SelectSubset<T, user_patch_favorite_folderUpsertArgs<ExtArgs>>): Prisma__user_patch_favorite_folderClient<$Result.GetResult<Prisma.$user_patch_favorite_folderPayload<ExtArgs>, T, "upsert", ClientOptions>, never, ExtArgs, ClientOptions>
+    upsert<T extends user_patch_favorite_folderUpsertArgs>(args: SelectSubset<T, user_patch_favorite_folderUpsertArgs<ExtArgs>>): Prisma__user_patch_favorite_folderClient<$Result.GetResult<Prisma.$user_patch_favorite_folderPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
 
     /**
@@ -8196,10 +8247,10 @@ export namespace Prisma {
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
-  export interface Prisma__user_patch_favorite_folderClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> extends Prisma.PrismaPromise<T> {
+  export interface Prisma__user_patch_favorite_folderClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    user<T extends userDefaultArgs<ExtArgs> = {}>(args?: Subset<T, userDefaultArgs<ExtArgs>>): Prisma__userClient<$Result.GetResult<Prisma.$userPayload<ExtArgs>, T, "findUniqueOrThrow", ClientOptions> | Null, Null, ExtArgs, ClientOptions>
-    patch<T extends user_patch_favorite_folder$patchArgs<ExtArgs> = {}>(args?: Subset<T, user_patch_favorite_folder$patchArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$user_patch_favorite_folder_relationPayload<ExtArgs>, T, "findMany", ClientOptions> | Null>
+    user<T extends userDefaultArgs<ExtArgs> = {}>(args?: Subset<T, userDefaultArgs<ExtArgs>>): Prisma__userClient<$Result.GetResult<Prisma.$userPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    patch<T extends user_patch_favorite_folder$patchArgs<ExtArgs> = {}>(args?: Subset<T, user_patch_favorite_folder$patchArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$user_patch_favorite_folder_relationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -8227,7 +8278,7 @@ export namespace Prisma {
 
   /**
    * Fields of the user_patch_favorite_folder model
-   */ 
+   */
   interface user_patch_favorite_folderFieldRefs {
     readonly id: FieldRef<"user_patch_favorite_folder", 'Int'>
     readonly name: FieldRef<"user_patch_favorite_folder", 'String'>
@@ -8529,6 +8580,10 @@ export namespace Prisma {
      * Filter which user_patch_favorite_folders to update
      */
     where?: user_patch_favorite_folderWhereInput
+    /**
+     * Limit how many user_patch_favorite_folders to update.
+     */
+    limit?: number
   }
 
   /**
@@ -8551,6 +8606,10 @@ export namespace Prisma {
      * Filter which user_patch_favorite_folders to update
      */
     where?: user_patch_favorite_folderWhereInput
+    /**
+     * Limit how many user_patch_favorite_folders to update.
+     */
+    limit?: number
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -8617,6 +8676,10 @@ export namespace Prisma {
      * Filter which user_patch_favorite_folders to delete
      */
     where?: user_patch_favorite_folderWhereInput
+    /**
+     * Limit how many user_patch_favorite_folders to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -8937,7 +9000,7 @@ export namespace Prisma {
       select?: User_patch_favorite_folder_relationCountAggregateInputType | true
     }
 
-  export interface user_patch_favorite_folder_relationDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> {
+  export interface user_patch_favorite_folder_relationDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
     [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['user_patch_favorite_folder_relation'], meta: { name: 'user_patch_favorite_folder_relation' } }
     /**
      * Find zero or one User_patch_favorite_folder_relation that matches the filter.
@@ -8950,7 +9013,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUnique<T extends user_patch_favorite_folder_relationFindUniqueArgs>(args: SelectSubset<T, user_patch_favorite_folder_relationFindUniqueArgs<ExtArgs>>): Prisma__user_patch_favorite_folder_relationClient<$Result.GetResult<Prisma.$user_patch_favorite_folder_relationPayload<ExtArgs>, T, "findUnique", ClientOptions> | null, null, ExtArgs, ClientOptions>
+    findUnique<T extends user_patch_favorite_folder_relationFindUniqueArgs>(args: SelectSubset<T, user_patch_favorite_folder_relationFindUniqueArgs<ExtArgs>>): Prisma__user_patch_favorite_folder_relationClient<$Result.GetResult<Prisma.$user_patch_favorite_folder_relationPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find one User_patch_favorite_folder_relation that matches the filter or throw an error with `error.code='P2025'`
@@ -8964,7 +9027,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUniqueOrThrow<T extends user_patch_favorite_folder_relationFindUniqueOrThrowArgs>(args: SelectSubset<T, user_patch_favorite_folder_relationFindUniqueOrThrowArgs<ExtArgs>>): Prisma__user_patch_favorite_folder_relationClient<$Result.GetResult<Prisma.$user_patch_favorite_folder_relationPayload<ExtArgs>, T, "findUniqueOrThrow", ClientOptions>, never, ExtArgs, ClientOptions>
+    findUniqueOrThrow<T extends user_patch_favorite_folder_relationFindUniqueOrThrowArgs>(args: SelectSubset<T, user_patch_favorite_folder_relationFindUniqueOrThrowArgs<ExtArgs>>): Prisma__user_patch_favorite_folder_relationClient<$Result.GetResult<Prisma.$user_patch_favorite_folder_relationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find the first User_patch_favorite_folder_relation that matches the filter.
@@ -8979,7 +9042,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirst<T extends user_patch_favorite_folder_relationFindFirstArgs>(args?: SelectSubset<T, user_patch_favorite_folder_relationFindFirstArgs<ExtArgs>>): Prisma__user_patch_favorite_folder_relationClient<$Result.GetResult<Prisma.$user_patch_favorite_folder_relationPayload<ExtArgs>, T, "findFirst", ClientOptions> | null, null, ExtArgs, ClientOptions>
+    findFirst<T extends user_patch_favorite_folder_relationFindFirstArgs>(args?: SelectSubset<T, user_patch_favorite_folder_relationFindFirstArgs<ExtArgs>>): Prisma__user_patch_favorite_folder_relationClient<$Result.GetResult<Prisma.$user_patch_favorite_folder_relationPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find the first User_patch_favorite_folder_relation that matches the filter or
@@ -8995,7 +9058,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirstOrThrow<T extends user_patch_favorite_folder_relationFindFirstOrThrowArgs>(args?: SelectSubset<T, user_patch_favorite_folder_relationFindFirstOrThrowArgs<ExtArgs>>): Prisma__user_patch_favorite_folder_relationClient<$Result.GetResult<Prisma.$user_patch_favorite_folder_relationPayload<ExtArgs>, T, "findFirstOrThrow", ClientOptions>, never, ExtArgs, ClientOptions>
+    findFirstOrThrow<T extends user_patch_favorite_folder_relationFindFirstOrThrowArgs>(args?: SelectSubset<T, user_patch_favorite_folder_relationFindFirstOrThrowArgs<ExtArgs>>): Prisma__user_patch_favorite_folder_relationClient<$Result.GetResult<Prisma.$user_patch_favorite_folder_relationPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find zero or more User_patch_favorite_folder_relations that matches the filter.
@@ -9013,7 +9076,7 @@ export namespace Prisma {
      * const user_patch_favorite_folder_relationWithIdOnly = await prisma.user_patch_favorite_folder_relation.findMany({ select: { id: true } })
      * 
      */
-    findMany<T extends user_patch_favorite_folder_relationFindManyArgs>(args?: SelectSubset<T, user_patch_favorite_folder_relationFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$user_patch_favorite_folder_relationPayload<ExtArgs>, T, "findMany", ClientOptions>>
+    findMany<T extends user_patch_favorite_folder_relationFindManyArgs>(args?: SelectSubset<T, user_patch_favorite_folder_relationFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$user_patch_favorite_folder_relationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
 
     /**
      * Create a User_patch_favorite_folder_relation.
@@ -9027,7 +9090,7 @@ export namespace Prisma {
      * })
      * 
      */
-    create<T extends user_patch_favorite_folder_relationCreateArgs>(args: SelectSubset<T, user_patch_favorite_folder_relationCreateArgs<ExtArgs>>): Prisma__user_patch_favorite_folder_relationClient<$Result.GetResult<Prisma.$user_patch_favorite_folder_relationPayload<ExtArgs>, T, "create", ClientOptions>, never, ExtArgs, ClientOptions>
+    create<T extends user_patch_favorite_folder_relationCreateArgs>(args: SelectSubset<T, user_patch_favorite_folder_relationCreateArgs<ExtArgs>>): Prisma__user_patch_favorite_folder_relationClient<$Result.GetResult<Prisma.$user_patch_favorite_folder_relationPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Create many User_patch_favorite_folder_relations.
@@ -9065,7 +9128,7 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * 
      */
-    createManyAndReturn<T extends user_patch_favorite_folder_relationCreateManyAndReturnArgs>(args?: SelectSubset<T, user_patch_favorite_folder_relationCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$user_patch_favorite_folder_relationPayload<ExtArgs>, T, "createManyAndReturn", ClientOptions>>
+    createManyAndReturn<T extends user_patch_favorite_folder_relationCreateManyAndReturnArgs>(args?: SelectSubset<T, user_patch_favorite_folder_relationCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$user_patch_favorite_folder_relationPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Delete a User_patch_favorite_folder_relation.
@@ -9079,7 +9142,7 @@ export namespace Prisma {
      * })
      * 
      */
-    delete<T extends user_patch_favorite_folder_relationDeleteArgs>(args: SelectSubset<T, user_patch_favorite_folder_relationDeleteArgs<ExtArgs>>): Prisma__user_patch_favorite_folder_relationClient<$Result.GetResult<Prisma.$user_patch_favorite_folder_relationPayload<ExtArgs>, T, "delete", ClientOptions>, never, ExtArgs, ClientOptions>
+    delete<T extends user_patch_favorite_folder_relationDeleteArgs>(args: SelectSubset<T, user_patch_favorite_folder_relationDeleteArgs<ExtArgs>>): Prisma__user_patch_favorite_folder_relationClient<$Result.GetResult<Prisma.$user_patch_favorite_folder_relationPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Update one User_patch_favorite_folder_relation.
@@ -9096,7 +9159,7 @@ export namespace Prisma {
      * })
      * 
      */
-    update<T extends user_patch_favorite_folder_relationUpdateArgs>(args: SelectSubset<T, user_patch_favorite_folder_relationUpdateArgs<ExtArgs>>): Prisma__user_patch_favorite_folder_relationClient<$Result.GetResult<Prisma.$user_patch_favorite_folder_relationPayload<ExtArgs>, T, "update", ClientOptions>, never, ExtArgs, ClientOptions>
+    update<T extends user_patch_favorite_folder_relationUpdateArgs>(args: SelectSubset<T, user_patch_favorite_folder_relationUpdateArgs<ExtArgs>>): Prisma__user_patch_favorite_folder_relationClient<$Result.GetResult<Prisma.$user_patch_favorite_folder_relationPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Delete zero or more User_patch_favorite_folder_relations.
@@ -9159,7 +9222,7 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * 
      */
-    updateManyAndReturn<T extends user_patch_favorite_folder_relationUpdateManyAndReturnArgs>(args: SelectSubset<T, user_patch_favorite_folder_relationUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$user_patch_favorite_folder_relationPayload<ExtArgs>, T, "updateManyAndReturn", ClientOptions>>
+    updateManyAndReturn<T extends user_patch_favorite_folder_relationUpdateManyAndReturnArgs>(args: SelectSubset<T, user_patch_favorite_folder_relationUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$user_patch_favorite_folder_relationPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one User_patch_favorite_folder_relation.
@@ -9178,7 +9241,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    upsert<T extends user_patch_favorite_folder_relationUpsertArgs>(args: SelectSubset<T, user_patch_favorite_folder_relationUpsertArgs<ExtArgs>>): Prisma__user_patch_favorite_folder_relationClient<$Result.GetResult<Prisma.$user_patch_favorite_folder_relationPayload<ExtArgs>, T, "upsert", ClientOptions>, never, ExtArgs, ClientOptions>
+    upsert<T extends user_patch_favorite_folder_relationUpsertArgs>(args: SelectSubset<T, user_patch_favorite_folder_relationUpsertArgs<ExtArgs>>): Prisma__user_patch_favorite_folder_relationClient<$Result.GetResult<Prisma.$user_patch_favorite_folder_relationPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
 
     /**
@@ -9318,10 +9381,10 @@ export namespace Prisma {
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
-  export interface Prisma__user_patch_favorite_folder_relationClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> extends Prisma.PrismaPromise<T> {
+  export interface Prisma__user_patch_favorite_folder_relationClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    folder<T extends user_patch_favorite_folderDefaultArgs<ExtArgs> = {}>(args?: Subset<T, user_patch_favorite_folderDefaultArgs<ExtArgs>>): Prisma__user_patch_favorite_folderClient<$Result.GetResult<Prisma.$user_patch_favorite_folderPayload<ExtArgs>, T, "findUniqueOrThrow", ClientOptions> | Null, Null, ExtArgs, ClientOptions>
-    patch<T extends patchDefaultArgs<ExtArgs> = {}>(args?: Subset<T, patchDefaultArgs<ExtArgs>>): Prisma__patchClient<$Result.GetResult<Prisma.$patchPayload<ExtArgs>, T, "findUniqueOrThrow", ClientOptions> | Null, Null, ExtArgs, ClientOptions>
+    folder<T extends user_patch_favorite_folderDefaultArgs<ExtArgs> = {}>(args?: Subset<T, user_patch_favorite_folderDefaultArgs<ExtArgs>>): Prisma__user_patch_favorite_folderClient<$Result.GetResult<Prisma.$user_patch_favorite_folderPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    patch<T extends patchDefaultArgs<ExtArgs> = {}>(args?: Subset<T, patchDefaultArgs<ExtArgs>>): Prisma__patchClient<$Result.GetResult<Prisma.$patchPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -9349,7 +9412,7 @@ export namespace Prisma {
 
   /**
    * Fields of the user_patch_favorite_folder_relation model
-   */ 
+   */
   interface user_patch_favorite_folder_relationFieldRefs {
     readonly id: FieldRef<"user_patch_favorite_folder_relation", 'Int'>
     readonly folder_id: FieldRef<"user_patch_favorite_folder_relation", 'Int'>
@@ -9649,6 +9712,10 @@ export namespace Prisma {
      * Filter which user_patch_favorite_folder_relations to update
      */
     where?: user_patch_favorite_folder_relationWhereInput
+    /**
+     * Limit how many user_patch_favorite_folder_relations to update.
+     */
+    limit?: number
   }
 
   /**
@@ -9671,6 +9738,10 @@ export namespace Prisma {
      * Filter which user_patch_favorite_folder_relations to update
      */
     where?: user_patch_favorite_folder_relationWhereInput
+    /**
+     * Limit how many user_patch_favorite_folder_relations to update.
+     */
+    limit?: number
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -9737,6 +9808,10 @@ export namespace Prisma {
      * Filter which user_patch_favorite_folder_relations to delete
      */
     where?: user_patch_favorite_folder_relationWhereInput
+    /**
+     * Limit how many user_patch_favorite_folder_relations to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -10033,7 +10108,7 @@ export namespace Prisma {
       select?: User_patch_comment_like_relationCountAggregateInputType | true
     }
 
-  export interface user_patch_comment_like_relationDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> {
+  export interface user_patch_comment_like_relationDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
     [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['user_patch_comment_like_relation'], meta: { name: 'user_patch_comment_like_relation' } }
     /**
      * Find zero or one User_patch_comment_like_relation that matches the filter.
@@ -10046,7 +10121,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUnique<T extends user_patch_comment_like_relationFindUniqueArgs>(args: SelectSubset<T, user_patch_comment_like_relationFindUniqueArgs<ExtArgs>>): Prisma__user_patch_comment_like_relationClient<$Result.GetResult<Prisma.$user_patch_comment_like_relationPayload<ExtArgs>, T, "findUnique", ClientOptions> | null, null, ExtArgs, ClientOptions>
+    findUnique<T extends user_patch_comment_like_relationFindUniqueArgs>(args: SelectSubset<T, user_patch_comment_like_relationFindUniqueArgs<ExtArgs>>): Prisma__user_patch_comment_like_relationClient<$Result.GetResult<Prisma.$user_patch_comment_like_relationPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find one User_patch_comment_like_relation that matches the filter or throw an error with `error.code='P2025'`
@@ -10060,7 +10135,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUniqueOrThrow<T extends user_patch_comment_like_relationFindUniqueOrThrowArgs>(args: SelectSubset<T, user_patch_comment_like_relationFindUniqueOrThrowArgs<ExtArgs>>): Prisma__user_patch_comment_like_relationClient<$Result.GetResult<Prisma.$user_patch_comment_like_relationPayload<ExtArgs>, T, "findUniqueOrThrow", ClientOptions>, never, ExtArgs, ClientOptions>
+    findUniqueOrThrow<T extends user_patch_comment_like_relationFindUniqueOrThrowArgs>(args: SelectSubset<T, user_patch_comment_like_relationFindUniqueOrThrowArgs<ExtArgs>>): Prisma__user_patch_comment_like_relationClient<$Result.GetResult<Prisma.$user_patch_comment_like_relationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find the first User_patch_comment_like_relation that matches the filter.
@@ -10075,7 +10150,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirst<T extends user_patch_comment_like_relationFindFirstArgs>(args?: SelectSubset<T, user_patch_comment_like_relationFindFirstArgs<ExtArgs>>): Prisma__user_patch_comment_like_relationClient<$Result.GetResult<Prisma.$user_patch_comment_like_relationPayload<ExtArgs>, T, "findFirst", ClientOptions> | null, null, ExtArgs, ClientOptions>
+    findFirst<T extends user_patch_comment_like_relationFindFirstArgs>(args?: SelectSubset<T, user_patch_comment_like_relationFindFirstArgs<ExtArgs>>): Prisma__user_patch_comment_like_relationClient<$Result.GetResult<Prisma.$user_patch_comment_like_relationPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find the first User_patch_comment_like_relation that matches the filter or
@@ -10091,7 +10166,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirstOrThrow<T extends user_patch_comment_like_relationFindFirstOrThrowArgs>(args?: SelectSubset<T, user_patch_comment_like_relationFindFirstOrThrowArgs<ExtArgs>>): Prisma__user_patch_comment_like_relationClient<$Result.GetResult<Prisma.$user_patch_comment_like_relationPayload<ExtArgs>, T, "findFirstOrThrow", ClientOptions>, never, ExtArgs, ClientOptions>
+    findFirstOrThrow<T extends user_patch_comment_like_relationFindFirstOrThrowArgs>(args?: SelectSubset<T, user_patch_comment_like_relationFindFirstOrThrowArgs<ExtArgs>>): Prisma__user_patch_comment_like_relationClient<$Result.GetResult<Prisma.$user_patch_comment_like_relationPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find zero or more User_patch_comment_like_relations that matches the filter.
@@ -10109,7 +10184,7 @@ export namespace Prisma {
      * const user_patch_comment_like_relationWithIdOnly = await prisma.user_patch_comment_like_relation.findMany({ select: { id: true } })
      * 
      */
-    findMany<T extends user_patch_comment_like_relationFindManyArgs>(args?: SelectSubset<T, user_patch_comment_like_relationFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$user_patch_comment_like_relationPayload<ExtArgs>, T, "findMany", ClientOptions>>
+    findMany<T extends user_patch_comment_like_relationFindManyArgs>(args?: SelectSubset<T, user_patch_comment_like_relationFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$user_patch_comment_like_relationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
 
     /**
      * Create a User_patch_comment_like_relation.
@@ -10123,7 +10198,7 @@ export namespace Prisma {
      * })
      * 
      */
-    create<T extends user_patch_comment_like_relationCreateArgs>(args: SelectSubset<T, user_patch_comment_like_relationCreateArgs<ExtArgs>>): Prisma__user_patch_comment_like_relationClient<$Result.GetResult<Prisma.$user_patch_comment_like_relationPayload<ExtArgs>, T, "create", ClientOptions>, never, ExtArgs, ClientOptions>
+    create<T extends user_patch_comment_like_relationCreateArgs>(args: SelectSubset<T, user_patch_comment_like_relationCreateArgs<ExtArgs>>): Prisma__user_patch_comment_like_relationClient<$Result.GetResult<Prisma.$user_patch_comment_like_relationPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Create many User_patch_comment_like_relations.
@@ -10161,7 +10236,7 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * 
      */
-    createManyAndReturn<T extends user_patch_comment_like_relationCreateManyAndReturnArgs>(args?: SelectSubset<T, user_patch_comment_like_relationCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$user_patch_comment_like_relationPayload<ExtArgs>, T, "createManyAndReturn", ClientOptions>>
+    createManyAndReturn<T extends user_patch_comment_like_relationCreateManyAndReturnArgs>(args?: SelectSubset<T, user_patch_comment_like_relationCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$user_patch_comment_like_relationPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Delete a User_patch_comment_like_relation.
@@ -10175,7 +10250,7 @@ export namespace Prisma {
      * })
      * 
      */
-    delete<T extends user_patch_comment_like_relationDeleteArgs>(args: SelectSubset<T, user_patch_comment_like_relationDeleteArgs<ExtArgs>>): Prisma__user_patch_comment_like_relationClient<$Result.GetResult<Prisma.$user_patch_comment_like_relationPayload<ExtArgs>, T, "delete", ClientOptions>, never, ExtArgs, ClientOptions>
+    delete<T extends user_patch_comment_like_relationDeleteArgs>(args: SelectSubset<T, user_patch_comment_like_relationDeleteArgs<ExtArgs>>): Prisma__user_patch_comment_like_relationClient<$Result.GetResult<Prisma.$user_patch_comment_like_relationPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Update one User_patch_comment_like_relation.
@@ -10192,7 +10267,7 @@ export namespace Prisma {
      * })
      * 
      */
-    update<T extends user_patch_comment_like_relationUpdateArgs>(args: SelectSubset<T, user_patch_comment_like_relationUpdateArgs<ExtArgs>>): Prisma__user_patch_comment_like_relationClient<$Result.GetResult<Prisma.$user_patch_comment_like_relationPayload<ExtArgs>, T, "update", ClientOptions>, never, ExtArgs, ClientOptions>
+    update<T extends user_patch_comment_like_relationUpdateArgs>(args: SelectSubset<T, user_patch_comment_like_relationUpdateArgs<ExtArgs>>): Prisma__user_patch_comment_like_relationClient<$Result.GetResult<Prisma.$user_patch_comment_like_relationPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Delete zero or more User_patch_comment_like_relations.
@@ -10255,7 +10330,7 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * 
      */
-    updateManyAndReturn<T extends user_patch_comment_like_relationUpdateManyAndReturnArgs>(args: SelectSubset<T, user_patch_comment_like_relationUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$user_patch_comment_like_relationPayload<ExtArgs>, T, "updateManyAndReturn", ClientOptions>>
+    updateManyAndReturn<T extends user_patch_comment_like_relationUpdateManyAndReturnArgs>(args: SelectSubset<T, user_patch_comment_like_relationUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$user_patch_comment_like_relationPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one User_patch_comment_like_relation.
@@ -10274,7 +10349,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    upsert<T extends user_patch_comment_like_relationUpsertArgs>(args: SelectSubset<T, user_patch_comment_like_relationUpsertArgs<ExtArgs>>): Prisma__user_patch_comment_like_relationClient<$Result.GetResult<Prisma.$user_patch_comment_like_relationPayload<ExtArgs>, T, "upsert", ClientOptions>, never, ExtArgs, ClientOptions>
+    upsert<T extends user_patch_comment_like_relationUpsertArgs>(args: SelectSubset<T, user_patch_comment_like_relationUpsertArgs<ExtArgs>>): Prisma__user_patch_comment_like_relationClient<$Result.GetResult<Prisma.$user_patch_comment_like_relationPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
 
     /**
@@ -10414,10 +10489,10 @@ export namespace Prisma {
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
-  export interface Prisma__user_patch_comment_like_relationClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> extends Prisma.PrismaPromise<T> {
+  export interface Prisma__user_patch_comment_like_relationClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    user<T extends userDefaultArgs<ExtArgs> = {}>(args?: Subset<T, userDefaultArgs<ExtArgs>>): Prisma__userClient<$Result.GetResult<Prisma.$userPayload<ExtArgs>, T, "findUniqueOrThrow", ClientOptions> | Null, Null, ExtArgs, ClientOptions>
-    comment<T extends patch_commentDefaultArgs<ExtArgs> = {}>(args?: Subset<T, patch_commentDefaultArgs<ExtArgs>>): Prisma__patch_commentClient<$Result.GetResult<Prisma.$patch_commentPayload<ExtArgs>, T, "findUniqueOrThrow", ClientOptions> | Null, Null, ExtArgs, ClientOptions>
+    user<T extends userDefaultArgs<ExtArgs> = {}>(args?: Subset<T, userDefaultArgs<ExtArgs>>): Prisma__userClient<$Result.GetResult<Prisma.$userPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    comment<T extends patch_commentDefaultArgs<ExtArgs> = {}>(args?: Subset<T, patch_commentDefaultArgs<ExtArgs>>): Prisma__patch_commentClient<$Result.GetResult<Prisma.$patch_commentPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -10445,7 +10520,7 @@ export namespace Prisma {
 
   /**
    * Fields of the user_patch_comment_like_relation model
-   */ 
+   */
   interface user_patch_comment_like_relationFieldRefs {
     readonly id: FieldRef<"user_patch_comment_like_relation", 'Int'>
     readonly user_id: FieldRef<"user_patch_comment_like_relation", 'Int'>
@@ -10745,6 +10820,10 @@ export namespace Prisma {
      * Filter which user_patch_comment_like_relations to update
      */
     where?: user_patch_comment_like_relationWhereInput
+    /**
+     * Limit how many user_patch_comment_like_relations to update.
+     */
+    limit?: number
   }
 
   /**
@@ -10767,6 +10846,10 @@ export namespace Prisma {
      * Filter which user_patch_comment_like_relations to update
      */
     where?: user_patch_comment_like_relationWhereInput
+    /**
+     * Limit how many user_patch_comment_like_relations to update.
+     */
+    limit?: number
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -10833,6 +10916,10 @@ export namespace Prisma {
      * Filter which user_patch_comment_like_relations to delete
      */
     where?: user_patch_comment_like_relationWhereInput
+    /**
+     * Limit how many user_patch_comment_like_relations to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -11129,7 +11216,7 @@ export namespace Prisma {
       select?: User_patch_resource_like_relationCountAggregateInputType | true
     }
 
-  export interface user_patch_resource_like_relationDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> {
+  export interface user_patch_resource_like_relationDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
     [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['user_patch_resource_like_relation'], meta: { name: 'user_patch_resource_like_relation' } }
     /**
      * Find zero or one User_patch_resource_like_relation that matches the filter.
@@ -11142,7 +11229,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUnique<T extends user_patch_resource_like_relationFindUniqueArgs>(args: SelectSubset<T, user_patch_resource_like_relationFindUniqueArgs<ExtArgs>>): Prisma__user_patch_resource_like_relationClient<$Result.GetResult<Prisma.$user_patch_resource_like_relationPayload<ExtArgs>, T, "findUnique", ClientOptions> | null, null, ExtArgs, ClientOptions>
+    findUnique<T extends user_patch_resource_like_relationFindUniqueArgs>(args: SelectSubset<T, user_patch_resource_like_relationFindUniqueArgs<ExtArgs>>): Prisma__user_patch_resource_like_relationClient<$Result.GetResult<Prisma.$user_patch_resource_like_relationPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find one User_patch_resource_like_relation that matches the filter or throw an error with `error.code='P2025'`
@@ -11156,7 +11243,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUniqueOrThrow<T extends user_patch_resource_like_relationFindUniqueOrThrowArgs>(args: SelectSubset<T, user_patch_resource_like_relationFindUniqueOrThrowArgs<ExtArgs>>): Prisma__user_patch_resource_like_relationClient<$Result.GetResult<Prisma.$user_patch_resource_like_relationPayload<ExtArgs>, T, "findUniqueOrThrow", ClientOptions>, never, ExtArgs, ClientOptions>
+    findUniqueOrThrow<T extends user_patch_resource_like_relationFindUniqueOrThrowArgs>(args: SelectSubset<T, user_patch_resource_like_relationFindUniqueOrThrowArgs<ExtArgs>>): Prisma__user_patch_resource_like_relationClient<$Result.GetResult<Prisma.$user_patch_resource_like_relationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find the first User_patch_resource_like_relation that matches the filter.
@@ -11171,7 +11258,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirst<T extends user_patch_resource_like_relationFindFirstArgs>(args?: SelectSubset<T, user_patch_resource_like_relationFindFirstArgs<ExtArgs>>): Prisma__user_patch_resource_like_relationClient<$Result.GetResult<Prisma.$user_patch_resource_like_relationPayload<ExtArgs>, T, "findFirst", ClientOptions> | null, null, ExtArgs, ClientOptions>
+    findFirst<T extends user_patch_resource_like_relationFindFirstArgs>(args?: SelectSubset<T, user_patch_resource_like_relationFindFirstArgs<ExtArgs>>): Prisma__user_patch_resource_like_relationClient<$Result.GetResult<Prisma.$user_patch_resource_like_relationPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find the first User_patch_resource_like_relation that matches the filter or
@@ -11187,7 +11274,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirstOrThrow<T extends user_patch_resource_like_relationFindFirstOrThrowArgs>(args?: SelectSubset<T, user_patch_resource_like_relationFindFirstOrThrowArgs<ExtArgs>>): Prisma__user_patch_resource_like_relationClient<$Result.GetResult<Prisma.$user_patch_resource_like_relationPayload<ExtArgs>, T, "findFirstOrThrow", ClientOptions>, never, ExtArgs, ClientOptions>
+    findFirstOrThrow<T extends user_patch_resource_like_relationFindFirstOrThrowArgs>(args?: SelectSubset<T, user_patch_resource_like_relationFindFirstOrThrowArgs<ExtArgs>>): Prisma__user_patch_resource_like_relationClient<$Result.GetResult<Prisma.$user_patch_resource_like_relationPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find zero or more User_patch_resource_like_relations that matches the filter.
@@ -11205,7 +11292,7 @@ export namespace Prisma {
      * const user_patch_resource_like_relationWithIdOnly = await prisma.user_patch_resource_like_relation.findMany({ select: { id: true } })
      * 
      */
-    findMany<T extends user_patch_resource_like_relationFindManyArgs>(args?: SelectSubset<T, user_patch_resource_like_relationFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$user_patch_resource_like_relationPayload<ExtArgs>, T, "findMany", ClientOptions>>
+    findMany<T extends user_patch_resource_like_relationFindManyArgs>(args?: SelectSubset<T, user_patch_resource_like_relationFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$user_patch_resource_like_relationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
 
     /**
      * Create a User_patch_resource_like_relation.
@@ -11219,7 +11306,7 @@ export namespace Prisma {
      * })
      * 
      */
-    create<T extends user_patch_resource_like_relationCreateArgs>(args: SelectSubset<T, user_patch_resource_like_relationCreateArgs<ExtArgs>>): Prisma__user_patch_resource_like_relationClient<$Result.GetResult<Prisma.$user_patch_resource_like_relationPayload<ExtArgs>, T, "create", ClientOptions>, never, ExtArgs, ClientOptions>
+    create<T extends user_patch_resource_like_relationCreateArgs>(args: SelectSubset<T, user_patch_resource_like_relationCreateArgs<ExtArgs>>): Prisma__user_patch_resource_like_relationClient<$Result.GetResult<Prisma.$user_patch_resource_like_relationPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Create many User_patch_resource_like_relations.
@@ -11257,7 +11344,7 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * 
      */
-    createManyAndReturn<T extends user_patch_resource_like_relationCreateManyAndReturnArgs>(args?: SelectSubset<T, user_patch_resource_like_relationCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$user_patch_resource_like_relationPayload<ExtArgs>, T, "createManyAndReturn", ClientOptions>>
+    createManyAndReturn<T extends user_patch_resource_like_relationCreateManyAndReturnArgs>(args?: SelectSubset<T, user_patch_resource_like_relationCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$user_patch_resource_like_relationPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Delete a User_patch_resource_like_relation.
@@ -11271,7 +11358,7 @@ export namespace Prisma {
      * })
      * 
      */
-    delete<T extends user_patch_resource_like_relationDeleteArgs>(args: SelectSubset<T, user_patch_resource_like_relationDeleteArgs<ExtArgs>>): Prisma__user_patch_resource_like_relationClient<$Result.GetResult<Prisma.$user_patch_resource_like_relationPayload<ExtArgs>, T, "delete", ClientOptions>, never, ExtArgs, ClientOptions>
+    delete<T extends user_patch_resource_like_relationDeleteArgs>(args: SelectSubset<T, user_patch_resource_like_relationDeleteArgs<ExtArgs>>): Prisma__user_patch_resource_like_relationClient<$Result.GetResult<Prisma.$user_patch_resource_like_relationPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Update one User_patch_resource_like_relation.
@@ -11288,7 +11375,7 @@ export namespace Prisma {
      * })
      * 
      */
-    update<T extends user_patch_resource_like_relationUpdateArgs>(args: SelectSubset<T, user_patch_resource_like_relationUpdateArgs<ExtArgs>>): Prisma__user_patch_resource_like_relationClient<$Result.GetResult<Prisma.$user_patch_resource_like_relationPayload<ExtArgs>, T, "update", ClientOptions>, never, ExtArgs, ClientOptions>
+    update<T extends user_patch_resource_like_relationUpdateArgs>(args: SelectSubset<T, user_patch_resource_like_relationUpdateArgs<ExtArgs>>): Prisma__user_patch_resource_like_relationClient<$Result.GetResult<Prisma.$user_patch_resource_like_relationPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Delete zero or more User_patch_resource_like_relations.
@@ -11351,7 +11438,7 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * 
      */
-    updateManyAndReturn<T extends user_patch_resource_like_relationUpdateManyAndReturnArgs>(args: SelectSubset<T, user_patch_resource_like_relationUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$user_patch_resource_like_relationPayload<ExtArgs>, T, "updateManyAndReturn", ClientOptions>>
+    updateManyAndReturn<T extends user_patch_resource_like_relationUpdateManyAndReturnArgs>(args: SelectSubset<T, user_patch_resource_like_relationUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$user_patch_resource_like_relationPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one User_patch_resource_like_relation.
@@ -11370,7 +11457,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    upsert<T extends user_patch_resource_like_relationUpsertArgs>(args: SelectSubset<T, user_patch_resource_like_relationUpsertArgs<ExtArgs>>): Prisma__user_patch_resource_like_relationClient<$Result.GetResult<Prisma.$user_patch_resource_like_relationPayload<ExtArgs>, T, "upsert", ClientOptions>, never, ExtArgs, ClientOptions>
+    upsert<T extends user_patch_resource_like_relationUpsertArgs>(args: SelectSubset<T, user_patch_resource_like_relationUpsertArgs<ExtArgs>>): Prisma__user_patch_resource_like_relationClient<$Result.GetResult<Prisma.$user_patch_resource_like_relationPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
 
     /**
@@ -11510,10 +11597,10 @@ export namespace Prisma {
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
-  export interface Prisma__user_patch_resource_like_relationClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> extends Prisma.PrismaPromise<T> {
+  export interface Prisma__user_patch_resource_like_relationClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    user<T extends userDefaultArgs<ExtArgs> = {}>(args?: Subset<T, userDefaultArgs<ExtArgs>>): Prisma__userClient<$Result.GetResult<Prisma.$userPayload<ExtArgs>, T, "findUniqueOrThrow", ClientOptions> | Null, Null, ExtArgs, ClientOptions>
-    resource<T extends patch_resourceDefaultArgs<ExtArgs> = {}>(args?: Subset<T, patch_resourceDefaultArgs<ExtArgs>>): Prisma__patch_resourceClient<$Result.GetResult<Prisma.$patch_resourcePayload<ExtArgs>, T, "findUniqueOrThrow", ClientOptions> | Null, Null, ExtArgs, ClientOptions>
+    user<T extends userDefaultArgs<ExtArgs> = {}>(args?: Subset<T, userDefaultArgs<ExtArgs>>): Prisma__userClient<$Result.GetResult<Prisma.$userPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    resource<T extends patch_resourceDefaultArgs<ExtArgs> = {}>(args?: Subset<T, patch_resourceDefaultArgs<ExtArgs>>): Prisma__patch_resourceClient<$Result.GetResult<Prisma.$patch_resourcePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -11541,7 +11628,7 @@ export namespace Prisma {
 
   /**
    * Fields of the user_patch_resource_like_relation model
-   */ 
+   */
   interface user_patch_resource_like_relationFieldRefs {
     readonly id: FieldRef<"user_patch_resource_like_relation", 'Int'>
     readonly user_id: FieldRef<"user_patch_resource_like_relation", 'Int'>
@@ -11841,6 +11928,10 @@ export namespace Prisma {
      * Filter which user_patch_resource_like_relations to update
      */
     where?: user_patch_resource_like_relationWhereInput
+    /**
+     * Limit how many user_patch_resource_like_relations to update.
+     */
+    limit?: number
   }
 
   /**
@@ -11863,6 +11954,10 @@ export namespace Prisma {
      * Filter which user_patch_resource_like_relations to update
      */
     where?: user_patch_resource_like_relationWhereInput
+    /**
+     * Limit how many user_patch_resource_like_relations to update.
+     */
+    limit?: number
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -11929,6 +12024,10 @@ export namespace Prisma {
      * Filter which user_patch_resource_like_relations to delete
      */
     where?: user_patch_resource_like_relationWhereInput
+    /**
+     * Limit how many user_patch_resource_like_relations to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -12398,7 +12497,7 @@ export namespace Prisma {
       select?: PatchCountAggregateInputType | true
     }
 
-  export interface patchDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> {
+  export interface patchDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
     [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['patch'], meta: { name: 'patch' } }
     /**
      * Find zero or one Patch that matches the filter.
@@ -12411,7 +12510,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUnique<T extends patchFindUniqueArgs>(args: SelectSubset<T, patchFindUniqueArgs<ExtArgs>>): Prisma__patchClient<$Result.GetResult<Prisma.$patchPayload<ExtArgs>, T, "findUnique", ClientOptions> | null, null, ExtArgs, ClientOptions>
+    findUnique<T extends patchFindUniqueArgs>(args: SelectSubset<T, patchFindUniqueArgs<ExtArgs>>): Prisma__patchClient<$Result.GetResult<Prisma.$patchPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find one Patch that matches the filter or throw an error with `error.code='P2025'`
@@ -12425,7 +12524,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUniqueOrThrow<T extends patchFindUniqueOrThrowArgs>(args: SelectSubset<T, patchFindUniqueOrThrowArgs<ExtArgs>>): Prisma__patchClient<$Result.GetResult<Prisma.$patchPayload<ExtArgs>, T, "findUniqueOrThrow", ClientOptions>, never, ExtArgs, ClientOptions>
+    findUniqueOrThrow<T extends patchFindUniqueOrThrowArgs>(args: SelectSubset<T, patchFindUniqueOrThrowArgs<ExtArgs>>): Prisma__patchClient<$Result.GetResult<Prisma.$patchPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find the first Patch that matches the filter.
@@ -12440,7 +12539,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirst<T extends patchFindFirstArgs>(args?: SelectSubset<T, patchFindFirstArgs<ExtArgs>>): Prisma__patchClient<$Result.GetResult<Prisma.$patchPayload<ExtArgs>, T, "findFirst", ClientOptions> | null, null, ExtArgs, ClientOptions>
+    findFirst<T extends patchFindFirstArgs>(args?: SelectSubset<T, patchFindFirstArgs<ExtArgs>>): Prisma__patchClient<$Result.GetResult<Prisma.$patchPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find the first Patch that matches the filter or
@@ -12456,7 +12555,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirstOrThrow<T extends patchFindFirstOrThrowArgs>(args?: SelectSubset<T, patchFindFirstOrThrowArgs<ExtArgs>>): Prisma__patchClient<$Result.GetResult<Prisma.$patchPayload<ExtArgs>, T, "findFirstOrThrow", ClientOptions>, never, ExtArgs, ClientOptions>
+    findFirstOrThrow<T extends patchFindFirstOrThrowArgs>(args?: SelectSubset<T, patchFindFirstOrThrowArgs<ExtArgs>>): Prisma__patchClient<$Result.GetResult<Prisma.$patchPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find zero or more Patches that matches the filter.
@@ -12474,7 +12573,7 @@ export namespace Prisma {
      * const patchWithIdOnly = await prisma.patch.findMany({ select: { id: true } })
      * 
      */
-    findMany<T extends patchFindManyArgs>(args?: SelectSubset<T, patchFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$patchPayload<ExtArgs>, T, "findMany", ClientOptions>>
+    findMany<T extends patchFindManyArgs>(args?: SelectSubset<T, patchFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$patchPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
 
     /**
      * Create a Patch.
@@ -12488,7 +12587,7 @@ export namespace Prisma {
      * })
      * 
      */
-    create<T extends patchCreateArgs>(args: SelectSubset<T, patchCreateArgs<ExtArgs>>): Prisma__patchClient<$Result.GetResult<Prisma.$patchPayload<ExtArgs>, T, "create", ClientOptions>, never, ExtArgs, ClientOptions>
+    create<T extends patchCreateArgs>(args: SelectSubset<T, patchCreateArgs<ExtArgs>>): Prisma__patchClient<$Result.GetResult<Prisma.$patchPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Create many Patches.
@@ -12526,7 +12625,7 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * 
      */
-    createManyAndReturn<T extends patchCreateManyAndReturnArgs>(args?: SelectSubset<T, patchCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$patchPayload<ExtArgs>, T, "createManyAndReturn", ClientOptions>>
+    createManyAndReturn<T extends patchCreateManyAndReturnArgs>(args?: SelectSubset<T, patchCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$patchPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Delete a Patch.
@@ -12540,7 +12639,7 @@ export namespace Prisma {
      * })
      * 
      */
-    delete<T extends patchDeleteArgs>(args: SelectSubset<T, patchDeleteArgs<ExtArgs>>): Prisma__patchClient<$Result.GetResult<Prisma.$patchPayload<ExtArgs>, T, "delete", ClientOptions>, never, ExtArgs, ClientOptions>
+    delete<T extends patchDeleteArgs>(args: SelectSubset<T, patchDeleteArgs<ExtArgs>>): Prisma__patchClient<$Result.GetResult<Prisma.$patchPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Update one Patch.
@@ -12557,7 +12656,7 @@ export namespace Prisma {
      * })
      * 
      */
-    update<T extends patchUpdateArgs>(args: SelectSubset<T, patchUpdateArgs<ExtArgs>>): Prisma__patchClient<$Result.GetResult<Prisma.$patchPayload<ExtArgs>, T, "update", ClientOptions>, never, ExtArgs, ClientOptions>
+    update<T extends patchUpdateArgs>(args: SelectSubset<T, patchUpdateArgs<ExtArgs>>): Prisma__patchClient<$Result.GetResult<Prisma.$patchPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Delete zero or more Patches.
@@ -12620,7 +12719,7 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * 
      */
-    updateManyAndReturn<T extends patchUpdateManyAndReturnArgs>(args: SelectSubset<T, patchUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$patchPayload<ExtArgs>, T, "updateManyAndReturn", ClientOptions>>
+    updateManyAndReturn<T extends patchUpdateManyAndReturnArgs>(args: SelectSubset<T, patchUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$patchPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one Patch.
@@ -12639,7 +12738,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    upsert<T extends patchUpsertArgs>(args: SelectSubset<T, patchUpsertArgs<ExtArgs>>): Prisma__patchClient<$Result.GetResult<Prisma.$patchPayload<ExtArgs>, T, "upsert", ClientOptions>, never, ExtArgs, ClientOptions>
+    upsert<T extends patchUpsertArgs>(args: SelectSubset<T, patchUpsertArgs<ExtArgs>>): Prisma__patchClient<$Result.GetResult<Prisma.$patchPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
 
     /**
@@ -12779,15 +12878,15 @@ export namespace Prisma {
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
-  export interface Prisma__patchClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> extends Prisma.PrismaPromise<T> {
+  export interface Prisma__patchClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    user<T extends userDefaultArgs<ExtArgs> = {}>(args?: Subset<T, userDefaultArgs<ExtArgs>>): Prisma__userClient<$Result.GetResult<Prisma.$userPayload<ExtArgs>, T, "findUniqueOrThrow", ClientOptions> | Null, Null, ExtArgs, ClientOptions>
-    alias<T extends patch$aliasArgs<ExtArgs> = {}>(args?: Subset<T, patch$aliasArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$patch_aliasPayload<ExtArgs>, T, "findMany", ClientOptions> | Null>
-    tag<T extends patch$tagArgs<ExtArgs> = {}>(args?: Subset<T, patch$tagArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$patch_tag_relationPayload<ExtArgs>, T, "findMany", ClientOptions> | Null>
-    favorite_folder<T extends patch$favorite_folderArgs<ExtArgs> = {}>(args?: Subset<T, patch$favorite_folderArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$user_patch_favorite_folder_relationPayload<ExtArgs>, T, "findMany", ClientOptions> | Null>
-    resource<T extends patch$resourceArgs<ExtArgs> = {}>(args?: Subset<T, patch$resourceArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$patch_resourcePayload<ExtArgs>, T, "findMany", ClientOptions> | Null>
-    comment<T extends patch$commentArgs<ExtArgs> = {}>(args?: Subset<T, patch$commentArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$patch_commentPayload<ExtArgs>, T, "findMany", ClientOptions> | Null>
-    characters<T extends patch$charactersArgs<ExtArgs> = {}>(args?: Subset<T, patch$charactersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$patch_characterPayload<ExtArgs>, T, "findMany", ClientOptions> | Null>
+    user<T extends userDefaultArgs<ExtArgs> = {}>(args?: Subset<T, userDefaultArgs<ExtArgs>>): Prisma__userClient<$Result.GetResult<Prisma.$userPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    alias<T extends patch$aliasArgs<ExtArgs> = {}>(args?: Subset<T, patch$aliasArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$patch_aliasPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    tag<T extends patch$tagArgs<ExtArgs> = {}>(args?: Subset<T, patch$tagArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$patch_tag_relationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    favorite_folder<T extends patch$favorite_folderArgs<ExtArgs> = {}>(args?: Subset<T, patch$favorite_folderArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$user_patch_favorite_folder_relationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    resource<T extends patch$resourceArgs<ExtArgs> = {}>(args?: Subset<T, patch$resourceArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$patch_resourcePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    comment<T extends patch$commentArgs<ExtArgs> = {}>(args?: Subset<T, patch$commentArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$patch_commentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    characters<T extends patch$charactersArgs<ExtArgs> = {}>(args?: Subset<T, patch$charactersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$patch_characterPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -12815,7 +12914,7 @@ export namespace Prisma {
 
   /**
    * Fields of the patch model
-   */ 
+   */
   interface patchFieldRefs {
     readonly id: FieldRef<"patch", 'Int'>
     readonly unique_id: FieldRef<"patch", 'String'>
@@ -13129,6 +13228,10 @@ export namespace Prisma {
      * Filter which patches to update
      */
     where?: patchWhereInput
+    /**
+     * Limit how many patches to update.
+     */
+    limit?: number
   }
 
   /**
@@ -13151,6 +13254,10 @@ export namespace Prisma {
      * Filter which patches to update
      */
     where?: patchWhereInput
+    /**
+     * Limit how many patches to update.
+     */
+    limit?: number
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -13217,6 +13324,10 @@ export namespace Prisma {
      * Filter which patches to delete
      */
     where?: patchWhereInput
+    /**
+     * Limit how many patches to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -13646,7 +13757,7 @@ export namespace Prisma {
       select?: Patch_aliasCountAggregateInputType | true
     }
 
-  export interface patch_aliasDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> {
+  export interface patch_aliasDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
     [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['patch_alias'], meta: { name: 'patch_alias' } }
     /**
      * Find zero or one Patch_alias that matches the filter.
@@ -13659,7 +13770,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUnique<T extends patch_aliasFindUniqueArgs>(args: SelectSubset<T, patch_aliasFindUniqueArgs<ExtArgs>>): Prisma__patch_aliasClient<$Result.GetResult<Prisma.$patch_aliasPayload<ExtArgs>, T, "findUnique", ClientOptions> | null, null, ExtArgs, ClientOptions>
+    findUnique<T extends patch_aliasFindUniqueArgs>(args: SelectSubset<T, patch_aliasFindUniqueArgs<ExtArgs>>): Prisma__patch_aliasClient<$Result.GetResult<Prisma.$patch_aliasPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find one Patch_alias that matches the filter or throw an error with `error.code='P2025'`
@@ -13673,7 +13784,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUniqueOrThrow<T extends patch_aliasFindUniqueOrThrowArgs>(args: SelectSubset<T, patch_aliasFindUniqueOrThrowArgs<ExtArgs>>): Prisma__patch_aliasClient<$Result.GetResult<Prisma.$patch_aliasPayload<ExtArgs>, T, "findUniqueOrThrow", ClientOptions>, never, ExtArgs, ClientOptions>
+    findUniqueOrThrow<T extends patch_aliasFindUniqueOrThrowArgs>(args: SelectSubset<T, patch_aliasFindUniqueOrThrowArgs<ExtArgs>>): Prisma__patch_aliasClient<$Result.GetResult<Prisma.$patch_aliasPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find the first Patch_alias that matches the filter.
@@ -13688,7 +13799,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirst<T extends patch_aliasFindFirstArgs>(args?: SelectSubset<T, patch_aliasFindFirstArgs<ExtArgs>>): Prisma__patch_aliasClient<$Result.GetResult<Prisma.$patch_aliasPayload<ExtArgs>, T, "findFirst", ClientOptions> | null, null, ExtArgs, ClientOptions>
+    findFirst<T extends patch_aliasFindFirstArgs>(args?: SelectSubset<T, patch_aliasFindFirstArgs<ExtArgs>>): Prisma__patch_aliasClient<$Result.GetResult<Prisma.$patch_aliasPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find the first Patch_alias that matches the filter or
@@ -13704,7 +13815,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirstOrThrow<T extends patch_aliasFindFirstOrThrowArgs>(args?: SelectSubset<T, patch_aliasFindFirstOrThrowArgs<ExtArgs>>): Prisma__patch_aliasClient<$Result.GetResult<Prisma.$patch_aliasPayload<ExtArgs>, T, "findFirstOrThrow", ClientOptions>, never, ExtArgs, ClientOptions>
+    findFirstOrThrow<T extends patch_aliasFindFirstOrThrowArgs>(args?: SelectSubset<T, patch_aliasFindFirstOrThrowArgs<ExtArgs>>): Prisma__patch_aliasClient<$Result.GetResult<Prisma.$patch_aliasPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find zero or more Patch_aliases that matches the filter.
@@ -13722,7 +13833,7 @@ export namespace Prisma {
      * const patch_aliasWithIdOnly = await prisma.patch_alias.findMany({ select: { id: true } })
      * 
      */
-    findMany<T extends patch_aliasFindManyArgs>(args?: SelectSubset<T, patch_aliasFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$patch_aliasPayload<ExtArgs>, T, "findMany", ClientOptions>>
+    findMany<T extends patch_aliasFindManyArgs>(args?: SelectSubset<T, patch_aliasFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$patch_aliasPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
 
     /**
      * Create a Patch_alias.
@@ -13736,7 +13847,7 @@ export namespace Prisma {
      * })
      * 
      */
-    create<T extends patch_aliasCreateArgs>(args: SelectSubset<T, patch_aliasCreateArgs<ExtArgs>>): Prisma__patch_aliasClient<$Result.GetResult<Prisma.$patch_aliasPayload<ExtArgs>, T, "create", ClientOptions>, never, ExtArgs, ClientOptions>
+    create<T extends patch_aliasCreateArgs>(args: SelectSubset<T, patch_aliasCreateArgs<ExtArgs>>): Prisma__patch_aliasClient<$Result.GetResult<Prisma.$patch_aliasPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Create many Patch_aliases.
@@ -13774,7 +13885,7 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * 
      */
-    createManyAndReturn<T extends patch_aliasCreateManyAndReturnArgs>(args?: SelectSubset<T, patch_aliasCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$patch_aliasPayload<ExtArgs>, T, "createManyAndReturn", ClientOptions>>
+    createManyAndReturn<T extends patch_aliasCreateManyAndReturnArgs>(args?: SelectSubset<T, patch_aliasCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$patch_aliasPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Delete a Patch_alias.
@@ -13788,7 +13899,7 @@ export namespace Prisma {
      * })
      * 
      */
-    delete<T extends patch_aliasDeleteArgs>(args: SelectSubset<T, patch_aliasDeleteArgs<ExtArgs>>): Prisma__patch_aliasClient<$Result.GetResult<Prisma.$patch_aliasPayload<ExtArgs>, T, "delete", ClientOptions>, never, ExtArgs, ClientOptions>
+    delete<T extends patch_aliasDeleteArgs>(args: SelectSubset<T, patch_aliasDeleteArgs<ExtArgs>>): Prisma__patch_aliasClient<$Result.GetResult<Prisma.$patch_aliasPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Update one Patch_alias.
@@ -13805,7 +13916,7 @@ export namespace Prisma {
      * })
      * 
      */
-    update<T extends patch_aliasUpdateArgs>(args: SelectSubset<T, patch_aliasUpdateArgs<ExtArgs>>): Prisma__patch_aliasClient<$Result.GetResult<Prisma.$patch_aliasPayload<ExtArgs>, T, "update", ClientOptions>, never, ExtArgs, ClientOptions>
+    update<T extends patch_aliasUpdateArgs>(args: SelectSubset<T, patch_aliasUpdateArgs<ExtArgs>>): Prisma__patch_aliasClient<$Result.GetResult<Prisma.$patch_aliasPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Delete zero or more Patch_aliases.
@@ -13868,7 +13979,7 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * 
      */
-    updateManyAndReturn<T extends patch_aliasUpdateManyAndReturnArgs>(args: SelectSubset<T, patch_aliasUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$patch_aliasPayload<ExtArgs>, T, "updateManyAndReturn", ClientOptions>>
+    updateManyAndReturn<T extends patch_aliasUpdateManyAndReturnArgs>(args: SelectSubset<T, patch_aliasUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$patch_aliasPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one Patch_alias.
@@ -13887,7 +13998,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    upsert<T extends patch_aliasUpsertArgs>(args: SelectSubset<T, patch_aliasUpsertArgs<ExtArgs>>): Prisma__patch_aliasClient<$Result.GetResult<Prisma.$patch_aliasPayload<ExtArgs>, T, "upsert", ClientOptions>, never, ExtArgs, ClientOptions>
+    upsert<T extends patch_aliasUpsertArgs>(args: SelectSubset<T, patch_aliasUpsertArgs<ExtArgs>>): Prisma__patch_aliasClient<$Result.GetResult<Prisma.$patch_aliasPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
 
     /**
@@ -14027,9 +14138,9 @@ export namespace Prisma {
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
-  export interface Prisma__patch_aliasClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> extends Prisma.PrismaPromise<T> {
+  export interface Prisma__patch_aliasClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    patch<T extends patchDefaultArgs<ExtArgs> = {}>(args?: Subset<T, patchDefaultArgs<ExtArgs>>): Prisma__patchClient<$Result.GetResult<Prisma.$patchPayload<ExtArgs>, T, "findUniqueOrThrow", ClientOptions> | Null, Null, ExtArgs, ClientOptions>
+    patch<T extends patchDefaultArgs<ExtArgs> = {}>(args?: Subset<T, patchDefaultArgs<ExtArgs>>): Prisma__patchClient<$Result.GetResult<Prisma.$patchPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -14057,7 +14168,7 @@ export namespace Prisma {
 
   /**
    * Fields of the patch_alias model
-   */ 
+   */
   interface patch_aliasFieldRefs {
     readonly id: FieldRef<"patch_alias", 'Int'>
     readonly name: FieldRef<"patch_alias", 'String'>
@@ -14357,6 +14468,10 @@ export namespace Prisma {
      * Filter which patch_aliases to update
      */
     where?: patch_aliasWhereInput
+    /**
+     * Limit how many patch_aliases to update.
+     */
+    limit?: number
   }
 
   /**
@@ -14379,6 +14494,10 @@ export namespace Prisma {
      * Filter which patch_aliases to update
      */
     where?: patch_aliasWhereInput
+    /**
+     * Limit how many patch_aliases to update.
+     */
+    limit?: number
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -14445,6 +14564,10 @@ export namespace Prisma {
      * Filter which patch_aliases to delete
      */
     where?: patch_aliasWhereInput
+    /**
+     * Limit how many patch_aliases to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -14771,7 +14894,7 @@ export namespace Prisma {
       select?: Patch_tagCountAggregateInputType | true
     }
 
-  export interface patch_tagDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> {
+  export interface patch_tagDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
     [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['patch_tag'], meta: { name: 'patch_tag' } }
     /**
      * Find zero or one Patch_tag that matches the filter.
@@ -14784,7 +14907,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUnique<T extends patch_tagFindUniqueArgs>(args: SelectSubset<T, patch_tagFindUniqueArgs<ExtArgs>>): Prisma__patch_tagClient<$Result.GetResult<Prisma.$patch_tagPayload<ExtArgs>, T, "findUnique", ClientOptions> | null, null, ExtArgs, ClientOptions>
+    findUnique<T extends patch_tagFindUniqueArgs>(args: SelectSubset<T, patch_tagFindUniqueArgs<ExtArgs>>): Prisma__patch_tagClient<$Result.GetResult<Prisma.$patch_tagPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find one Patch_tag that matches the filter or throw an error with `error.code='P2025'`
@@ -14798,7 +14921,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUniqueOrThrow<T extends patch_tagFindUniqueOrThrowArgs>(args: SelectSubset<T, patch_tagFindUniqueOrThrowArgs<ExtArgs>>): Prisma__patch_tagClient<$Result.GetResult<Prisma.$patch_tagPayload<ExtArgs>, T, "findUniqueOrThrow", ClientOptions>, never, ExtArgs, ClientOptions>
+    findUniqueOrThrow<T extends patch_tagFindUniqueOrThrowArgs>(args: SelectSubset<T, patch_tagFindUniqueOrThrowArgs<ExtArgs>>): Prisma__patch_tagClient<$Result.GetResult<Prisma.$patch_tagPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find the first Patch_tag that matches the filter.
@@ -14813,7 +14936,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirst<T extends patch_tagFindFirstArgs>(args?: SelectSubset<T, patch_tagFindFirstArgs<ExtArgs>>): Prisma__patch_tagClient<$Result.GetResult<Prisma.$patch_tagPayload<ExtArgs>, T, "findFirst", ClientOptions> | null, null, ExtArgs, ClientOptions>
+    findFirst<T extends patch_tagFindFirstArgs>(args?: SelectSubset<T, patch_tagFindFirstArgs<ExtArgs>>): Prisma__patch_tagClient<$Result.GetResult<Prisma.$patch_tagPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find the first Patch_tag that matches the filter or
@@ -14829,7 +14952,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirstOrThrow<T extends patch_tagFindFirstOrThrowArgs>(args?: SelectSubset<T, patch_tagFindFirstOrThrowArgs<ExtArgs>>): Prisma__patch_tagClient<$Result.GetResult<Prisma.$patch_tagPayload<ExtArgs>, T, "findFirstOrThrow", ClientOptions>, never, ExtArgs, ClientOptions>
+    findFirstOrThrow<T extends patch_tagFindFirstOrThrowArgs>(args?: SelectSubset<T, patch_tagFindFirstOrThrowArgs<ExtArgs>>): Prisma__patch_tagClient<$Result.GetResult<Prisma.$patch_tagPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find zero or more Patch_tags that matches the filter.
@@ -14847,7 +14970,7 @@ export namespace Prisma {
      * const patch_tagWithIdOnly = await prisma.patch_tag.findMany({ select: { id: true } })
      * 
      */
-    findMany<T extends patch_tagFindManyArgs>(args?: SelectSubset<T, patch_tagFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$patch_tagPayload<ExtArgs>, T, "findMany", ClientOptions>>
+    findMany<T extends patch_tagFindManyArgs>(args?: SelectSubset<T, patch_tagFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$patch_tagPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
 
     /**
      * Create a Patch_tag.
@@ -14861,7 +14984,7 @@ export namespace Prisma {
      * })
      * 
      */
-    create<T extends patch_tagCreateArgs>(args: SelectSubset<T, patch_tagCreateArgs<ExtArgs>>): Prisma__patch_tagClient<$Result.GetResult<Prisma.$patch_tagPayload<ExtArgs>, T, "create", ClientOptions>, never, ExtArgs, ClientOptions>
+    create<T extends patch_tagCreateArgs>(args: SelectSubset<T, patch_tagCreateArgs<ExtArgs>>): Prisma__patch_tagClient<$Result.GetResult<Prisma.$patch_tagPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Create many Patch_tags.
@@ -14899,7 +15022,7 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * 
      */
-    createManyAndReturn<T extends patch_tagCreateManyAndReturnArgs>(args?: SelectSubset<T, patch_tagCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$patch_tagPayload<ExtArgs>, T, "createManyAndReturn", ClientOptions>>
+    createManyAndReturn<T extends patch_tagCreateManyAndReturnArgs>(args?: SelectSubset<T, patch_tagCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$patch_tagPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Delete a Patch_tag.
@@ -14913,7 +15036,7 @@ export namespace Prisma {
      * })
      * 
      */
-    delete<T extends patch_tagDeleteArgs>(args: SelectSubset<T, patch_tagDeleteArgs<ExtArgs>>): Prisma__patch_tagClient<$Result.GetResult<Prisma.$patch_tagPayload<ExtArgs>, T, "delete", ClientOptions>, never, ExtArgs, ClientOptions>
+    delete<T extends patch_tagDeleteArgs>(args: SelectSubset<T, patch_tagDeleteArgs<ExtArgs>>): Prisma__patch_tagClient<$Result.GetResult<Prisma.$patch_tagPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Update one Patch_tag.
@@ -14930,7 +15053,7 @@ export namespace Prisma {
      * })
      * 
      */
-    update<T extends patch_tagUpdateArgs>(args: SelectSubset<T, patch_tagUpdateArgs<ExtArgs>>): Prisma__patch_tagClient<$Result.GetResult<Prisma.$patch_tagPayload<ExtArgs>, T, "update", ClientOptions>, never, ExtArgs, ClientOptions>
+    update<T extends patch_tagUpdateArgs>(args: SelectSubset<T, patch_tagUpdateArgs<ExtArgs>>): Prisma__patch_tagClient<$Result.GetResult<Prisma.$patch_tagPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Delete zero or more Patch_tags.
@@ -14993,7 +15116,7 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * 
      */
-    updateManyAndReturn<T extends patch_tagUpdateManyAndReturnArgs>(args: SelectSubset<T, patch_tagUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$patch_tagPayload<ExtArgs>, T, "updateManyAndReturn", ClientOptions>>
+    updateManyAndReturn<T extends patch_tagUpdateManyAndReturnArgs>(args: SelectSubset<T, patch_tagUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$patch_tagPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one Patch_tag.
@@ -15012,7 +15135,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    upsert<T extends patch_tagUpsertArgs>(args: SelectSubset<T, patch_tagUpsertArgs<ExtArgs>>): Prisma__patch_tagClient<$Result.GetResult<Prisma.$patch_tagPayload<ExtArgs>, T, "upsert", ClientOptions>, never, ExtArgs, ClientOptions>
+    upsert<T extends patch_tagUpsertArgs>(args: SelectSubset<T, patch_tagUpsertArgs<ExtArgs>>): Prisma__patch_tagClient<$Result.GetResult<Prisma.$patch_tagPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
 
     /**
@@ -15152,10 +15275,10 @@ export namespace Prisma {
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
-  export interface Prisma__patch_tagClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> extends Prisma.PrismaPromise<T> {
+  export interface Prisma__patch_tagClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    patch_relation<T extends patch_tag$patch_relationArgs<ExtArgs> = {}>(args?: Subset<T, patch_tag$patch_relationArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$patch_tag_relationPayload<ExtArgs>, T, "findMany", ClientOptions> | Null>
-    user<T extends userDefaultArgs<ExtArgs> = {}>(args?: Subset<T, userDefaultArgs<ExtArgs>>): Prisma__userClient<$Result.GetResult<Prisma.$userPayload<ExtArgs>, T, "findUniqueOrThrow", ClientOptions> | Null, Null, ExtArgs, ClientOptions>
+    patch_relation<T extends patch_tag$patch_relationArgs<ExtArgs> = {}>(args?: Subset<T, patch_tag$patch_relationArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$patch_tag_relationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    user<T extends userDefaultArgs<ExtArgs> = {}>(args?: Subset<T, userDefaultArgs<ExtArgs>>): Prisma__userClient<$Result.GetResult<Prisma.$userPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -15183,7 +15306,7 @@ export namespace Prisma {
 
   /**
    * Fields of the patch_tag model
-   */ 
+   */
   interface patch_tagFieldRefs {
     readonly id: FieldRef<"patch_tag", 'Int'>
     readonly name: FieldRef<"patch_tag", 'String'>
@@ -15486,6 +15609,10 @@ export namespace Prisma {
      * Filter which patch_tags to update
      */
     where?: patch_tagWhereInput
+    /**
+     * Limit how many patch_tags to update.
+     */
+    limit?: number
   }
 
   /**
@@ -15508,6 +15635,10 @@ export namespace Prisma {
      * Filter which patch_tags to update
      */
     where?: patch_tagWhereInput
+    /**
+     * Limit how many patch_tags to update.
+     */
+    limit?: number
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -15574,6 +15705,10 @@ export namespace Prisma {
      * Filter which patch_tags to delete
      */
     where?: patch_tagWhereInput
+    /**
+     * Limit how many patch_tags to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -15894,7 +16029,7 @@ export namespace Prisma {
       select?: Patch_tag_relationCountAggregateInputType | true
     }
 
-  export interface patch_tag_relationDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> {
+  export interface patch_tag_relationDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
     [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['patch_tag_relation'], meta: { name: 'patch_tag_relation' } }
     /**
      * Find zero or one Patch_tag_relation that matches the filter.
@@ -15907,7 +16042,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUnique<T extends patch_tag_relationFindUniqueArgs>(args: SelectSubset<T, patch_tag_relationFindUniqueArgs<ExtArgs>>): Prisma__patch_tag_relationClient<$Result.GetResult<Prisma.$patch_tag_relationPayload<ExtArgs>, T, "findUnique", ClientOptions> | null, null, ExtArgs, ClientOptions>
+    findUnique<T extends patch_tag_relationFindUniqueArgs>(args: SelectSubset<T, patch_tag_relationFindUniqueArgs<ExtArgs>>): Prisma__patch_tag_relationClient<$Result.GetResult<Prisma.$patch_tag_relationPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find one Patch_tag_relation that matches the filter or throw an error with `error.code='P2025'`
@@ -15921,7 +16056,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUniqueOrThrow<T extends patch_tag_relationFindUniqueOrThrowArgs>(args: SelectSubset<T, patch_tag_relationFindUniqueOrThrowArgs<ExtArgs>>): Prisma__patch_tag_relationClient<$Result.GetResult<Prisma.$patch_tag_relationPayload<ExtArgs>, T, "findUniqueOrThrow", ClientOptions>, never, ExtArgs, ClientOptions>
+    findUniqueOrThrow<T extends patch_tag_relationFindUniqueOrThrowArgs>(args: SelectSubset<T, patch_tag_relationFindUniqueOrThrowArgs<ExtArgs>>): Prisma__patch_tag_relationClient<$Result.GetResult<Prisma.$patch_tag_relationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find the first Patch_tag_relation that matches the filter.
@@ -15936,7 +16071,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirst<T extends patch_tag_relationFindFirstArgs>(args?: SelectSubset<T, patch_tag_relationFindFirstArgs<ExtArgs>>): Prisma__patch_tag_relationClient<$Result.GetResult<Prisma.$patch_tag_relationPayload<ExtArgs>, T, "findFirst", ClientOptions> | null, null, ExtArgs, ClientOptions>
+    findFirst<T extends patch_tag_relationFindFirstArgs>(args?: SelectSubset<T, patch_tag_relationFindFirstArgs<ExtArgs>>): Prisma__patch_tag_relationClient<$Result.GetResult<Prisma.$patch_tag_relationPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find the first Patch_tag_relation that matches the filter or
@@ -15952,7 +16087,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirstOrThrow<T extends patch_tag_relationFindFirstOrThrowArgs>(args?: SelectSubset<T, patch_tag_relationFindFirstOrThrowArgs<ExtArgs>>): Prisma__patch_tag_relationClient<$Result.GetResult<Prisma.$patch_tag_relationPayload<ExtArgs>, T, "findFirstOrThrow", ClientOptions>, never, ExtArgs, ClientOptions>
+    findFirstOrThrow<T extends patch_tag_relationFindFirstOrThrowArgs>(args?: SelectSubset<T, patch_tag_relationFindFirstOrThrowArgs<ExtArgs>>): Prisma__patch_tag_relationClient<$Result.GetResult<Prisma.$patch_tag_relationPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find zero or more Patch_tag_relations that matches the filter.
@@ -15970,7 +16105,7 @@ export namespace Prisma {
      * const patch_tag_relationWithIdOnly = await prisma.patch_tag_relation.findMany({ select: { id: true } })
      * 
      */
-    findMany<T extends patch_tag_relationFindManyArgs>(args?: SelectSubset<T, patch_tag_relationFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$patch_tag_relationPayload<ExtArgs>, T, "findMany", ClientOptions>>
+    findMany<T extends patch_tag_relationFindManyArgs>(args?: SelectSubset<T, patch_tag_relationFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$patch_tag_relationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
 
     /**
      * Create a Patch_tag_relation.
@@ -15984,7 +16119,7 @@ export namespace Prisma {
      * })
      * 
      */
-    create<T extends patch_tag_relationCreateArgs>(args: SelectSubset<T, patch_tag_relationCreateArgs<ExtArgs>>): Prisma__patch_tag_relationClient<$Result.GetResult<Prisma.$patch_tag_relationPayload<ExtArgs>, T, "create", ClientOptions>, never, ExtArgs, ClientOptions>
+    create<T extends patch_tag_relationCreateArgs>(args: SelectSubset<T, patch_tag_relationCreateArgs<ExtArgs>>): Prisma__patch_tag_relationClient<$Result.GetResult<Prisma.$patch_tag_relationPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Create many Patch_tag_relations.
@@ -16022,7 +16157,7 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * 
      */
-    createManyAndReturn<T extends patch_tag_relationCreateManyAndReturnArgs>(args?: SelectSubset<T, patch_tag_relationCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$patch_tag_relationPayload<ExtArgs>, T, "createManyAndReturn", ClientOptions>>
+    createManyAndReturn<T extends patch_tag_relationCreateManyAndReturnArgs>(args?: SelectSubset<T, patch_tag_relationCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$patch_tag_relationPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Delete a Patch_tag_relation.
@@ -16036,7 +16171,7 @@ export namespace Prisma {
      * })
      * 
      */
-    delete<T extends patch_tag_relationDeleteArgs>(args: SelectSubset<T, patch_tag_relationDeleteArgs<ExtArgs>>): Prisma__patch_tag_relationClient<$Result.GetResult<Prisma.$patch_tag_relationPayload<ExtArgs>, T, "delete", ClientOptions>, never, ExtArgs, ClientOptions>
+    delete<T extends patch_tag_relationDeleteArgs>(args: SelectSubset<T, patch_tag_relationDeleteArgs<ExtArgs>>): Prisma__patch_tag_relationClient<$Result.GetResult<Prisma.$patch_tag_relationPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Update one Patch_tag_relation.
@@ -16053,7 +16188,7 @@ export namespace Prisma {
      * })
      * 
      */
-    update<T extends patch_tag_relationUpdateArgs>(args: SelectSubset<T, patch_tag_relationUpdateArgs<ExtArgs>>): Prisma__patch_tag_relationClient<$Result.GetResult<Prisma.$patch_tag_relationPayload<ExtArgs>, T, "update", ClientOptions>, never, ExtArgs, ClientOptions>
+    update<T extends patch_tag_relationUpdateArgs>(args: SelectSubset<T, patch_tag_relationUpdateArgs<ExtArgs>>): Prisma__patch_tag_relationClient<$Result.GetResult<Prisma.$patch_tag_relationPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Delete zero or more Patch_tag_relations.
@@ -16116,7 +16251,7 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * 
      */
-    updateManyAndReturn<T extends patch_tag_relationUpdateManyAndReturnArgs>(args: SelectSubset<T, patch_tag_relationUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$patch_tag_relationPayload<ExtArgs>, T, "updateManyAndReturn", ClientOptions>>
+    updateManyAndReturn<T extends patch_tag_relationUpdateManyAndReturnArgs>(args: SelectSubset<T, patch_tag_relationUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$patch_tag_relationPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one Patch_tag_relation.
@@ -16135,7 +16270,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    upsert<T extends patch_tag_relationUpsertArgs>(args: SelectSubset<T, patch_tag_relationUpsertArgs<ExtArgs>>): Prisma__patch_tag_relationClient<$Result.GetResult<Prisma.$patch_tag_relationPayload<ExtArgs>, T, "upsert", ClientOptions>, never, ExtArgs, ClientOptions>
+    upsert<T extends patch_tag_relationUpsertArgs>(args: SelectSubset<T, patch_tag_relationUpsertArgs<ExtArgs>>): Prisma__patch_tag_relationClient<$Result.GetResult<Prisma.$patch_tag_relationPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
 
     /**
@@ -16275,10 +16410,10 @@ export namespace Prisma {
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
-  export interface Prisma__patch_tag_relationClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> extends Prisma.PrismaPromise<T> {
+  export interface Prisma__patch_tag_relationClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    patch<T extends patchDefaultArgs<ExtArgs> = {}>(args?: Subset<T, patchDefaultArgs<ExtArgs>>): Prisma__patchClient<$Result.GetResult<Prisma.$patchPayload<ExtArgs>, T, "findUniqueOrThrow", ClientOptions> | Null, Null, ExtArgs, ClientOptions>
-    tag<T extends patch_tagDefaultArgs<ExtArgs> = {}>(args?: Subset<T, patch_tagDefaultArgs<ExtArgs>>): Prisma__patch_tagClient<$Result.GetResult<Prisma.$patch_tagPayload<ExtArgs>, T, "findUniqueOrThrow", ClientOptions> | Null, Null, ExtArgs, ClientOptions>
+    patch<T extends patchDefaultArgs<ExtArgs> = {}>(args?: Subset<T, patchDefaultArgs<ExtArgs>>): Prisma__patchClient<$Result.GetResult<Prisma.$patchPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    tag<T extends patch_tagDefaultArgs<ExtArgs> = {}>(args?: Subset<T, patch_tagDefaultArgs<ExtArgs>>): Prisma__patch_tagClient<$Result.GetResult<Prisma.$patch_tagPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -16306,7 +16441,7 @@ export namespace Prisma {
 
   /**
    * Fields of the patch_tag_relation model
-   */ 
+   */
   interface patch_tag_relationFieldRefs {
     readonly id: FieldRef<"patch_tag_relation", 'Int'>
     readonly patch_id: FieldRef<"patch_tag_relation", 'Int'>
@@ -16606,6 +16741,10 @@ export namespace Prisma {
      * Filter which patch_tag_relations to update
      */
     where?: patch_tag_relationWhereInput
+    /**
+     * Limit how many patch_tag_relations to update.
+     */
+    limit?: number
   }
 
   /**
@@ -16628,6 +16767,10 @@ export namespace Prisma {
      * Filter which patch_tag_relations to update
      */
     where?: patch_tag_relationWhereInput
+    /**
+     * Limit how many patch_tag_relations to update.
+     */
+    limit?: number
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -16694,6 +16837,10 @@ export namespace Prisma {
      * Filter which patch_tag_relations to delete
      */
     where?: patch_tag_relationWhereInput
+    /**
+     * Limit how many patch_tag_relations to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -17159,7 +17306,7 @@ export namespace Prisma {
       select?: Patch_resourceCountAggregateInputType | true
     }
 
-  export interface patch_resourceDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> {
+  export interface patch_resourceDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
     [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['patch_resource'], meta: { name: 'patch_resource' } }
     /**
      * Find zero or one Patch_resource that matches the filter.
@@ -17172,7 +17319,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUnique<T extends patch_resourceFindUniqueArgs>(args: SelectSubset<T, patch_resourceFindUniqueArgs<ExtArgs>>): Prisma__patch_resourceClient<$Result.GetResult<Prisma.$patch_resourcePayload<ExtArgs>, T, "findUnique", ClientOptions> | null, null, ExtArgs, ClientOptions>
+    findUnique<T extends patch_resourceFindUniqueArgs>(args: SelectSubset<T, patch_resourceFindUniqueArgs<ExtArgs>>): Prisma__patch_resourceClient<$Result.GetResult<Prisma.$patch_resourcePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find one Patch_resource that matches the filter or throw an error with `error.code='P2025'`
@@ -17186,7 +17333,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUniqueOrThrow<T extends patch_resourceFindUniqueOrThrowArgs>(args: SelectSubset<T, patch_resourceFindUniqueOrThrowArgs<ExtArgs>>): Prisma__patch_resourceClient<$Result.GetResult<Prisma.$patch_resourcePayload<ExtArgs>, T, "findUniqueOrThrow", ClientOptions>, never, ExtArgs, ClientOptions>
+    findUniqueOrThrow<T extends patch_resourceFindUniqueOrThrowArgs>(args: SelectSubset<T, patch_resourceFindUniqueOrThrowArgs<ExtArgs>>): Prisma__patch_resourceClient<$Result.GetResult<Prisma.$patch_resourcePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find the first Patch_resource that matches the filter.
@@ -17201,7 +17348,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirst<T extends patch_resourceFindFirstArgs>(args?: SelectSubset<T, patch_resourceFindFirstArgs<ExtArgs>>): Prisma__patch_resourceClient<$Result.GetResult<Prisma.$patch_resourcePayload<ExtArgs>, T, "findFirst", ClientOptions> | null, null, ExtArgs, ClientOptions>
+    findFirst<T extends patch_resourceFindFirstArgs>(args?: SelectSubset<T, patch_resourceFindFirstArgs<ExtArgs>>): Prisma__patch_resourceClient<$Result.GetResult<Prisma.$patch_resourcePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find the first Patch_resource that matches the filter or
@@ -17217,7 +17364,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirstOrThrow<T extends patch_resourceFindFirstOrThrowArgs>(args?: SelectSubset<T, patch_resourceFindFirstOrThrowArgs<ExtArgs>>): Prisma__patch_resourceClient<$Result.GetResult<Prisma.$patch_resourcePayload<ExtArgs>, T, "findFirstOrThrow", ClientOptions>, never, ExtArgs, ClientOptions>
+    findFirstOrThrow<T extends patch_resourceFindFirstOrThrowArgs>(args?: SelectSubset<T, patch_resourceFindFirstOrThrowArgs<ExtArgs>>): Prisma__patch_resourceClient<$Result.GetResult<Prisma.$patch_resourcePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find zero or more Patch_resources that matches the filter.
@@ -17235,7 +17382,7 @@ export namespace Prisma {
      * const patch_resourceWithIdOnly = await prisma.patch_resource.findMany({ select: { id: true } })
      * 
      */
-    findMany<T extends patch_resourceFindManyArgs>(args?: SelectSubset<T, patch_resourceFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$patch_resourcePayload<ExtArgs>, T, "findMany", ClientOptions>>
+    findMany<T extends patch_resourceFindManyArgs>(args?: SelectSubset<T, patch_resourceFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$patch_resourcePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
 
     /**
      * Create a Patch_resource.
@@ -17249,7 +17396,7 @@ export namespace Prisma {
      * })
      * 
      */
-    create<T extends patch_resourceCreateArgs>(args: SelectSubset<T, patch_resourceCreateArgs<ExtArgs>>): Prisma__patch_resourceClient<$Result.GetResult<Prisma.$patch_resourcePayload<ExtArgs>, T, "create", ClientOptions>, never, ExtArgs, ClientOptions>
+    create<T extends patch_resourceCreateArgs>(args: SelectSubset<T, patch_resourceCreateArgs<ExtArgs>>): Prisma__patch_resourceClient<$Result.GetResult<Prisma.$patch_resourcePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Create many Patch_resources.
@@ -17287,7 +17434,7 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * 
      */
-    createManyAndReturn<T extends patch_resourceCreateManyAndReturnArgs>(args?: SelectSubset<T, patch_resourceCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$patch_resourcePayload<ExtArgs>, T, "createManyAndReturn", ClientOptions>>
+    createManyAndReturn<T extends patch_resourceCreateManyAndReturnArgs>(args?: SelectSubset<T, patch_resourceCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$patch_resourcePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Delete a Patch_resource.
@@ -17301,7 +17448,7 @@ export namespace Prisma {
      * })
      * 
      */
-    delete<T extends patch_resourceDeleteArgs>(args: SelectSubset<T, patch_resourceDeleteArgs<ExtArgs>>): Prisma__patch_resourceClient<$Result.GetResult<Prisma.$patch_resourcePayload<ExtArgs>, T, "delete", ClientOptions>, never, ExtArgs, ClientOptions>
+    delete<T extends patch_resourceDeleteArgs>(args: SelectSubset<T, patch_resourceDeleteArgs<ExtArgs>>): Prisma__patch_resourceClient<$Result.GetResult<Prisma.$patch_resourcePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Update one Patch_resource.
@@ -17318,7 +17465,7 @@ export namespace Prisma {
      * })
      * 
      */
-    update<T extends patch_resourceUpdateArgs>(args: SelectSubset<T, patch_resourceUpdateArgs<ExtArgs>>): Prisma__patch_resourceClient<$Result.GetResult<Prisma.$patch_resourcePayload<ExtArgs>, T, "update", ClientOptions>, never, ExtArgs, ClientOptions>
+    update<T extends patch_resourceUpdateArgs>(args: SelectSubset<T, patch_resourceUpdateArgs<ExtArgs>>): Prisma__patch_resourceClient<$Result.GetResult<Prisma.$patch_resourcePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Delete zero or more Patch_resources.
@@ -17381,7 +17528,7 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * 
      */
-    updateManyAndReturn<T extends patch_resourceUpdateManyAndReturnArgs>(args: SelectSubset<T, patch_resourceUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$patch_resourcePayload<ExtArgs>, T, "updateManyAndReturn", ClientOptions>>
+    updateManyAndReturn<T extends patch_resourceUpdateManyAndReturnArgs>(args: SelectSubset<T, patch_resourceUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$patch_resourcePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one Patch_resource.
@@ -17400,7 +17547,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    upsert<T extends patch_resourceUpsertArgs>(args: SelectSubset<T, patch_resourceUpsertArgs<ExtArgs>>): Prisma__patch_resourceClient<$Result.GetResult<Prisma.$patch_resourcePayload<ExtArgs>, T, "upsert", ClientOptions>, never, ExtArgs, ClientOptions>
+    upsert<T extends patch_resourceUpsertArgs>(args: SelectSubset<T, patch_resourceUpsertArgs<ExtArgs>>): Prisma__patch_resourceClient<$Result.GetResult<Prisma.$patch_resourcePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
 
     /**
@@ -17540,11 +17687,11 @@ export namespace Prisma {
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
-  export interface Prisma__patch_resourceClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> extends Prisma.PrismaPromise<T> {
+  export interface Prisma__patch_resourceClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    like_by<T extends patch_resource$like_byArgs<ExtArgs> = {}>(args?: Subset<T, patch_resource$like_byArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$user_patch_resource_like_relationPayload<ExtArgs>, T, "findMany", ClientOptions> | Null>
-    user<T extends userDefaultArgs<ExtArgs> = {}>(args?: Subset<T, userDefaultArgs<ExtArgs>>): Prisma__userClient<$Result.GetResult<Prisma.$userPayload<ExtArgs>, T, "findUniqueOrThrow", ClientOptions> | Null, Null, ExtArgs, ClientOptions>
-    patch<T extends patchDefaultArgs<ExtArgs> = {}>(args?: Subset<T, patchDefaultArgs<ExtArgs>>): Prisma__patchClient<$Result.GetResult<Prisma.$patchPayload<ExtArgs>, T, "findUniqueOrThrow", ClientOptions> | Null, Null, ExtArgs, ClientOptions>
+    like_by<T extends patch_resource$like_byArgs<ExtArgs> = {}>(args?: Subset<T, patch_resource$like_byArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$user_patch_resource_like_relationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    user<T extends userDefaultArgs<ExtArgs> = {}>(args?: Subset<T, userDefaultArgs<ExtArgs>>): Prisma__userClient<$Result.GetResult<Prisma.$userPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    patch<T extends patchDefaultArgs<ExtArgs> = {}>(args?: Subset<T, patchDefaultArgs<ExtArgs>>): Prisma__patchClient<$Result.GetResult<Prisma.$patchPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -17572,7 +17719,7 @@ export namespace Prisma {
 
   /**
    * Fields of the patch_resource model
-   */ 
+   */
   interface patch_resourceFieldRefs {
     readonly id: FieldRef<"patch_resource", 'Int'>
     readonly storage: FieldRef<"patch_resource", 'String'>
@@ -17886,6 +18033,10 @@ export namespace Prisma {
      * Filter which patch_resources to update
      */
     where?: patch_resourceWhereInput
+    /**
+     * Limit how many patch_resources to update.
+     */
+    limit?: number
   }
 
   /**
@@ -17908,6 +18059,10 @@ export namespace Prisma {
      * Filter which patch_resources to update
      */
     where?: patch_resourceWhereInput
+    /**
+     * Limit how many patch_resources to update.
+     */
+    limit?: number
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -17974,6 +18129,10 @@ export namespace Prisma {
      * Filter which patch_resources to delete
      */
     where?: patch_resourceWhereInput
+    /**
+     * Limit how many patch_resources to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -18349,7 +18508,7 @@ export namespace Prisma {
       select?: Patch_commentCountAggregateInputType | true
     }
 
-  export interface patch_commentDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> {
+  export interface patch_commentDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
     [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['patch_comment'], meta: { name: 'patch_comment' } }
     /**
      * Find zero or one Patch_comment that matches the filter.
@@ -18362,7 +18521,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUnique<T extends patch_commentFindUniqueArgs>(args: SelectSubset<T, patch_commentFindUniqueArgs<ExtArgs>>): Prisma__patch_commentClient<$Result.GetResult<Prisma.$patch_commentPayload<ExtArgs>, T, "findUnique", ClientOptions> | null, null, ExtArgs, ClientOptions>
+    findUnique<T extends patch_commentFindUniqueArgs>(args: SelectSubset<T, patch_commentFindUniqueArgs<ExtArgs>>): Prisma__patch_commentClient<$Result.GetResult<Prisma.$patch_commentPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find one Patch_comment that matches the filter or throw an error with `error.code='P2025'`
@@ -18376,7 +18535,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUniqueOrThrow<T extends patch_commentFindUniqueOrThrowArgs>(args: SelectSubset<T, patch_commentFindUniqueOrThrowArgs<ExtArgs>>): Prisma__patch_commentClient<$Result.GetResult<Prisma.$patch_commentPayload<ExtArgs>, T, "findUniqueOrThrow", ClientOptions>, never, ExtArgs, ClientOptions>
+    findUniqueOrThrow<T extends patch_commentFindUniqueOrThrowArgs>(args: SelectSubset<T, patch_commentFindUniqueOrThrowArgs<ExtArgs>>): Prisma__patch_commentClient<$Result.GetResult<Prisma.$patch_commentPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find the first Patch_comment that matches the filter.
@@ -18391,7 +18550,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirst<T extends patch_commentFindFirstArgs>(args?: SelectSubset<T, patch_commentFindFirstArgs<ExtArgs>>): Prisma__patch_commentClient<$Result.GetResult<Prisma.$patch_commentPayload<ExtArgs>, T, "findFirst", ClientOptions> | null, null, ExtArgs, ClientOptions>
+    findFirst<T extends patch_commentFindFirstArgs>(args?: SelectSubset<T, patch_commentFindFirstArgs<ExtArgs>>): Prisma__patch_commentClient<$Result.GetResult<Prisma.$patch_commentPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find the first Patch_comment that matches the filter or
@@ -18407,7 +18566,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirstOrThrow<T extends patch_commentFindFirstOrThrowArgs>(args?: SelectSubset<T, patch_commentFindFirstOrThrowArgs<ExtArgs>>): Prisma__patch_commentClient<$Result.GetResult<Prisma.$patch_commentPayload<ExtArgs>, T, "findFirstOrThrow", ClientOptions>, never, ExtArgs, ClientOptions>
+    findFirstOrThrow<T extends patch_commentFindFirstOrThrowArgs>(args?: SelectSubset<T, patch_commentFindFirstOrThrowArgs<ExtArgs>>): Prisma__patch_commentClient<$Result.GetResult<Prisma.$patch_commentPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find zero or more Patch_comments that matches the filter.
@@ -18425,7 +18584,7 @@ export namespace Prisma {
      * const patch_commentWithIdOnly = await prisma.patch_comment.findMany({ select: { id: true } })
      * 
      */
-    findMany<T extends patch_commentFindManyArgs>(args?: SelectSubset<T, patch_commentFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$patch_commentPayload<ExtArgs>, T, "findMany", ClientOptions>>
+    findMany<T extends patch_commentFindManyArgs>(args?: SelectSubset<T, patch_commentFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$patch_commentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
 
     /**
      * Create a Patch_comment.
@@ -18439,7 +18598,7 @@ export namespace Prisma {
      * })
      * 
      */
-    create<T extends patch_commentCreateArgs>(args: SelectSubset<T, patch_commentCreateArgs<ExtArgs>>): Prisma__patch_commentClient<$Result.GetResult<Prisma.$patch_commentPayload<ExtArgs>, T, "create", ClientOptions>, never, ExtArgs, ClientOptions>
+    create<T extends patch_commentCreateArgs>(args: SelectSubset<T, patch_commentCreateArgs<ExtArgs>>): Prisma__patch_commentClient<$Result.GetResult<Prisma.$patch_commentPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Create many Patch_comments.
@@ -18477,7 +18636,7 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * 
      */
-    createManyAndReturn<T extends patch_commentCreateManyAndReturnArgs>(args?: SelectSubset<T, patch_commentCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$patch_commentPayload<ExtArgs>, T, "createManyAndReturn", ClientOptions>>
+    createManyAndReturn<T extends patch_commentCreateManyAndReturnArgs>(args?: SelectSubset<T, patch_commentCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$patch_commentPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Delete a Patch_comment.
@@ -18491,7 +18650,7 @@ export namespace Prisma {
      * })
      * 
      */
-    delete<T extends patch_commentDeleteArgs>(args: SelectSubset<T, patch_commentDeleteArgs<ExtArgs>>): Prisma__patch_commentClient<$Result.GetResult<Prisma.$patch_commentPayload<ExtArgs>, T, "delete", ClientOptions>, never, ExtArgs, ClientOptions>
+    delete<T extends patch_commentDeleteArgs>(args: SelectSubset<T, patch_commentDeleteArgs<ExtArgs>>): Prisma__patch_commentClient<$Result.GetResult<Prisma.$patch_commentPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Update one Patch_comment.
@@ -18508,7 +18667,7 @@ export namespace Prisma {
      * })
      * 
      */
-    update<T extends patch_commentUpdateArgs>(args: SelectSubset<T, patch_commentUpdateArgs<ExtArgs>>): Prisma__patch_commentClient<$Result.GetResult<Prisma.$patch_commentPayload<ExtArgs>, T, "update", ClientOptions>, never, ExtArgs, ClientOptions>
+    update<T extends patch_commentUpdateArgs>(args: SelectSubset<T, patch_commentUpdateArgs<ExtArgs>>): Prisma__patch_commentClient<$Result.GetResult<Prisma.$patch_commentPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Delete zero or more Patch_comments.
@@ -18571,7 +18730,7 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * 
      */
-    updateManyAndReturn<T extends patch_commentUpdateManyAndReturnArgs>(args: SelectSubset<T, patch_commentUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$patch_commentPayload<ExtArgs>, T, "updateManyAndReturn", ClientOptions>>
+    updateManyAndReturn<T extends patch_commentUpdateManyAndReturnArgs>(args: SelectSubset<T, patch_commentUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$patch_commentPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one Patch_comment.
@@ -18590,7 +18749,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    upsert<T extends patch_commentUpsertArgs>(args: SelectSubset<T, patch_commentUpsertArgs<ExtArgs>>): Prisma__patch_commentClient<$Result.GetResult<Prisma.$patch_commentPayload<ExtArgs>, T, "upsert", ClientOptions>, never, ExtArgs, ClientOptions>
+    upsert<T extends patch_commentUpsertArgs>(args: SelectSubset<T, patch_commentUpsertArgs<ExtArgs>>): Prisma__patch_commentClient<$Result.GetResult<Prisma.$patch_commentPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
 
     /**
@@ -18730,13 +18889,13 @@ export namespace Prisma {
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
-  export interface Prisma__patch_commentClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> extends Prisma.PrismaPromise<T> {
+  export interface Prisma__patch_commentClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    like_by<T extends patch_comment$like_byArgs<ExtArgs> = {}>(args?: Subset<T, patch_comment$like_byArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$user_patch_comment_like_relationPayload<ExtArgs>, T, "findMany", ClientOptions> | Null>
-    reply<T extends patch_comment$replyArgs<ExtArgs> = {}>(args?: Subset<T, patch_comment$replyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$patch_commentPayload<ExtArgs>, T, "findMany", ClientOptions> | Null>
-    parent<T extends patch_comment$parentArgs<ExtArgs> = {}>(args?: Subset<T, patch_comment$parentArgs<ExtArgs>>): Prisma__patch_commentClient<$Result.GetResult<Prisma.$patch_commentPayload<ExtArgs>, T, "findUniqueOrThrow", ClientOptions> | null, null, ExtArgs, ClientOptions>
-    user<T extends userDefaultArgs<ExtArgs> = {}>(args?: Subset<T, userDefaultArgs<ExtArgs>>): Prisma__userClient<$Result.GetResult<Prisma.$userPayload<ExtArgs>, T, "findUniqueOrThrow", ClientOptions> | Null, Null, ExtArgs, ClientOptions>
-    patch<T extends patchDefaultArgs<ExtArgs> = {}>(args?: Subset<T, patchDefaultArgs<ExtArgs>>): Prisma__patchClient<$Result.GetResult<Prisma.$patchPayload<ExtArgs>, T, "findUniqueOrThrow", ClientOptions> | Null, Null, ExtArgs, ClientOptions>
+    like_by<T extends patch_comment$like_byArgs<ExtArgs> = {}>(args?: Subset<T, patch_comment$like_byArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$user_patch_comment_like_relationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    reply<T extends patch_comment$replyArgs<ExtArgs> = {}>(args?: Subset<T, patch_comment$replyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$patch_commentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    parent<T extends patch_comment$parentArgs<ExtArgs> = {}>(args?: Subset<T, patch_comment$parentArgs<ExtArgs>>): Prisma__patch_commentClient<$Result.GetResult<Prisma.$patch_commentPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    user<T extends userDefaultArgs<ExtArgs> = {}>(args?: Subset<T, userDefaultArgs<ExtArgs>>): Prisma__userClient<$Result.GetResult<Prisma.$userPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    patch<T extends patchDefaultArgs<ExtArgs> = {}>(args?: Subset<T, patchDefaultArgs<ExtArgs>>): Prisma__patchClient<$Result.GetResult<Prisma.$patchPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -18764,7 +18923,7 @@ export namespace Prisma {
 
   /**
    * Fields of the patch_comment model
-   */ 
+   */
   interface patch_commentFieldRefs {
     readonly id: FieldRef<"patch_comment", 'Int'>
     readonly content: FieldRef<"patch_comment", 'String'>
@@ -19067,6 +19226,10 @@ export namespace Prisma {
      * Filter which patch_comments to update
      */
     where?: patch_commentWhereInput
+    /**
+     * Limit how many patch_comments to update.
+     */
+    limit?: number
   }
 
   /**
@@ -19089,6 +19252,10 @@ export namespace Prisma {
      * Filter which patch_comments to update
      */
     where?: patch_commentWhereInput
+    /**
+     * Limit how many patch_comments to update.
+     */
+    limit?: number
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -19155,6 +19322,10 @@ export namespace Prisma {
      * Filter which patch_comments to delete
      */
     where?: patch_commentWhereInput
+    /**
+     * Limit how many patch_comments to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -19746,7 +19917,7 @@ export namespace Prisma {
       select?: Patch_characterCountAggregateInputType | true
     }
 
-  export interface patch_characterDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> {
+  export interface patch_characterDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
     [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['patch_character'], meta: { name: 'patch_character' } }
     /**
      * Find zero or one Patch_character that matches the filter.
@@ -19759,7 +19930,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUnique<T extends patch_characterFindUniqueArgs>(args: SelectSubset<T, patch_characterFindUniqueArgs<ExtArgs>>): Prisma__patch_characterClient<$Result.GetResult<Prisma.$patch_characterPayload<ExtArgs>, T, "findUnique", ClientOptions> | null, null, ExtArgs, ClientOptions>
+    findUnique<T extends patch_characterFindUniqueArgs>(args: SelectSubset<T, patch_characterFindUniqueArgs<ExtArgs>>): Prisma__patch_characterClient<$Result.GetResult<Prisma.$patch_characterPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find one Patch_character that matches the filter or throw an error with `error.code='P2025'`
@@ -19773,7 +19944,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUniqueOrThrow<T extends patch_characterFindUniqueOrThrowArgs>(args: SelectSubset<T, patch_characterFindUniqueOrThrowArgs<ExtArgs>>): Prisma__patch_characterClient<$Result.GetResult<Prisma.$patch_characterPayload<ExtArgs>, T, "findUniqueOrThrow", ClientOptions>, never, ExtArgs, ClientOptions>
+    findUniqueOrThrow<T extends patch_characterFindUniqueOrThrowArgs>(args: SelectSubset<T, patch_characterFindUniqueOrThrowArgs<ExtArgs>>): Prisma__patch_characterClient<$Result.GetResult<Prisma.$patch_characterPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find the first Patch_character that matches the filter.
@@ -19788,7 +19959,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirst<T extends patch_characterFindFirstArgs>(args?: SelectSubset<T, patch_characterFindFirstArgs<ExtArgs>>): Prisma__patch_characterClient<$Result.GetResult<Prisma.$patch_characterPayload<ExtArgs>, T, "findFirst", ClientOptions> | null, null, ExtArgs, ClientOptions>
+    findFirst<T extends patch_characterFindFirstArgs>(args?: SelectSubset<T, patch_characterFindFirstArgs<ExtArgs>>): Prisma__patch_characterClient<$Result.GetResult<Prisma.$patch_characterPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find the first Patch_character that matches the filter or
@@ -19804,7 +19975,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirstOrThrow<T extends patch_characterFindFirstOrThrowArgs>(args?: SelectSubset<T, patch_characterFindFirstOrThrowArgs<ExtArgs>>): Prisma__patch_characterClient<$Result.GetResult<Prisma.$patch_characterPayload<ExtArgs>, T, "findFirstOrThrow", ClientOptions>, never, ExtArgs, ClientOptions>
+    findFirstOrThrow<T extends patch_characterFindFirstOrThrowArgs>(args?: SelectSubset<T, patch_characterFindFirstOrThrowArgs<ExtArgs>>): Prisma__patch_characterClient<$Result.GetResult<Prisma.$patch_characterPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find zero or more Patch_characters that matches the filter.
@@ -19822,7 +19993,7 @@ export namespace Prisma {
      * const patch_characterWithIdOnly = await prisma.patch_character.findMany({ select: { id: true } })
      * 
      */
-    findMany<T extends patch_characterFindManyArgs>(args?: SelectSubset<T, patch_characterFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$patch_characterPayload<ExtArgs>, T, "findMany", ClientOptions>>
+    findMany<T extends patch_characterFindManyArgs>(args?: SelectSubset<T, patch_characterFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$patch_characterPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
 
     /**
      * Create a Patch_character.
@@ -19836,7 +20007,7 @@ export namespace Prisma {
      * })
      * 
      */
-    create<T extends patch_characterCreateArgs>(args: SelectSubset<T, patch_characterCreateArgs<ExtArgs>>): Prisma__patch_characterClient<$Result.GetResult<Prisma.$patch_characterPayload<ExtArgs>, T, "create", ClientOptions>, never, ExtArgs, ClientOptions>
+    create<T extends patch_characterCreateArgs>(args: SelectSubset<T, patch_characterCreateArgs<ExtArgs>>): Prisma__patch_characterClient<$Result.GetResult<Prisma.$patch_characterPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Create many Patch_characters.
@@ -19874,7 +20045,7 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * 
      */
-    createManyAndReturn<T extends patch_characterCreateManyAndReturnArgs>(args?: SelectSubset<T, patch_characterCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$patch_characterPayload<ExtArgs>, T, "createManyAndReturn", ClientOptions>>
+    createManyAndReturn<T extends patch_characterCreateManyAndReturnArgs>(args?: SelectSubset<T, patch_characterCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$patch_characterPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Delete a Patch_character.
@@ -19888,7 +20059,7 @@ export namespace Prisma {
      * })
      * 
      */
-    delete<T extends patch_characterDeleteArgs>(args: SelectSubset<T, patch_characterDeleteArgs<ExtArgs>>): Prisma__patch_characterClient<$Result.GetResult<Prisma.$patch_characterPayload<ExtArgs>, T, "delete", ClientOptions>, never, ExtArgs, ClientOptions>
+    delete<T extends patch_characterDeleteArgs>(args: SelectSubset<T, patch_characterDeleteArgs<ExtArgs>>): Prisma__patch_characterClient<$Result.GetResult<Prisma.$patch_characterPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Update one Patch_character.
@@ -19905,7 +20076,7 @@ export namespace Prisma {
      * })
      * 
      */
-    update<T extends patch_characterUpdateArgs>(args: SelectSubset<T, patch_characterUpdateArgs<ExtArgs>>): Prisma__patch_characterClient<$Result.GetResult<Prisma.$patch_characterPayload<ExtArgs>, T, "update", ClientOptions>, never, ExtArgs, ClientOptions>
+    update<T extends patch_characterUpdateArgs>(args: SelectSubset<T, patch_characterUpdateArgs<ExtArgs>>): Prisma__patch_characterClient<$Result.GetResult<Prisma.$patch_characterPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Delete zero or more Patch_characters.
@@ -19968,7 +20139,7 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * 
      */
-    updateManyAndReturn<T extends patch_characterUpdateManyAndReturnArgs>(args: SelectSubset<T, patch_characterUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$patch_characterPayload<ExtArgs>, T, "updateManyAndReturn", ClientOptions>>
+    updateManyAndReturn<T extends patch_characterUpdateManyAndReturnArgs>(args: SelectSubset<T, patch_characterUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$patch_characterPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one Patch_character.
@@ -19987,7 +20158,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    upsert<T extends patch_characterUpsertArgs>(args: SelectSubset<T, patch_characterUpsertArgs<ExtArgs>>): Prisma__patch_characterClient<$Result.GetResult<Prisma.$patch_characterPayload<ExtArgs>, T, "upsert", ClientOptions>, never, ExtArgs, ClientOptions>
+    upsert<T extends patch_characterUpsertArgs>(args: SelectSubset<T, patch_characterUpsertArgs<ExtArgs>>): Prisma__patch_characterClient<$Result.GetResult<Prisma.$patch_characterPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
 
     /**
@@ -20127,12 +20298,12 @@ export namespace Prisma {
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
-  export interface Prisma__patch_characterClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> extends Prisma.PrismaPromise<T> {
+  export interface Prisma__patch_characterClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    original<T extends patch_character$originalArgs<ExtArgs> = {}>(args?: Subset<T, patch_character$originalArgs<ExtArgs>>): Prisma__patch_characterClient<$Result.GetResult<Prisma.$patch_characterPayload<ExtArgs>, T, "findUniqueOrThrow", ClientOptions> | null, null, ExtArgs, ClientOptions>
-    new_versions<T extends patch_character$new_versionsArgs<ExtArgs> = {}>(args?: Subset<T, patch_character$new_versionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$patch_characterPayload<ExtArgs>, T, "findMany", ClientOptions> | Null>
-    user<T extends userDefaultArgs<ExtArgs> = {}>(args?: Subset<T, userDefaultArgs<ExtArgs>>): Prisma__userClient<$Result.GetResult<Prisma.$userPayload<ExtArgs>, T, "findUniqueOrThrow", ClientOptions> | Null, Null, ExtArgs, ClientOptions>
-    patch<T extends patchDefaultArgs<ExtArgs> = {}>(args?: Subset<T, patchDefaultArgs<ExtArgs>>): Prisma__patchClient<$Result.GetResult<Prisma.$patchPayload<ExtArgs>, T, "findUniqueOrThrow", ClientOptions> | Null, Null, ExtArgs, ClientOptions>
+    original<T extends patch_character$originalArgs<ExtArgs> = {}>(args?: Subset<T, patch_character$originalArgs<ExtArgs>>): Prisma__patch_characterClient<$Result.GetResult<Prisma.$patch_characterPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    new_versions<T extends patch_character$new_versionsArgs<ExtArgs> = {}>(args?: Subset<T, patch_character$new_versionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$patch_characterPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    user<T extends userDefaultArgs<ExtArgs> = {}>(args?: Subset<T, userDefaultArgs<ExtArgs>>): Prisma__userClient<$Result.GetResult<Prisma.$userPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    patch<T extends patchDefaultArgs<ExtArgs> = {}>(args?: Subset<T, patchDefaultArgs<ExtArgs>>): Prisma__patchClient<$Result.GetResult<Prisma.$patchPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -20160,7 +20331,7 @@ export namespace Prisma {
 
   /**
    * Fields of the patch_character model
-   */ 
+   */
   interface patch_characterFieldRefs {
     readonly id: FieldRef<"patch_character", 'Int'>
     readonly name: FieldRef<"patch_character", 'String'>
@@ -20479,6 +20650,10 @@ export namespace Prisma {
      * Filter which patch_characters to update
      */
     where?: patch_characterWhereInput
+    /**
+     * Limit how many patch_characters to update.
+     */
+    limit?: number
   }
 
   /**
@@ -20501,6 +20676,10 @@ export namespace Prisma {
      * Filter which patch_characters to update
      */
     where?: patch_characterWhereInput
+    /**
+     * Limit how many patch_characters to update.
+     */
+    limit?: number
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -20567,6 +20746,10 @@ export namespace Prisma {
      * Filter which patch_characters to delete
      */
     where?: patch_characterWhereInput
+    /**
+     * Limit how many patch_characters to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -20908,7 +21091,7 @@ export namespace Prisma {
 
 
   /**
-   * Field references 
+   * Field references
    */
 
 

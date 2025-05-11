@@ -14,7 +14,7 @@
     "lint": "next lint",
     "lint:fix": "next lint --fix",
     "prisma:push": "pnpx prisma db push",
-    "prisma:generate": "pnpx prisma generate",
+    "prisma:generate": "pnpx prisma generate && mkdir -p .prisma/client",
     "start": "pm2 start ecosystem.config.js",
     "stop": "pm2 delete kun-galgamex-next",
     "deploy:install": "esno scripts/deployInstall.ts",

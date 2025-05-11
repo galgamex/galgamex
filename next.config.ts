@@ -66,6 +66,7 @@ const nextConfig: NextConfig = {
     config.resolve.alias = {
       ...config.resolve.alias,
       '@': path.resolve(__dirname),
+      '@prisma/client': path.resolve(__dirname, 'prisma/client-adapter.ts'),
     }
 
     if (!dev && !isServer) {
