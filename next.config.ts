@@ -55,6 +55,10 @@ const nextConfig: NextConfig = {
     serverActions: {
       allowedOrigins: ["www.galgamex.net", "www.galgamex.net:443"]
     },
+    skipTrailingSlashRedirect: true,
+    skipMiddlewareUrlNormalize: true,
+    clientRouterFilter: false,
+    strictNextHead: false,
     optimizePackageImports: [
       '@nextui-org/react',
       '@tabler/icons-react',

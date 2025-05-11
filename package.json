@@ -8,6 +8,7 @@
     "dev:webpack": "next dev --hostname=127.0.0.1 --port=3000",
     "dev": "next dev --turbo --hostname=127.0.0.1 --port=3000",
     "build": "next build",
+    "build:clean": "esno scripts/cleanBuild.ts",
     "build:sitemap": "esno scripts/generateKunSitemap.ts",
     "postbuild": "esno scripts/postbuild.ts",
     "format": "prettier . --write",
@@ -16,7 +17,7 @@
     "prisma:push": "pnpx prisma db push",
     "prisma:generate": "pnpx prisma generate",
     "start": "pm2 start ecosystem.config.js",
-    "stop": "pm2 delete kun-galgamex-next",
+    "stop": "pm2 delete kun-galgamex-next || true",
     "deploy:install": "esno scripts/deployInstall.ts",
     "deploy:build": "esno scripts/deployBuild.ts"
   },

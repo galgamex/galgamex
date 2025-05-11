@@ -23,13 +23,25 @@ const KunFooter = dynamic(() => import('~/components/kun/Footer').then(mod => mo
 export const viewport: Viewport = kunViewport
 export const metadata: Metadata = generateKunMetadata()
 
+// 定义应用的HTML属性
+export const generateHtmlAttributes = () => {
+  return {
+    lang: 'zh-Hans',
+    suppressHydrationWarning: true
+  }
+}
+
+export const generateBodyAttributes = () => {
+  return {}
+}
+
 export default function RootLayout({
   children
 }: {
   children: React.ReactNode
 }) {
   return (
-    <html lang="zh-Hans" suppressHydrationWarning>
+    <>
       {process.env.KUN_VISUAL_NOVEL_TEST_SITE_LABEL && (
         <head>
           <meta name="robots" content="noindex,nofollow" />
@@ -37,20 +49,18 @@ export default function RootLayout({
         </head>
       )}
 
-      <body>
-        <Providers>
-          <div className="relative flex flex-col items-center justify-center min-h-screen bg-radial">
-            <KunTopBar />
-            <KunNavigationBreadcrumb />
-            <div className="flex min-h-[calc(100dvh-256px)] w-full max-w-[1500px] grow px-1.5 sm:px-6">
-              {children}
-              <ToasterWrapper />
-            </div>
-            <KunBackToTop />
-            <KunFooter />
+      <Providers>
+        <div className="relative flex flex-col items-center justify-center min-h-screen bg-radial">
+          <KunTopBar />
+          <KunNavigationBreadcrumb />
+          <div className="flex min-h-[calc(100dvh-256px)] w-full max-w-[1500px] grow px-1.5 sm:px-6">
+            {children}
+            <ToasterWrapper />
           </div>
-        </Providers>
-      </body>
-    </html>
+          <KunBackToTop />
+          <KunFooter />
+        </div>
+      </Providers>
+    </>
   )
 }

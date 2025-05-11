@@ -12,38 +12,55 @@ if (!fs.existsSync(envPath)) {
 
 config({ path: envPath })
 
-try {
-  envSchema.safeParse(process.env)
+// 安全执行命令，允许失败并继续
+const safeExecSync = (command: string, description: string, allowFail = false) => {
+  try {
+    console.log(`\n==== 执行${description} ====`)
+    execSync(command, { stdio: 'inherit' })
+    console.log(`==== ${description}完成 ====\n`)
+    return true
+  } catch (error) {
+    console.error(`==== ${description}失败 ====`)
+    console.error(error)
+    if (!allowFail) throw error
+    console.log(`==== 忽略${description}错误，继续执行 ====\n`)
+    return false
+  }
+}
 
-  console.log('Environment variables are valid.')
-  console.log('Executing the commands...')
+try {
+  const envParseResult = envSchema.safeParse(process.env)
+  if (!envParseResult.success) {
+    console.error('环境变量验证失败:', envParseResult.error)
+    process.exit(1)
+  }
+
+  console.log('环境变量验证通过.')
+  console.log('开始执行部署流程...')
 
   if (process.env.KUN_VISUAL_NOVEL_TEST_SITE_LABEL) {
-    console.log('DANGEROUS❗❗❗❗❗❗❗❗❗❗❗❗❗❗❗')
-    console.log(
-      'You website is running on a test environment now, it will be disable any search engine indexing!'
-    )
+    console.log('⚠️ 警告: 测试环境 ⚠️')
+    console.log('网站运行在测试环境中，将禁用搜索引擎索引!')
   }
 
-  // 执行git pull
-  execSync('git pull', { stdio: 'inherit' })
+  // 尝试拉取最新代码，允许失败
+  safeExecSync('git pull', 'Git代码拉取', true)
 
-  // 执行prisma数据库推送
-  execSync('pnpm prisma:push', { stdio: 'inherit' })
+  // 执行数据库迁移
+  safeExecSync('pnpm prisma:push', '数据库迁移')
 
-  // 构建应用
-  execSync('pnpm build', { stdio: 'inherit' })
+  // 清理构建
+  safeExecSync('pnpm build:clean', '清理构建')
 
-  // 尝试停止已存在的PM2进程，忽略错误
-  try {
-    execSync('pnpm stop', { stdio: 'inherit' })
-  } catch (error) {
-    console.log('No existing process found or failed to stop, continuing with startup...')
-  }
+  // 尝试停止已存在的PM2进程，允许失败
+  safeExecSync('pnpm stop', 'PM2进程停止', true)
 
   // 启动应用
-  execSync('pnpm start', { stdio: 'inherit' })
+  safeExecSync('pnpm start', '应用启动')
+
+  console.log('✅ 部署完成!\n')
 } catch (e) {
-  console.error('Invalid environment variables')
+  console.error('❌ 部署失败!')
+  console.error(e)
   process.exit(1)
 }
