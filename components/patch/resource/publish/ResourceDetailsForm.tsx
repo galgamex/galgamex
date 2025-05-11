@@ -9,11 +9,11 @@ import {
   SUPPORTED_PLATFORM_MAP
 } from '~/constants/resource'
 import { useUserStore } from '~/store/userStore'
-import type { Control, FieldErrors } from 'react-hook-form'
+import type { ControlType, ErrorType } from '../share'
 
 interface ResourceDetailsFormProps {
-  control: Control<any>
-  errors: FieldErrors
+  control: ControlType
+  errors: ErrorType
   section?: string
 }
 
@@ -188,8 +188,8 @@ export const ResourceDetailsForm = ({
             {...field}
             label="资源名称"
             placeholder="请填写您的资源名称, 例如 DeepSeek V3 翻译补丁"
-            isInvalid={!!errors.note}
-            errorMessage={errors.note?.message}
+            isInvalid={!!errors.name}
+            errorMessage={errors.name?.message}
           />
         )}
       />
@@ -202,8 +202,8 @@ export const ResourceDetailsForm = ({
             {...field}
             label="提取码"
             placeholder="如果资源的获取需要密码, 请填写密码"
-            isInvalid={!!errors.password}
-            errorMessage={errors.password?.message}
+            isInvalid={!!errors.code}
+            errorMessage={errors.code?.message}
           />
         )}
       />
@@ -216,8 +216,8 @@ export const ResourceDetailsForm = ({
             {...field}
             label="解压码"
             placeholder="如果资源的解压需要解压码, 请填写解压码"
-            isInvalid={!!errors.code}
-            errorMessage={errors.code?.message}
+            isInvalid={!!errors.password}
+            errorMessage={errors.password?.message}
           />
         )}
       />

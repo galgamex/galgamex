@@ -15,6 +15,7 @@ interface Fields {
   note: string
   language: string[]
   platform: string[]
+  status: number
 }
 
 export interface FileStatus {

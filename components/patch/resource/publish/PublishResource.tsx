@@ -25,8 +25,9 @@ import { FileUploadContainer } from '../upload/FileUploadContainer'
 import { kunErrorHandler } from '~/utils/kunErrorHandler'
 import { useUserStore } from '~/store/userStore'
 import type { PatchResource } from '~/types/api/patch'
+import type { Fields } from '../share'
 
-export type ResourceFormData = z.infer<typeof patchResourceCreateSchema>
+export type ResourceFormData = Fields
 
 interface CreateResourceProps {
   patchId: number
@@ -79,9 +80,10 @@ export const PublishResource = ({
 
   const handleRewriteResource = async () => {
     setCreating(true)
+    const formData = watch();
     const res = await kunFetchPost<KunResponse<PatchResource>>(
       '/patch/resource',
-      watch()
+      formData as unknown as Record<string, unknown>
     )
     setCreating(false)
     kunErrorHandler(res, (value) => {

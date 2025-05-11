@@ -1,14 +1,10 @@
 'use client'
 
-import { z } from 'zod'
 import { Controller } from 'react-hook-form'
 import { Select, SelectItem } from '@nextui-org/select'
-import { patchResourceCreateSchema } from '~/validations/patch'
 import { useUserStore } from '~/store/userStore'
 import { storageTypes } from '~/constants/resource'
 import type { ControlType, ErrorType } from '../share'
-
-export type ResourceFormData = z.infer<typeof patchResourceCreateSchema>
 
 interface Props {
   section: string
