@@ -50,7 +50,7 @@ const nextConfig: NextConfig = {
     removeConsole: process.env.NODE_ENV === 'production' ? { exclude: ['error', 'warn'] } : false,
   },
   experimental: {
-    optimizeCss: true,
+    optimizeCss: false,
     serverActions: {
       allowedOrigins: ["www.galgamex.net", "www.galgamex.net:443"]
     },

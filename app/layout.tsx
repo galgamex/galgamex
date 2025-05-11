@@ -4,6 +4,7 @@ import { generateKunMetadata, kunViewport } from './metadata'
 import type { Metadata, Viewport } from 'next'
 import '~/styles/index.scss'
 import './actions'
+import { ToasterWrapper } from '~/components/toaster/ToasterWrapper'
 
 // 动态导入组件以解决生产环境中的类型错误
 const KunTopBar = dynamic(() => import('~/components/kun/top-bar/TopBar').then(mod => mod.KunTopBar), {
@@ -17,11 +18,6 @@ const KunBackToTop = dynamic(() => import('~/components/kun/BackToTop').then(mod
 })
 const KunFooter = dynamic(() => import('~/components/kun/Footer').then(mod => mod.KunFooter), {
   ssr: true
-})
-
-// 动态导入 Toaster 组件
-const Toaster = dynamic(() => import('react-hot-toast').then(mod => mod.Toaster), {
-  ssr: false
 })
 
 export const viewport: Viewport = kunViewport
@@ -48,7 +44,7 @@ export default function RootLayout({
             <KunNavigationBreadcrumb />
             <div className="flex min-h-[calc(100dvh-256px)] w-full max-w-[1500px] grow px-1.5 sm:px-6">
               {children}
-              <Toaster />
+              <ToasterWrapper />
             </div>
             <KunBackToTop />
             <KunFooter />
