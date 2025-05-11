@@ -50,13 +50,17 @@ const nextConfig: NextConfig = {
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production' ? { exclude: ['error', 'warn'] } : false,
   },
+
+  // 从experimental中移出到根级别
+  skipTrailingSlashRedirect: true,
+  skipMiddlewareUrlNormalize: true,
+
   experimental: {
     optimizeCss: false,
     serverActions: {
       allowedOrigins: ["www.galgamex.net", "www.galgamex.net:443"]
     },
-    skipTrailingSlashRedirect: true,
-    skipMiddlewareUrlNormalize: true,
+    // 这些选项保留在experimental中
     clientRouterFilter: false,
     strictNextHead: false,
     optimizePackageImports: [
