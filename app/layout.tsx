@@ -1,4 +1,3 @@
-import { Toaster } from 'react-hot-toast'
 import { Providers } from './providers'
 import dynamic from 'next/dynamic'
 import { generateKunMetadata, kunViewport } from './metadata'
@@ -18,6 +17,11 @@ const KunBackToTop = dynamic(() => import('~/components/kun/BackToTop').then(mod
 })
 const KunFooter = dynamic(() => import('~/components/kun/Footer').then(mod => mod.KunFooter), {
   ssr: true
+})
+
+// 动态导入 Toaster 组件
+const Toaster = dynamic(() => import('react-hot-toast').then(mod => mod.Toaster), {
+  ssr: false
 })
 
 export const viewport: Viewport = kunViewport
