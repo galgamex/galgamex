@@ -77,6 +77,7 @@ export interface FloatingCardUser {
     follower: number
     patch: number
     patch_resource: number
+    patch_character: number
   }
 }
 

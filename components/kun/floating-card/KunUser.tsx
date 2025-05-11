@@ -5,6 +5,12 @@ import { User } from '@nextui-org/user'
 import { useRouter } from 'next-nprogress-bar'
 import { KunUserCard } from './KunUserCard'
 import type { UserProps } from '@nextui-org/user'
+import React from 'react'
+
+export interface KunUser {
+  id: number;
+  name: string;
+}
 
 interface KunUserProps {
   user: KunUser
@@ -31,7 +37,7 @@ export const KunUser = ({ user, userProps }: KunUserProps) => {
     >
       <User
         {...restUser}
-        onClick={(event) => {
+        onPress={(event: React.SyntheticEvent) => {
           event.preventDefault()
           event.stopPropagation()
           router.push(`/user/${user.id}/resource`)

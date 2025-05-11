@@ -39,13 +39,13 @@ const nextConfig: NextConfig = {
         pathname: '/**'
       }
     ],
-    formats: ['image/avif', 'image/webp'],
+
     minimumCacheTTL: 60 * 60 * 24 * 7,
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
   },
 
   output: 'standalone',
-  swcMinify: true,
+
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production' ? { exclude: ['error', 'warn'] } : false,
   },
