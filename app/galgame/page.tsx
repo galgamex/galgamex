@@ -115,7 +115,7 @@ export default async function Kun({ searchParams }: Props) {
             <div className="w-full max-w-[1500px] grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 p-4">
               {Array(12).fill(0).map((_, i) => (
                 <div key={i} className="w-full">
-                  <div className="w-full bg-default-200 animate-pulse" style={{ aspectRatio: '2/3' }}></div>
+                  <div className="w-full bg-default-200 animate-pulse" style={{ aspectRatio: '4/6' }}></div>
                   <div className="h-6 w-3/4 bg-default-200 animate-pulse mt-2 rounded-sm"></div>
                 </div>
               ))}
