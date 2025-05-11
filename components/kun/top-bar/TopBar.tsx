@@ -34,13 +34,13 @@ export const KunTopBar = () => {
         menu: 'bg-background/80 backdrop-blur-md'
       }}
     >
-      <NavbarContent className="lg:hidden" justify="start">
+      <NavbarContent className="sm:hidden" justify="start">
         <NavbarMenuToggle className="text-foreground/80 hover:text-foreground" />
       </NavbarContent>
 
       <KunTopBarBrand />
 
-      <NavbarContent className="hidden gap-6 lg:flex">
+      <NavbarContent className="hidden gap-6 sm:flex">
         {kunNavItem.map((item) => (
           <NavbarItem key={item.href} isActive={pathname === item.href}>
             <Link
