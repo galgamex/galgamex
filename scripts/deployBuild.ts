@@ -25,10 +25,6 @@ try {
     )
   }
 
-  // 执行部署构建前的修复脚本
-  console.log('Running deployment build fix script...')
-  execSync('node scripts/deployBuildFix.js', { stdio: 'inherit' })
-
   execSync(
     'git pull && pnpm prisma:push && pnpm build && pnpm stop && pnpm start',
     { stdio: 'inherit' }

@@ -1,4 +1,4 @@
-import { PrismaClient } from '../prisma/generated/client'
+import { PrismaClient } from '@prisma/client'
 
 // 创建Prisma客户端单例
 const globalForPrisma = global as unknown as { prisma: PrismaClient }

@@ -44,7 +44,8 @@ const nextConfig: NextConfig = {
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
   },
 
-  output: 'standalone',
+  // 注释掉standalone输出以避免Windows环境下的符号链接权限问题
+  // output: 'standalone',
 
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production' ? { exclude: ['error', 'warn'] } : false,
@@ -66,7 +67,6 @@ const nextConfig: NextConfig = {
     config.resolve.alias = {
       ...config.resolve.alias,
       '@': path.resolve(__dirname),
-      '@prisma/client': path.resolve(__dirname, 'prisma/client-adapter.ts'),
     }
 
     if (!dev && !isServer) {
