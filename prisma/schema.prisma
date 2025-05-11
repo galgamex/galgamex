@@ -233,7 +233,7 @@ model patch_resource {
   language String[]
   platform String[]
   download Int      @default(0)
-  status   Int      @default(0)
+  status   Int      @default(0)  // 0 - 正常可下载; 1 - 仅备份不可下载; 2 - 其他状态
 
   like_by user_patch_resource_like_relation[]
 

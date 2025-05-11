@@ -74,7 +74,7 @@ export const IntroductionTab = ({ intro, patchId }: Props) => {
         return
       }
       const root = document.createElement('div')
-      root.className = element.className
+      root.className = 'max-w-xl ml-0 my-6 py-1 px-2 md:px-0 overflow-hidden shadow-md rounded-xl'
       element.replaceWith(root)
       const videoRoot = createRoot(root)
       videoRoot.render(<KunPlyr src={src} />)

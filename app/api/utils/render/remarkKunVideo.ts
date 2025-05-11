@@ -19,7 +19,7 @@ export const remarkKunVideo: Plugin<[], Node> = () => {
         data.hProperties = {
           'data-video-player': '',
           'data-src': attributes.src,
-          className: 'w-full my-4 overflow-hidden shadow-lg rounded-xl'
+          className: 'max-w-xl ml-0 my-6 py-1 px-2 md:px-0 overflow-hidden shadow-md rounded-xl'
         }
       }
     })

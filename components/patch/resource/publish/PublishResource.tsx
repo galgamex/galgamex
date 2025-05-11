@@ -72,7 +72,8 @@ export const PublishResource = ({
       platform: [],
       size: '',
       password: '',
-      note: ''
+      note: '',
+      status: 0
     }
   })
 

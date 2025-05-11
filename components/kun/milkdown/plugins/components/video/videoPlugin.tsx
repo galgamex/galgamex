@@ -38,7 +38,7 @@ export const videoNode = $node('kun-video', () => ({
     container.setAttribute('data-video-player', '')
     container.setAttribute('data-src', node.attrs.src)
     container.setAttribute('contenteditable', 'false')
-    container.className = 'w-full my-4 overflow-hidden shadow-lg rounded-xl'
+    container.className = 'max-w-xl ml-0 my-6 py-1 px-2 md:px-0 overflow-hidden shadow-md rounded-xl'
 
     const root = createRoot(container)
     root.render(<KunPlyr src={node.attrs.src} />)
@@ -70,18 +70,18 @@ export const insertKunVideoCommand = $command(
   'InsertKunVideo',
   (ctx) =>
     (payload: InsertKunVideoCommandPayload = { src: '' }) =>
-    (state, dispatch) => {
-      if (!dispatch) {
+      (state, dispatch) => {
+        if (!dispatch) {
+          return true
+        }
+        const { src = '' } = payload
+        const node = videoNode.type(ctx).create({ src })
+        if (!node) {
+          return true
+        }
+        dispatch(state.tr.replaceSelectionWith(node).scrollIntoView())
         return true
       }
-      const { src = '' } = payload
-      const node = videoNode.type(ctx).create({ src })
-      if (!node) {
-        return true
-      }
-      dispatch(state.tr.replaceSelectionWith(node).scrollIntoView())
-      return true
-    }
 )
 
 export const videoInputRule = $inputRule(

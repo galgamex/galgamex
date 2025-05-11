@@ -41,8 +41,10 @@ export const KunPlyr = ({ src, className = '' }: VideoPlayerProps) => {
   }, [])
 
   return (
-    <video ref={videoRef} className={`plyr-react ${className}`} playsInline>
-      <source src={src} type="video/mp4" />
-    </video>
+    <div className="w-full max-w-xl ml-0 px-2 md:px-0">
+      <video ref={videoRef} className={`plyr-react ${className}`} playsInline>
+        <source src={src} type="video/mp4" />
+      </video>
+    </div>
   )
 }

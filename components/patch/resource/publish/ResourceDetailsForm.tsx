@@ -8,12 +8,12 @@ import {
   SUPPORTED_PLATFORM,
   SUPPORTED_PLATFORM_MAP
 } from '~/constants/resource'
-import { ControlType, ErrorType } from '../share'
 import { useUserStore } from '~/store/userStore'
+import type { Control, FieldErrors } from 'react-hook-form'
 
 interface ResourceDetailsFormProps {
-  control: ControlType
-  errors: ErrorType
+  control: Control<any>
+  errors: FieldErrors
   section?: string
 }
 
@@ -37,6 +37,20 @@ export const ResourceDetailsForm = ({
     // 其他用户显示所有选项
     return true;
   });
+
+  // 资源状态选项
+  const resourceStatusOptions = [
+    {
+      value: 0,
+      label: '正常可下载',
+      description: '用户可以查看并下载此资源'
+    },
+    {
+      value: 1,
+      label: '仅备份不可下载',
+      description: '仅作备份用途，用户无法下载'
+    }
+  ];
 
   return (
     <div className="space-y-2">
@@ -137,6 +151,34 @@ export const ResourceDetailsForm = ({
           )}
         />
       </div>
+
+      {user.role >= 2 && (
+        <Controller
+          name="status"
+          control={control}
+          render={({ field }) => (
+            <Select
+              label="资源下载状态"
+              placeholder="请选择资源是否可以下载"
+              selectedKeys={[String(field.value || 0)]}
+              onChange={(e) => field.onChange(Number(e.target.value))}
+              isInvalid={!!errors.status}
+              errorMessage={errors.status?.message}
+            >
+              {resourceStatusOptions.map((status) => (
+                <SelectItem key={String(status.value)} textValue={status.label} value={status.value}>
+                  <div className="flex flex-col">
+                    <span className="text">{status.label}</span>
+                    <span className="text-small text-default-500">
+                      {status.description}
+                    </span>
+                  </div>
+                </SelectItem>
+              ))}
+            </Select>
+          )}
+        />
+      )}
 
       <Controller
         name="name"

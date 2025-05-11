@@ -59,6 +59,7 @@ export const patchResourceCreateSchema = z.object({
   code: z.string().trim().max(1007, { message: '资源提取码长度最多 1007 位' }),
   password: z.string().max(1007, { message: '资源解压码长度最多 1007 位' }),
   note: z.string().max(10007, { message: '资源备注最多 10007 字' }),
+  status: z.number().int().min(0).max(1).optional().default(0),
   type: z
     .array(z.string())
     .min(1, { message: '请选择至少一个资源类型' })

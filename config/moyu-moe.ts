@@ -8,10 +8,10 @@ const KUN_SITE_IMAGE =
   'https://img.galgamexstatic.org/uploads/20241217174250074.avif'
 const KUN_SITE_DESCRIPTION =
   'Galgamex 是一个一站式 Galgame 文化社区。提供Galgame 论坛、Galgame 下载等服务。承诺永久免费, 高质量。为Galgame 爱好者提供一片净土！'
-const KUN_SITE_URL = 'https://www.galgamex.io'
+const KUN_SITE_URL = 'https://www.galgamex.net'
 const KUN_SITE_ARCHIVE = 'https://archive.galgamex.co/'
 const KUN_SITE_FORUM = 'https://t.me/galgamex'
-const KUN_SITE_NAV = 'https://gal.red'
+const KUN_SITE_NAV = 'https://galgamex.com'
 const KUN_SITE_TELEGRAM_GROUP = 'https://t.me/galgamex'
 const KUN_SITE_LIST = [
   { name: KUN_SITE_NAME, url: 'https://www.galgamex.net' },

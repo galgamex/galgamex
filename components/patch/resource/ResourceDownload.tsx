@@ -23,6 +23,9 @@ export const ResourceDownload = ({ resource }: Props) => {
     }))
   }
 
+  // 检查资源状态是否可下载（status为0表示正常可下载）
+  const isDownloadable = resource.status === 0
+
   return (
     <div className="space-y-2">
       {resource.note ? (
@@ -66,18 +69,20 @@ export const ResourceDownload = ({ resource }: Props) => {
 
         <div className="flex gap-2">
           <ResourceLikeButton resource={resource} />
-          <Button
-            color="primary"
-            isIconOnly
-            aria-label={`下载 Galgame 资源`}
-            onPress={() => toggleLinks(resource.id)}
-          >
-            <Download className="size-4" />
-          </Button>
+          {isDownloadable && (
+            <Button
+              color="primary"
+              isIconOnly
+              aria-label={`下载 Galgame 资源`}
+              onPress={() => toggleLinks(resource.id)}
+            >
+              <Download className="size-4" />
+            </Button>
+          )}
         </div>
       </div>
 
-      {showLinks[resource.id] && <ResourceDownloadCard resource={resource} />}
+      {isDownloadable && showLinks[resource.id] && <ResourceDownloadCard resource={resource} />}
     </div>
   )
 }
