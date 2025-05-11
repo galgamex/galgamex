@@ -6,6 +6,11 @@ import { useRouter } from 'next-nprogress-bar'
 import { KunUserCard } from './KunUserCard'
 import type { UserProps } from '@nextui-org/user'
 
+interface KunUser {
+  id: number;
+  name: string;
+}
+
 interface KunUserProps {
   user: KunUser
   userProps: UserProps
