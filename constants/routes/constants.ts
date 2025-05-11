@@ -31,7 +31,7 @@ export const keyLabelMap: Record<string, string> = {
   '/resource': '资源下载',
   '/search': '搜索',
   '/settings/user': '用户设置',
-  '/tag': '补丁标签',
+  '/tag': '标签',
   '/tag/[id]': '标签详情',
   '/user/[id]/comment': '用户评论',
   '/user/[id]/contribute': '用户贡献',

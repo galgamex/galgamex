@@ -121,7 +121,7 @@ export const createBreadcrumbItem = (
   if (isTagPath(pathname)) {
     const allTagRoute: KunBreadcrumbItem = {
       key: 'tag',
-      label: '补丁标签',
+      label: '标签',
       href: '/tag'
     }
     return [allTagRoute, createTagBreadcrumb(params, defaultItem, pageTitle)]
