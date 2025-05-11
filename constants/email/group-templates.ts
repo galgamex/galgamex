@@ -1,5 +1,5 @@
 import { kunMoyuMoe } from '~/config/moyu-moe'
-import { galgamexTemplate } from './templates/galgamex'
+import { galgamexTemplate } from './templates/touchgal'
 import { announcementTemplate } from './templates/announcement'
 
 export interface EmailTemplate {

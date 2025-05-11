@@ -9,7 +9,7 @@ import type { Metadata } from 'next'
 import type { SortField, SortOrder } from '~/components/galgame/_sort'
 
 // 设置ISR缓存时间，提高性能并保持内容相对新鲜
-export const revalidate = 60 * 30 // 30分钟缓存
+export const revalidate = 1800 // 30分钟缓存
 
 export const metadata: Metadata = kunMetadata
 

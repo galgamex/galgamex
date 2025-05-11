@@ -9,7 +9,7 @@ import type { Metadata } from 'next'
 import type { SortField } from '~/components/tag/detail/_sort'
 
 // 提高缓存时间以改善性能
-export const revalidate = 60 * 30 // 30分钟
+export const revalidate = 1800 // 30分钟
 
 interface Props {
   params: Promise<{ id: string }>
