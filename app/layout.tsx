@@ -29,6 +29,9 @@ export const metadata: Metadata = {
     htmlAttributes: {
       lang: 'zh-Hans',
       suppressHydrationWarning: true
+    },
+    other: {
+      'mobile-web-app-capable': 'yes'
     }
   }
 }

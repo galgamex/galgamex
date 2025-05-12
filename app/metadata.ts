@@ -74,6 +74,7 @@ export const generateKunMetadata = (): Metadata => {
     other: {
       'lang': 'zh-Hans',
       'apple-mobile-web-app-capable': 'yes',
+      'mobile-web-app-capable': 'yes',
       'apple-mobile-web-app-status-bar-style': 'default',
       'apple-mobile-web-app-title': kunMoyuMoe.title
     }
