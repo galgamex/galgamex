@@ -21,18 +21,16 @@ const KunFooter = dynamic(() => import('~/components/kun/Footer').then(mod => mo
 })
 
 export const viewport: Viewport = kunViewport
-export const metadata: Metadata = generateKunMetadata()
 
-// 定义应用的HTML属性
-export const generateHtmlAttributes = () => {
-  return {
-    lang: 'zh-Hans',
-    suppressHydrationWarning: true
+// 定义HTML语言和抑制水合警告
+export const metadata: Metadata = {
+  ...generateKunMetadata(),
+  ...{
+    htmlAttributes: {
+      lang: 'zh-Hans',
+      suppressHydrationWarning: true
+    }
   }
-}
-
-export const generateBodyAttributes = () => {
-  return {}
 }
 
 export default function RootLayout({
@@ -41,26 +39,28 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <>
-      {process.env.KUN_VISUAL_NOVEL_TEST_SITE_LABEL && (
-        <head>
-          <meta name="robots" content="noindex,nofollow" />
-          <meta name="googlebot" content="noindex,nofollow" />
-        </head>
-      )}
+    <html lang="zh-Hans" suppressHydrationWarning>
+      <body>
+        {process.env.KUN_VISUAL_NOVEL_TEST_SITE_LABEL && (
+          <head>
+            <meta name="robots" content="noindex,nofollow" />
+            <meta name="googlebot" content="noindex,nofollow" />
+          </head>
+        )}
 
-      <Providers>
-        <div className="relative flex flex-col items-center justify-center min-h-screen bg-radial">
-          <KunTopBar />
-          <KunNavigationBreadcrumb />
-          <div className="flex min-h-[calc(100dvh-256px)] w-full max-w-[1500px] grow px-1.5 sm:px-6">
-            {children}
-            <ToasterWrapper />
+        <Providers>
+          <div className="relative flex flex-col items-center justify-center min-h-screen bg-radial">
+            <KunTopBar />
+            <KunNavigationBreadcrumb />
+            <div className="flex min-h-[calc(100dvh-256px)] w-full max-w-[1500px] grow px-1.5 sm:px-6">
+              {children}
+              <ToasterWrapper />
+            </div>
+            <KunBackToTop />
+            <KunFooter />
           </div>
-          <KunBackToTop />
-          <KunFooter />
-        </div>
-      </Providers>
-    </>
+        </Providers>
+      </body>
+    </html>
   )
 }

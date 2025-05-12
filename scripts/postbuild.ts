@@ -47,43 +47,50 @@ const copyFiles = async () => {
     if (stderr) console.error(stderr)
 
     try {
-      // 检查是否存在standalone目录（是否使用standalone输出模式）
-      const standaloneExists = await directoryExists('.next/standalone')
+      // 检查是否存在out目录（是否使用export输出模式）
+      const exportExists = await directoryExists('out')
 
-      if (!standaloneExists) {
-        console.log('Standalone output is disabled, skipping file copying step.')
-        return
-      }
+      if (!exportExists) {
+        console.log('Export output directory not found, using standalone mode.')
 
-      if (isWindows) {
-        console.log('Detected Windows OS. Using fs module for copying files.')
+        // 检查是否存在standalone目录（是否使用standalone输出模式）
+        const standaloneExists = await directoryExists('.next/standalone')
 
-        await copyDirectory('public', '.next/standalone/public')
-        await copyDirectory('.next/static', '.next/standalone/.next/static')
-        console.log('Files copied successfully.')
-      } else {
-        console.log(
-          'Detected non-Windows OS. Using cp command for copying files.'
-        )
-
-        const commands: string[] = [
-          'cp -r public .next/standalone/',
-          'cp -r .next/static .next/standalone/.next/'
-        ]
-
-        for (const command of commands) {
-          exec(command, (error, stdout, stderr) => {
-            if (error) {
-              console.error(`Error executing command "${command}":`, error)
-              process.exit(1)
-            }
-            if (stdout) console.log(stdout)
-            if (stderr) console.error(stderr)
-          })
+        if (!standaloneExists) {
+          console.log('Standalone output not found either. Check your build configuration.')
+          return
         }
+
+        if (isWindows) {
+          console.log('Detected Windows OS. Using fs module for copying files.')
+
+          await copyDirectory('public', '.next/standalone/public')
+          await copyDirectory('.next/static', '.next/standalone/.next/static')
+          console.log('Files copied successfully for standalone mode.')
+        } else {
+          console.log('Detected non-Windows OS. Using cp command for copying files.')
+
+          const commands: string[] = [
+            'cp -r public .next/standalone/',
+            'cp -r .next/static .next/standalone/.next/'
+          ]
+
+          for (const command of commands) {
+            exec(command, (error, stdout, stderr) => {
+              if (error) {
+                console.error(`Error executing command "${command}":`, error)
+                process.exit(1)
+              }
+              if (stdout) console.log(stdout)
+              if (stderr) console.error(stderr)
+            })
+          }
+        }
+      } else {
+        console.log('Export output detected, no additional file copying needed.')
       }
     } catch (fsError) {
-      console.error('Error copying files:', fsError)
+      console.error('Error managing build files:', fsError)
       process.exit(1)
     }
   })

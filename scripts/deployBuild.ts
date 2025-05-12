@@ -52,6 +52,14 @@ try {
   // 清理构建
   safeExecSync('pnpm build:clean', '清理构建')
 
+  // 确保out目录存在
+  const outDir = path.resolve(__dirname, '..', 'out')
+  if (!fs.existsSync(outDir)) {
+    console.log('⚠️ 警告: out目录不存在，可能构建未完成或使用了standalone模式')
+  } else {
+    console.log('✅ 检测到out目录，使用static export模式')
+  }
+
   // 尝试停止已存在的PM2进程，允许失败
   safeExecSync('pnpm stop', 'PM2进程停止', true)
 

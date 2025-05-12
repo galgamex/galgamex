@@ -44,8 +44,11 @@ const nextConfig: NextConfig = {
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
   },
 
-  // 注释掉standalone输出以避免Windows环境下的符号链接权限问题
-  // output: 'standalone',
+  // 使用标准输出模式，确保资源路径正确
+  distDir: '.next',
+  // 确保开发环境和生产环境的静态资源路径一致
+  assetPrefix: process.env.NODE_ENV === 'production' ? '' : undefined,
+  poweredByHeader: false,
 
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production' ? { exclude: ['error', 'warn'] } : false,
@@ -56,9 +59,10 @@ const nextConfig: NextConfig = {
   skipMiddlewareUrlNormalize: true,
 
   experimental: {
+    // 禁用这些可能导致问题的实验性功能
     optimizeCss: false,
     serverActions: {
-      allowedOrigins: ["www.galgamex.net", "www.galgamex.net:443"]
+      allowedOrigins: ["localhost", "localhost:3000"]
     },
     // 这些选项保留在experimental中
     clientRouterFilter: false,
@@ -78,36 +82,20 @@ const nextConfig: NextConfig = {
     }
 
     if (!dev && !isServer) {
+      // 确保输出的文件名格式简单一致
+      config.output.filename = 'static/chunks/[name].[contenthash:8].js'
+      config.output.chunkFilename = 'static/chunks/[name].[contenthash:8].js'
+
+      // 使用更保守的chunks策略
       config.optimization = {
         ...config.optimization,
+        minimize: true,
         splitChunks: {
           chunks: 'all',
-          cacheGroups: {
-            default: false,
-            vendors: false,
-            nextui: {
-              name: 'nextui',
-              test: /[\\/]node_modules[\\/](@nextui-org)[\\/]/,
-              chunks: 'all',
-              priority: 20,
-            },
-            framework: {
-              chunks: 'all',
-              name: 'framework',
-              test: /[\\/]node_modules[\\/](react|react-dom|framer-motion)[\\/]/,
-              priority: 10,
-            },
-            commons: {
-              name: 'commons',
-              minChunks: 2,
-              priority: 5,
-              reuseExistingChunk: true,
-            },
-          },
+          maxInitialRequests: 25,
+          minSize: 20000,
         },
       }
-
-      config.output.filename = '[name].[contenthash:8].js'
     }
 
     return config
