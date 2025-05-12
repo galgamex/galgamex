@@ -11,6 +11,8 @@ import path from 'path'
 // const __filename = fileURLToPath(import.meta.url)
 // const __dirname = path.dirname(__filename)
 
+const PRODUCTION_DOMAIN = 'https://www.galgamex.net'
+
 const nextConfig: NextConfig = {
   pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
   transpilePackages: ['next-mdx-remote'],
@@ -46,8 +48,10 @@ const nextConfig: NextConfig = {
 
   // 使用标准输出模式，确保资源路径正确
   distDir: '.next',
-  // 确保开发环境和生产环境的静态资源路径一致
-  assetPrefix: process.env.NODE_ENV === 'production' ? '' : undefined,
+  // 确保在生产环境中使用正确的资源前缀，但不使用特定域名
+  // 这可以确保相对路径能正常工作，避免跨域问题
+  assetPrefix: process.env.NODE_ENV === 'production' ? '' : '',
+  basePath: '',
   poweredByHeader: false,
 
   compiler: {
@@ -62,7 +66,7 @@ const nextConfig: NextConfig = {
     // 禁用这些可能导致问题的实验性功能
     optimizeCss: false,
     serverActions: {
-      allowedOrigins: ["localhost", "localhost:3000"]
+      allowedOrigins: ["www.galgamex.net", "localhost", "localhost:3000"]
     },
     // 这些选项保留在experimental中
     clientRouterFilter: false,
@@ -86,14 +90,44 @@ const nextConfig: NextConfig = {
       config.output.filename = 'static/chunks/[name].[contenthash:8].js'
       config.output.chunkFilename = 'static/chunks/[name].[contenthash:8].js'
 
-      // 使用更保守的chunks策略
+      // 为客户端组件添加更灵活的分块策略，特别关注doc和leaderboard路径
       config.optimization = {
         ...config.optimization,
         minimize: true,
         splitChunks: {
           chunks: 'all',
-          maxInitialRequests: 25,
+          maxInitialRequests: 30,
           minSize: 20000,
+          cacheGroups: {
+            default: {
+              minChunks: 2,
+              priority: -20,
+              reuseExistingChunk: true,
+            },
+            vendors: {
+              test: /[\\/]node_modules[\\/]/,
+              priority: -10,
+              reuseExistingChunk: true,
+            },
+            commons: {
+              name: 'commons',
+              minChunks: 3,
+              priority: -30,
+              reuseExistingChunk: true,
+            },
+            docPage: {
+              test: /[\\/]app[\\/]doc[\\/]/,
+              name: 'doc-bundle',
+              priority: 10,
+              reuseExistingChunk: true,
+            },
+            leaderboard: {
+              test: /[\\/]app[\\/]leaderboard[\\/]/,
+              name: 'leaderboard-bundle',
+              priority: 10,
+              reuseExistingChunk: true,
+            },
+          },
         },
       }
     }
