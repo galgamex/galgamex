@@ -5,7 +5,6 @@ import type { Metadata, Viewport } from 'next'
 import '~/styles/index.scss'
 import './actions'
 import { ToasterWrapper } from '~/components/toaster/ToasterWrapper'
-import Script from 'next/script'
 
 // 动态导入组件以解决生产环境中的类型错误
 const KunTopBar = dynamic(() => import('~/components/kun/top-bar/TopBar').then(mod => mod.KunTopBar), {
@@ -64,16 +63,6 @@ export default function RootLayout({
             <KunFooter />
           </div>
         </Providers>
-
-        {/* Cloudflare Web Analytics */}
-        <Script
-          defer
-          src="https://static.cloudflareinsights.com/beacon.min.js"
-          data-cf-beacon={`{"token": "${process.env.NODE_ENV === 'production'
-            ? '225bf24440f847a6aedf08dd9044b4b9'
-            : '225bf24440f847a6aedf08dd9044b4b9'}"}`}
-          strategy="afterInteractive"
-        />
       </body>
     </html>
   )
