@@ -44,12 +44,6 @@ export default function RootLayout({
 }) {
   return (
     <html lang="zh-Hans" suppressHydrationWarning>
-      <head>
-        <Script src="/cloudflare-rum-blocker.js" strategy="beforeInteractive" />
-        {process.env.NODE_ENV !== 'production' && (
-          <Script src="/network-monitor.js" strategy="beforeInteractive" />
-        )}
-      </head>
       <body>
         {process.env.KUN_VISUAL_NOVEL_TEST_SITE_LABEL && (
           <head>
@@ -70,6 +64,16 @@ export default function RootLayout({
             <KunFooter />
           </div>
         </Providers>
+
+        {/* Cloudflare Web Analytics */}
+        <Script
+          defer
+          src="https://static.cloudflareinsights.com/beacon.min.js"
+          data-cf-beacon={`{"token": "${process.env.NODE_ENV === 'production'
+            ? '225bf24440f847a6aedf08dd9044b4b9'
+            : '225bf24440f847a6aedf08dd9044b4b9'}"}`}
+          strategy="afterInteractive"
+        />
       </body>
     </html>
   )
