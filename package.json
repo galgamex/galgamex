@@ -18,7 +18,7 @@
     "prisma:generate": "pnpx prisma generate",
     "start": "next start",
     "start:custom": "node scripts/runServer.js",
-    "stop": "pm2 delete kun-galgamex-next || true",
+    "stop": "pm2 delete kun-galgamex-next || exit 0",
     "deploy:install": "esno scripts/deployInstall.ts",
     "deploy:build": "esno scripts/deployBuild.ts",
     "fix": "node scripts/fixBuild.js"

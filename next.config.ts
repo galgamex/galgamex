@@ -11,7 +11,8 @@ import path from 'path'
 // const __filename = fileURLToPath(import.meta.url)
 // const __dirname = path.dirname(__filename)
 
-const PRODUCTION_DOMAIN = 'https://www.galgamex.net'
+// 移除硬编码的域名
+// const PRODUCTION_DOMAIN = 'https://www.galgamex.net'
 
 const nextConfig: NextConfig = {
   pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
@@ -48,8 +49,8 @@ const nextConfig: NextConfig = {
 
   // 使用标准输出模式，确保资源路径正确
   distDir: '.next',
-  // 为生产环境指定资产前缀，解决404问题
-  assetPrefix: process.env.NODE_ENV === 'production' ? PRODUCTION_DOMAIN : '',
+  // 移除硬编码的assetPrefix，使用相对路径
+  assetPrefix: '',
   basePath: '',
   poweredByHeader: false,
 
@@ -65,7 +66,7 @@ const nextConfig: NextConfig = {
     // 禁用这些可能导致问题的实验性功能
     optimizeCss: false,
     serverActions: {
-      allowedOrigins: ["www.galgamex.net", "localhost", "localhost:3000"]
+      allowedOrigins: ["*"] // 允许所有域名
     },
     // 这些选项保留在experimental中
     clientRouterFilter: false,
