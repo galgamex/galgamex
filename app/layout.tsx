@@ -5,6 +5,7 @@ import type { Metadata, Viewport } from 'next'
 import '~/styles/index.scss'
 import './actions'
 import { ToasterWrapper } from '~/components/toaster/ToasterWrapper'
+import Script from 'next/script'
 
 // 动态导入组件以解决生产环境中的类型错误
 const KunTopBar = dynamic(() => import('~/components/kun/top-bar/TopBar').then(mod => mod.KunTopBar), {
@@ -43,6 +44,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="zh-Hans" suppressHydrationWarning>
+      <head>
+        <Script src="/cloudflare-rum-blocker.js" strategy="beforeInteractive" />
+        {process.env.NODE_ENV !== 'production' && (
+          <Script src="/network-monitor.js" strategy="beforeInteractive" />
+        )}
+      </head>
       <body>
         {process.env.KUN_VISUAL_NOVEL_TEST_SITE_LABEL && (
           <head>
