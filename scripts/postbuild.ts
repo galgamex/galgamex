@@ -64,59 +64,22 @@ const copyFiles = async () => {
         if (isWindows) {
           console.log('Detected Windows OS. Using fs module for copying files.')
 
-          // 确保目标目录存在
-          await mkdir('.next/standalone/.next', { recursive: true })
-
-          // 复制public目录
           await copyDirectory('public', '.next/standalone/public')
-
-          // 复制全部静态资源，而不仅仅是static目录
           await copyDirectory('.next/static', '.next/standalone/.next/static')
-
-          // 复制server端和客户端构建文件，确保动态路由能正确加载js
-          await copyDirectory('.next/server', '.next/standalone/.next/server')
-
-          // 确保必要的缓存和其他资源也被复制
-          if (await directoryExists('.next/cache')) {
-            await copyDirectory('.next/cache', '.next/standalone/.next/cache')
-          }
-
-          // 复制其他重要文件
-          if (await directoryExists('.next/chunks')) {
-            await copyDirectory('.next/chunks', '.next/standalone/.next/chunks')
-          }
-
-          // 确保构建信息也被复制，包括routes-manifest
-          await copyFile('.next/routes-manifest.json', '.next/standalone/.next/routes-manifest.json')
-            .catch(err => console.warn('Warning: routes-manifest.json not found', err))
-
-          await copyFile('.next/build-manifest.json', '.next/standalone/.next/build-manifest.json')
-            .catch(err => console.warn('Warning: build-manifest.json not found', err))
-
           console.log('Files copied successfully for standalone mode.')
         } else {
           console.log('Detected non-Windows OS. Using cp command for copying files.')
 
           const commands: string[] = [
             'cp -r public .next/standalone/',
-            'cp -r .next/static .next/standalone/.next/',
-            'cp -r .next/server .next/standalone/.next/',
-            'mkdir -p .next/standalone/.next/cache && cp -r .next/cache/* .next/standalone/.next/cache/ || true',
-            'cp -r .next/chunks .next/standalone/.next/ || true',
-            'cp .next/routes-manifest.json .next/standalone/.next/ || true',
-            'cp .next/build-manifest.json .next/standalone/.next/ || true'
+            'cp -r .next/static .next/standalone/.next/'
           ]
 
           for (const command of commands) {
             exec(command, (error, stdout, stderr) => {
               if (error) {
                 console.error(`Error executing command "${command}":`, error)
-                // 非关键错误不终止程序
-                if (command.includes('|| true')) {
-                  console.warn('Continuing despite error on optional copy.')
-                } else {
-                  process.exit(1)
-                }
+                process.exit(1)
               }
               if (stdout) console.log(stdout)
               if (stderr) console.error(stderr)
