@@ -18,6 +18,7 @@ import { ResourceList } from './ResourceList'
 import { KunLoading } from '~/components/kun/Loading'
 import toast from 'react-hot-toast'
 import { useUserStore } from '~/store/userStore'
+import { NsfwAds } from '~/components/ads/NsfwAds'
 import type { PatchResource } from '~/types/api/patch'
 
 interface Props {
@@ -83,19 +84,11 @@ export const Resources = ({ id, section }: Props) => {
   const shouldShowAddButton = !(user.role < 3 && section === 'galgame')
 
   return (
-    <div className="mt-4 space-y-4">
-      {shouldShowAddButton && (
-        <div className="flex justify-end">
-          <Button
-            color="primary"
-            variant="flat"
-            startContent={<Plus className="size-4" />}
-            onPress={onOpenCreate}
-          >
-            添加资源
-          </Button>
-        </div>
-      )}
+    <div className="space-y-4">
+      {/* 添加资源按钮已移至标题栏 */}
+
+      {/* NSFW广告组件 */}
+      <NsfwAds section={section} />
 
       {loading ? (
         <KunLoading hint={`正在获取 ${section === 'galgame' ? 'Galgame 资源' : 'Galgame 补丁'}数据...`} />
@@ -108,6 +101,15 @@ export const Resources = ({ id, section }: Props) => {
           setDeleteResourceId={setDeleteResourceId}
         />
       )}
+
+      {/* 添加资源模态框 */}
+      <Button
+        className="hidden"
+        onPress={onOpenCreate}
+        id="resource-add-button"
+      >
+        添加资源
+      </Button>
 
       <Modal
         size="3xl"

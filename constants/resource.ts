@@ -146,6 +146,6 @@ export const ALLOWED_EXTENSIONS = ['.zip', '.rar', '.7z']
 export const SUPPORTED_RESOURCE_SECTION = ['galgame', 'patch']
 
 export const RESOURCE_SECTION_MAP: Record<string, string> = {
-  galgame: 'Galgame 资源',
-  patch: 'Galgame 补丁'
+  galgame: '游戏资源',
+  patch: '游戏补丁'
 }

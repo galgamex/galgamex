@@ -39,6 +39,18 @@ const nextConfig: NextConfig = {
         hostname: 'img.touchgalstatic.org',
         port: '',
         pathname: '/**'
+      },
+      {
+        protocol: 'https',
+        hostname: 'via.placeholder.com',
+        port: '',
+        pathname: '/**'
+      },
+      {
+        protocol: 'https',
+        hostname: 'cdn.sa.net',
+        port: '',
+        pathname: '/**'
       }
     ],
 
