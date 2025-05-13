@@ -8,7 +8,6 @@ import { KunMasonryGrid } from '~/components/kun/MasonryGrid'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import type { HomeResource } from '~/types/api/home'
-import { LoginBanner } from './LoginBanner'
 
 interface Props {
   galgames: GalgameCard[]
@@ -33,10 +32,8 @@ export const HomeContainer = ({ galgames, resources }: Props) => {
 
   return (
     <div className="mx-auto space-y-2 max-w-[1500px]">
-      <LoginBanner />
-
       <section className="space-y-6">
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-4 my-4">
           <h2 className="text-lg font-bold sm:text-2xl">最新更新</h2>
           <Button
             variant="light"
@@ -60,8 +57,6 @@ export const HomeContainer = ({ galgames, resources }: Props) => {
           ))}
         </KunMasonryGrid>
       </section>
-
-
     </div>
   )
 }

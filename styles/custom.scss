@@ -14,3 +14,16 @@
     background-size: cover;
     font-weight: 900;
 }
+
+/* 移动端导航栏高度调整 */
+@media (max-width: 1024px) {
+    nav[style*="--navbar-height"] {
+        --navbar-height: 3rem !important;
+    }
+
+    nav[style*="--navbar-height"] header {
+        height: var(--navbar-height);
+        padding-top: 0.25rem;
+        padding-bottom: 0.25rem;
+    }
+}

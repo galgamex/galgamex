@@ -1,5 +1,6 @@
 'use client'
 
+import { memo, useCallback, useState } from 'react'
 import {
   Dropdown,
   DropdownItem,
@@ -31,7 +32,6 @@ import {
 } from '~/constants/resource'
 import { cn } from '~/utils/cn'
 import type { SortField, SortOrder } from './_sort'
-import { useState } from 'react'
 
 interface Props {
   selectedType: string
@@ -99,39 +99,78 @@ interface MonthChipsProps {
   setSelectedMonths: (months: string[]) => void
 }
 
-const MonthChips = ({ selectedMonths, setSelectedMonths }: MonthChipsProps) => {
+// 使用memo优化月份组件
+const MonthChips = memo(({ selectedMonths, setSelectedMonths }: MonthChipsProps) => {
   const months = selectedMonths.filter(m => m !== 'all')
-
-  // 创建一个月份渲染数组
-  const monthChips = []
-
-  // 手动循环添加每个月份芯片
-  for (let i = 0; i < months.length; i++) {
-    const month = months[i]
-    monthChips.push(
-      <Chip
-        key={`month-${month}`}
-        variant="flat"
-        color="secondary"
-        size="sm"
-        onClose={() => {
-          const newMonths = selectedMonths.filter(m => m !== month)
-          setSelectedMonths(newMonths.length ? newMonths : ['all'])
-        }}
-      >
-        {`${month}月`}
-      </Chip>
-    )
-  }
 
   return (
     <div className="flex flex-wrap gap-1">
-      {monthChips}
+      {months.map(month => (
+        <Chip
+          key={`month-${month}`}
+          variant="flat"
+          color="secondary"
+          size="sm"
+          onClose={() => {
+            const newMonths = selectedMonths.filter(m => m !== month)
+            setSelectedMonths(newMonths.length ? newMonths : ['all'])
+          }}
+        >
+          {`${month}月`}
+        </Chip>
+      ))}
     </div>
   )
+})
+
+MonthChips.displayName = 'MonthChips'
+
+// 标签芯片组件
+interface TagChipsProps {
+  selectedTags: string[]
+  setSelectedTags: (tags: string[]) => void
+  availableTags: Array<{ id: number; name: string }>
 }
 
-export const FilterBar = ({
+// 使用memo优化标签组件
+const TagChips = memo(({ selectedTags, setSelectedTags, availableTags }: TagChipsProps) => {
+  return (
+    <>
+      {selectedTags.length > 0 && Array.isArray(availableTags) && (
+        <div className="flex flex-wrap gap-1">
+          {availableTags
+            .filter(tag => selectedTags.includes(tag.id.toString()))
+            .map(tag => (
+              <Chip
+                key={`tag-${tag.id}`}
+                variant="flat"
+                color="secondary"
+                size="sm"
+                onClose={() => {
+                  setSelectedTags(selectedTags.filter(id => id !== tag.id.toString()))
+                }}
+              >
+                {tag.name}
+              </Chip>
+            ))}
+        </div>
+      )}
+    </>
+  )
+})
+
+TagChips.displayName = 'TagChips'
+
+// 下拉菜单项生成器 - 减少重复代码
+const createDropdownItems = (items: string[], labelMap: Record<string, string>) => {
+  return items.map(item => (
+    <DropdownItem key={item}>
+      {labelMap[item]}
+    </DropdownItem>
+  ))
+}
+
+export const FilterBar = memo(({
   selectedType,
   setSelectedType,
   sortField,
@@ -164,17 +203,23 @@ export const FilterBar = ({
     !selectedMonths.includes('all') ||
     safeSelectedTags.length > 0
 
-  const resetFilters = () => {
+  // 使用useCallback优化重置函数
+  const resetFilters = useCallback(() => {
     setSelectedType('all')
     setSelectedLanguage('all')
     setSelectedPlatform('all')
     setSelectedYears(['all'])
     setSelectedMonths(['all'])
     setSelectedTags([])
-  }
+  }, [setSelectedType, setSelectedLanguage, setSelectedPlatform, setSelectedYears, setSelectedMonths, setSelectedTags])
+
+  // 切换高级筛选
+  const toggleAdvanced = useCallback(() => {
+    setShowAdvanced(prev => !prev)
+  }, [])
 
   return (
-    <Card className="w-full border border-default-100 bg-content1/50 backdrop-blur-lg shadow-sm">
+    <Card className="w-full border border-default-100 bg-content1/50 backdrop-blur-lg shadow-sm transition-all duration-200">
       <CardHeader className="flex flex-row items-center justify-between p-4">
         <div className="flex items-center gap-2">
           <SlidersHorizontal className="size-5 text-primary" />
@@ -186,7 +231,7 @@ export const FilterBar = ({
                 isIconOnly
                 size="sm"
                 variant="light"
-                className="text-danger"
+                className="text-danger hover:bg-danger/10"
                 onPress={resetFilters}
               >
                 <X className="size-4" />
@@ -199,10 +244,10 @@ export const FilterBar = ({
           variant="light"
           size="sm"
           className="text-primary"
-          onPress={() => setShowAdvanced(!showAdvanced)}
+          onPress={toggleAdvanced}
           endContent={
             <ChevronDown
-              className={cn("size-4 transition-transform",
+              className={cn("size-4 transition-transform duration-300",
                 showAdvanced ? "rotate-180" : ""
               )}
             />
@@ -214,10 +259,13 @@ export const FilterBar = ({
 
       <Divider />
 
-      <CardBody className="px-4 flex flex-col gap-4">
+      <CardBody className={cn(
+        "px-4 flex flex-col gap-4",
+        (!hasActiveFilters && !showAdvanced) && "hidden"
+      )}>
         {/* 选中的筛选条件展示区 */}
         {hasActiveFilters && (
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 animate-in fade-in duration-300">
             {/* 类型 */}
             {selectedType !== 'all' && (
               <Chip
@@ -225,6 +273,7 @@ export const FilterBar = ({
                 color="primary"
                 size="sm"
                 onClose={() => setSelectedType('all')}
+                className="transition-all hover:scale-105"
               >
                 {SUPPORTED_TYPE_MAP[selectedType]}
               </Chip>
@@ -237,6 +286,7 @@ export const FilterBar = ({
                 color="primary"
                 size="sm"
                 onClose={() => setSelectedLanguage('all')}
+                className="transition-all hover:scale-105"
               >
                 {SUPPORTED_LANGUAGE_MAP[selectedLanguage]}
               </Chip>
@@ -249,6 +299,7 @@ export const FilterBar = ({
                 color="primary"
                 size="sm"
                 onClose={() => setSelectedPlatform('all')}
+                className="transition-all hover:scale-105"
               >
                 {SUPPORTED_PLATFORM_MAP[selectedPlatform]}
               </Chip>
@@ -260,6 +311,7 @@ export const FilterBar = ({
               color="default"
               size="sm"
               endContent={sortOrder === 'asc' ? <ArrowUpAZ className="size-3.5" /> : <ArrowDownAZ className="size-3.5" />}
+              className="transition-all hover:scale-105"
             >
               {sortFieldLabelMap[sortField]} {sortOrder === 'asc' ? '升序' : '降序'}
             </Chip>
@@ -275,6 +327,7 @@ export const FilterBar = ({
                   const newYears = selectedYears.filter(y => y !== year)
                   setSelectedYears(newYears.length ? newYears : ['all'])
                 }}
+                className="transition-all hover:scale-105"
               >
                 {GALGAME_SORT_YEARS_MAP[year] ?? year}
               </Chip>
@@ -289,29 +342,17 @@ export const FilterBar = ({
             )}
 
             {/* 标签芯片 */}
-            {safeSelectedTags.length > 0 && Array.isArray(availableTags) && (
-              availableTags
-                .filter(tag => safeSelectedTags.includes(tag.id.toString()))
-                .map(tag => (
-                  <Chip
-                    key={`tag-${tag.id}`}
-                    variant="flat"
-                    color="secondary"
-                    size="sm"
-                    onClose={() => {
-                      setSelectedTags(safeSelectedTags.filter(id => id !== tag.id.toString()))
-                    }}
-                  >
-                    {tag.name}
-                  </Chip>
-                ))
-            )}
+            <TagChips
+              selectedTags={safeSelectedTags}
+              setSelectedTags={setSelectedTags}
+              availableTags={availableTags}
+            />
           </div>
         )}
 
         {/* 高级筛选区域 */}
         {showAdvanced && (
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-4 animate-in slide-in-from-top duration-300">
             <div className="flex flex-col w-full gap-4 sm:flex-row sm:flex-wrap">
               {/* 类型筛选 */}
               <Dropdown className="w-full sm:w-auto">
@@ -322,7 +363,7 @@ export const FilterBar = ({
                     color={selectedType !== 'all' ? "primary" : "default"}
                     startContent={<Filter className="size-3.5" />}
                     endContent={<ChevronDown className="size-3.5" />}
-                    className="px-3 h-8"
+                    className="px-3 h-8 transition-all hover:shadow-md"
                   >
                     {SUPPORTED_TYPE_MAP[selectedType]}
                   </Chip>
@@ -336,18 +377,7 @@ export const FilterBar = ({
                     if (selected) setSelectedType(selected)
                   }}
                 >
-                  {(() => {
-                    const items = []
-                    for (let i = 0; i < ALL_SUPPORTED_TYPE.length; i++) {
-                      const type = ALL_SUPPORTED_TYPE[i]
-                      items.push(
-                        <DropdownItem key={type}>
-                          {SUPPORTED_TYPE_MAP[type]}
-                        </DropdownItem>
-                      )
-                    }
-                    return items
-                  })()}
+                  {createDropdownItems(ALL_SUPPORTED_TYPE, SUPPORTED_TYPE_MAP)}
                 </DropdownMenu>
               </Dropdown>
 
@@ -360,7 +390,7 @@ export const FilterBar = ({
                     color={selectedLanguage !== 'all' ? "primary" : "default"}
                     startContent={<Filter className="size-3.5" />}
                     endContent={<ChevronDown className="size-3.5" />}
-                    className="px-3 h-8"
+                    className="px-3 h-8 transition-all hover:shadow-md"
                   >
                     {SUPPORTED_LANGUAGE_MAP[selectedLanguage]}
                   </Chip>
@@ -374,18 +404,7 @@ export const FilterBar = ({
                     if (selected) setSelectedLanguage(selected)
                   }}
                 >
-                  {(() => {
-                    const items = []
-                    for (let i = 0; i < ALL_SUPPORTED_LANGUAGE.length; i++) {
-                      const language = ALL_SUPPORTED_LANGUAGE[i]
-                      items.push(
-                        <DropdownItem key={language}>
-                          {SUPPORTED_LANGUAGE_MAP[language]}
-                        </DropdownItem>
-                      )
-                    }
-                    return items
-                  })()}
+                  {createDropdownItems(ALL_SUPPORTED_LANGUAGE, SUPPORTED_LANGUAGE_MAP)}
                 </DropdownMenu>
               </Dropdown>
 
@@ -398,7 +417,7 @@ export const FilterBar = ({
                     color={selectedPlatform !== 'all' ? "primary" : "default"}
                     startContent={<Filter className="size-3.5" />}
                     endContent={<ChevronDown className="size-3.5" />}
-                    className="px-3 h-8"
+                    className="px-3 h-8 transition-all hover:shadow-md"
                   >
                     {SUPPORTED_PLATFORM_MAP[selectedPlatform]}
                   </Chip>
@@ -412,18 +431,7 @@ export const FilterBar = ({
                     if (selected) setSelectedPlatform(selected)
                   }}
                 >
-                  {(() => {
-                    const items = []
-                    for (let i = 0; i < ALL_SUPPORTED_PLATFORM.length; i++) {
-                      const platform = ALL_SUPPORTED_PLATFORM[i]
-                      items.push(
-                        <DropdownItem key={platform}>
-                          {SUPPORTED_PLATFORM_MAP[platform]}
-                        </DropdownItem>
-                      )
-                    }
-                    return items
-                  })()}
+                  {createDropdownItems(ALL_SUPPORTED_PLATFORM, SUPPORTED_PLATFORM_MAP)}
                 </DropdownMenu>
               </Dropdown>
 
@@ -437,7 +445,7 @@ export const FilterBar = ({
                       color={safeSelectedTags.length > 0 ? "primary" : "default"}
                       startContent={<Filter className="size-3.5" />}
                       endContent={<ChevronDown className="size-3.5" />}
-                      className="px-3 h-8"
+                      className="px-3 h-8 transition-all hover:shadow-md"
                     >
                       {safeSelectedTags.length > 0 ? `已选${safeSelectedTags.length}个标签` : "标签筛选"}
                     </Chip>
@@ -451,6 +459,9 @@ export const FilterBar = ({
                     }}
                     disallowEmptySelection={false}
                     closeOnSelect={false}
+                    classNames={{
+                      base: "max-h-64 overflow-y-auto"
+                    }}
                   >
                     {availableTags.map((tag) => {
                       const tagId = tag.id.toString();
@@ -478,7 +489,7 @@ export const FilterBar = ({
                     color="default"
                     startContent={sortOrder === 'asc' ? <ArrowUpAZ className="size-3.5" /> : <ArrowDownAZ className="size-3.5" />}
                     endContent={<ChevronDown className="size-3.5" />}
-                    className="px-3 h-8"
+                    className="px-3 h-8 transition-all hover:shadow-md"
                   >
                     {sortFieldLabelMap[sortField]} {sortOrder === 'asc' ? '升序' : '降序'}
                   </Chip>
@@ -564,22 +575,16 @@ export const FilterBar = ({
                 variant="bordered"
                 classNames={{
                   base: "w-full sm:w-1/2",
-                  trigger: "h-10",
-                  value: "text-small"
+                  trigger: "h-10 transition-all hover:border-primary",
+                  value: "text-small",
+                  listboxWrapper: "max-h-64"
                 }}
               >
-                {(() => {
-                  const items = []
-                  for (let i = 0; i < GALGAME_SORT_YEARS.length; i++) {
-                    const year = GALGAME_SORT_YEARS[i]
-                    items.push(
-                      <SelectItem key={year} value={year}>
-                        {GALGAME_SORT_YEARS_MAP[year] ?? year}
-                      </SelectItem>
-                    )
-                  }
-                  return items
-                })()}
+                {GALGAME_SORT_YEARS.map(year => (
+                  <SelectItem key={year} value={year}>
+                    {GALGAME_SORT_YEARS_MAP[year] ?? year}
+                  </SelectItem>
+                ))}
               </Select>
 
               <Select
@@ -608,22 +613,15 @@ export const FilterBar = ({
                 }
                 classNames={{
                   base: "w-full sm:w-1/2",
-                  trigger: "h-10",
+                  trigger: "h-10 transition-all hover:border-primary",
                   value: "text-small"
                 }}
               >
-                {(() => {
-                  const items = []
-                  for (let i = 0; i < GALGAME_SORT_MONTHS.length; i++) {
-                    const month = GALGAME_SORT_MONTHS[i]
-                    items.push(
-                      <SelectItem key={month} value={month}>
-                        {month === 'all' ? '全部月份' : month}
-                      </SelectItem>
-                    )
-                  }
-                  return items
-                })()}
+                {GALGAME_SORT_MONTHS.map(month => (
+                  <SelectItem key={month} value={month}>
+                    {month === 'all' ? '全部月份' : `${month}月`}
+                  </SelectItem>
+                ))}
               </Select>
             </div>
           </div>
@@ -631,4 +629,6 @@ export const FilterBar = ({
       </CardBody>
     </Card>
   )
-}
+})
+
+FilterBar.displayName = 'FilterBar'

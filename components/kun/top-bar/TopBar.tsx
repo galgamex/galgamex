@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useState } from 'react'
 import {
   Navbar,
   NavbarContent,
@@ -12,11 +12,18 @@ import { KunTopBarBrand } from './Brand'
 import { KunTopBarUser } from './User'
 import { usePathname } from 'next/navigation'
 import { kunNavItem } from '~/constants/top-bar'
-import { KunMobileMenu } from './KunMobileMenu'
+
+// 使用懒加载优化移动菜单
+const KunMobileMenu = lazy(() => import('./KunMobileMenu').then(mod => ({ default: mod.KunMobileMenu })))
 
 export const KunTopBar = () => {
   const pathname = usePathname()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+
+  // 使用useCallback优化状态更新
+  const handleMenuChange = useCallback((open: boolean) => {
+    setIsMenuOpen(open)
+  }, [])
 
   useEffect(() => {
     setIsMenuOpen(false)
@@ -26,16 +33,16 @@ export const KunTopBar = () => {
     <Navbar
       maxWidth="full"
       isMenuOpen={isMenuOpen}
-      onMenuOpenChange={setIsMenuOpen}
+      onMenuOpenChange={handleMenuChange}
       classNames={{
         wrapper: 'px-3 sm:px-6 max-w-[1500px] mx-auto',
-        base: 'bg-background/80 backdrop-blur-md border-b border-divider',
+        base: 'bg-background/80 backdrop-blur-md border-b border-divider z-40',
         content: 'gap-6',
         menu: 'bg-background/80 backdrop-blur-md'
       }}
     >
       <NavbarContent className="lg:hidden" justify="start">
-        <NavbarMenuToggle className="text-foreground/80 hover:text-foreground" />
+        <NavbarMenuToggle aria-label="菜单" className="text-foreground/80 hover:text-foreground" />
       </NavbarContent>
 
       <KunTopBarBrand />
@@ -58,7 +65,12 @@ export const KunTopBar = () => {
 
       <KunTopBarUser />
 
-      <KunMobileMenu />
+      {/* 仅在菜单打开时渲染移动菜单内容 */}
+      {isMenuOpen && (
+        <Suspense fallback={<div className="h-4"></div>}>
+          <KunMobileMenu />
+        </Suspense>
+      )}
     </Navbar>
   )
 }

@@ -20,16 +20,12 @@ const kunFetchRequest = async <T>(
         .join('&')
       : ''
 
-    const fetchAddress =
-      process.env.NODE_ENV === 'development'
-        ? process.env.NEXT_PUBLIC_KUN_PATCH_ADDRESS_DEV
-        : process.env.NEXT_PUBLIC_KUN_PATCH_ADDRESS_PROD
-    const fullUrl = `${fetchAddress}/api${url}${queryString}`
+    // 使用相对URL来避免CORS问题，让浏览器自动使用当前主机名
+    const apiPath = `/api${url}${queryString}`
 
     const fetchOptions: RequestInit = {
       method,
       credentials: 'include',
-      mode: 'cors',
       headers: {
         ...headers
       }
@@ -41,7 +37,7 @@ const kunFetchRequest = async <T>(
       fetchOptions.body = JSON.stringify(body)
     }
 
-    const response = await fetch(fullUrl, fetchOptions)
+    const response = await fetch(apiPath, fetchOptions)
 
     if (!response.ok) {
       throw new Error(`Kun Fetch error! Status: ${response.status}`)

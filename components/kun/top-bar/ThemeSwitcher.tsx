@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { memo, useCallback, useEffect, useMemo, useState } from 'react'
 import { useTheme } from 'next-themes'
 import { Tooltip } from '@nextui-org/tooltip'
 import {
@@ -27,17 +27,30 @@ enum ThemeLabel {
 
 type SelectionSet = Exclude<Selection, 'all'>
 
-export const ThemeSwitcher = () => {
+// 使用memo封装主题图标组件以减少重渲染
+const ThemeIcon = memo(({ theme }: { theme: SelectionSet }) => {
+  if (theme.has(Theme.light)) {
+    return <Sun />
+  }
+  if (theme.has(Theme.dark)) {
+    return <Moon />
+  }
+  return <SunMoon />
+})
+
+ThemeIcon.displayName = 'ThemeIcon'
+
+export const ThemeSwitcher = memo(() => {
   const { theme, setTheme } = useTheme()
-  const [selectedTheme, setSelectedTheme] = useState(
-    new Set([theme]) as SelectionSet
+  const [selectedTheme, setSelectedTheme] = useState<SelectionSet>(
+    new Set([theme ?? Theme.system])
   )
 
   useEffect(() => {
     if (theme && !selectedTheme.has(theme)) {
       setSelectedTheme(new Set([theme]))
     }
-  }, [selectedTheme, theme])
+  }, [theme, selectedTheme])
 
   const onSelectedThemeChange = useCallback(
     (value: Selection) => {
@@ -50,16 +63,6 @@ export const ThemeSwitcher = () => {
     [setTheme]
   )
 
-  const themeIcon = useMemo(() => {
-    if (selectedTheme.has(Theme.light)) {
-      return <Sun />
-    }
-    if (selectedTheme.has(Theme.dark)) {
-      return <Moon />
-    }
-    return <SunMoon />
-  }, [selectedTheme])
-
   return (
     <Dropdown className="min-w-0">
       <Tooltip disableAnimation showArrow closeDelay={0} content="主题切换">
@@ -71,7 +74,7 @@ export const ThemeSwitcher = () => {
               aria-label="主题切换"
               className="text-default-500"
             >
-              {themeIcon}
+              <ThemeIcon theme={selectedTheme} />
             </Button>
           </DropdownTrigger>
         </div>
@@ -81,6 +84,7 @@ export const ThemeSwitcher = () => {
         selectedKeys={selectedTheme}
         selectionMode="single"
         onSelectionChange={onSelectedThemeChange}
+        aria-label="主题选择"
       >
         <DropdownItem
           startContent={<Sun className="size-4" />}
@@ -103,4 +107,6 @@ export const ThemeSwitcher = () => {
       </DropdownMenu>
     </Dropdown>
   )
-}
+})
+
+ThemeSwitcher.displayName = 'ThemeSwitcher'

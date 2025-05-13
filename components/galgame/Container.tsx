@@ -207,7 +207,7 @@ export const CardContainer = ({ initialGalgames, initialTotal }: Props) => {
   }, [fetchPatches, isMounted])
 
   return (
-    <div className="container mx-auto my-4 space-y-6">
+    <div className="container mx-auto  space-y-6">
       <FilterBar
         selectedType={selectedType}
         setSelectedType={setSelectedType}

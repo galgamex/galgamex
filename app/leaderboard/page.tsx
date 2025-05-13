@@ -5,6 +5,13 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Avatar } from '@nextui-org/avatar'
 import axios from 'axios'
+import { 
+  CalendarCheck, 
+  Lollipop, 
+  MessageSquare, 
+  Puzzle, 
+  UserRound 
+} from 'lucide-react'
 
 interface UserRanking {
     id: number
@@ -50,7 +57,41 @@ export default function LeaderboardPage() {
         fetchData()
     }, [])
 
-    const renderRankings = (rankings: UserRanking[]) => {
+    const getTabIcon = (tab: string) => {
+        switch (tab) {
+            case 'checkin':
+                return <CalendarCheck className="size-4 mr-1.5 text-primary-500 flex-shrink-0" />;
+            case 'moemoepoint':
+                return <Lollipop className="size-4 mr-1.5 text-secondary-500 flex-shrink-0" />;
+            case 'comment':
+                return <MessageSquare className="size-4 mr-1.5 text-success-500 flex-shrink-0" />;
+            case 'patch':
+                return <Puzzle className="size-4 mr-1.5 text-warning-500 flex-shrink-0" />;
+            case 'character':
+                return <UserRound className="size-4 mr-1.5 text-danger-500 flex-shrink-0" />;
+            default:
+                return null;
+        }
+    };
+
+    const getTabLabel = (tab: string) => {
+        switch (tab) {
+            case 'checkin':
+                return "签到次数";
+            case 'moemoepoint':
+                return "萌萌点";
+            case 'comment':
+                return "评论数";
+            case 'patch':
+                return "资源数";
+            case 'character':
+                return "角色数";
+            default:
+                return "";
+        }
+    };
+
+    const renderRankings = (rankings: UserRanking[], tab: string) => {
         if (loading) {
             return <div className="py-10 text-center">加载中...</div>
         }
@@ -60,29 +101,33 @@ export default function LeaderboardPage() {
         }
 
         return (
-            <div className="space-y-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 my-4">
                 {rankings.map((user, index) => (
                     <div
                         key={user.id}
-                        className="flex items-center justify-between p-3 bg-content2 rounded-lg cursor-pointer hover:bg-content3"
+                        className="flex items-center bg-background rounded-xl shadow-sm p-4 cursor-pointer hover:bg-default-50 transition-colors"
                         onClick={() => router.push(`/user/${user.id}`)}
                     >
-                        <div className="flex items-center gap-3">
-                            <div className={`text-lg font-bold min-w-8 ${index < 3 ? 'text-primary' : ''}`}>
-                                {index + 1}
-                            </div>
+                        <div className="relative mr-3.5">
                             <Avatar
                                 isBordered
-                                className="transition-transform shrink-0"
-                                color={index < 3 ? "secondary" : "default"}
+                                className="w-12 h-12"
+                                color={index < 3 ? "primary" : "default"}
                                 name={user.name.charAt(0).toUpperCase()}
-                                size="sm"
                                 src={user.avatar}
                                 showFallback
                             />
-                            <div className="text-md">{user.name}</div>
+                            <div className={`absolute -top-2 -left-2 w-5 h-5 ${index < 3 ? 'bg-primary' : 'bg-default-100'} rounded-full flex items-center justify-center text-xs font-bold ${index < 3 ? 'text-white' : 'text-foreground'}`}>
+                                {index + 1}
+                            </div>
                         </div>
-                        <div className="font-semibold">{user.score}</div>
+                        <div className="flex-1 min-w-0">
+                            <div className="font-bold text-foreground truncate mb-0.5 text-sm">{user.name}</div>
+                            <div className="text-xs text-default-500 flex items-center">
+                                {getTabIcon(tab)}
+                                <span className="font-medium truncate">{getTabLabel(tab)}: {user.score}</span>
+                            </div>
+                        </div>
                     </div>
                 ))}
             </div>
@@ -90,7 +135,7 @@ export default function LeaderboardPage() {
     }
 
     return (
-        <div className="container mx-auto ">
+        <div className="container mx-auto py-6">
             <Card className="mb-8">
                 <CardHeader className="flex flex-col gap-2">
                     <div className="text-2xl font-bold">排行榜</div>
@@ -112,20 +157,60 @@ export default function LeaderboardPage() {
                             tabContent: "group-data-[selected=true]:text-primary"
                         }}
                     >
-                        <Tab key="checkin" title="签到次数">
-                            {renderRankings(checkInRankings)}
+                        <Tab 
+                            key="checkin" 
+                            title={
+                                <div className="flex items-center gap-1">
+                                    <CalendarCheck className="size-4" />
+                                    <span>签到次数</span>
+                                </div>
+                            }
+                        >
+                            {renderRankings(checkInRankings, 'checkin')}
                         </Tab>
-                        <Tab key="moemoepoint" title="萌萌点">
-                            {renderRankings(moeMoePointRankings)}
+                        <Tab 
+                            key="moemoepoint" 
+                            title={
+                                <div className="flex items-center gap-1">
+                                    <Lollipop className="size-4" />
+                                    <span>萌萌点</span>
+                                </div>
+                            }
+                        >
+                            {renderRankings(moeMoePointRankings, 'moemoepoint')}
                         </Tab>
-                        <Tab key="comment" title="评论数">
-                            {renderRankings(commentRankings)}
+                        <Tab 
+                            key="comment" 
+                            title={
+                                <div className="flex items-center gap-1">
+                                    <MessageSquare className="size-4" />
+                                    <span>评论数</span>
+                                </div>
+                            }
+                        >
+                            {renderRankings(commentRankings, 'comment')}
                         </Tab>
-                        <Tab key="patch" title="补丁数">
-                            {renderRankings(patchRankings)}
+                        <Tab 
+                            key="patch" 
+                            title={
+                                <div className="flex items-center gap-1">
+                                    <Puzzle className="size-4" />
+                                    <span>资源数</span>
+                                </div>
+                            }
+                        >
+                            {renderRankings(patchRankings, 'patch')}
                         </Tab>
-                        <Tab key="character" title="角色数">
-                            {renderRankings(characterRankings)}
+                        <Tab 
+                            key="character" 
+                            title={
+                                <div className="flex items-center gap-1">
+                                    <UserRound className="size-4" />
+                                    <span>角色数</span>
+                                </div>
+                            }
+                        >
+                            {renderRankings(characterRankings, 'character')}
                         </Tab>
                     </Tabs>
                 </CardBody>

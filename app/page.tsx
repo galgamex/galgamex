@@ -7,7 +7,7 @@ export default async function Kun() {
   const response = await kunGetActions()
 
   return (
-    <div className="container mx-auto my-4 space-y-6">
+    <div className="container mx-auto  space-y-6">
       <HomeContainer {...response} />
     </div>
   )

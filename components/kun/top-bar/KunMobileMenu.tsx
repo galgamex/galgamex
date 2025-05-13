@@ -1,5 +1,6 @@
 'use client'
 
+import { memo } from 'react'
 import { NavbarMenu, NavbarMenuItem } from '@nextui-org/navbar'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -21,9 +22,24 @@ const iconMap: Record<string, ReactNode> = {
   '/': <Home className="w-5 h-5 mr-2" />
 }
 
-export const KunMobileMenu = () => {
+// 用memo包装菜单项组件以减少不必要的重渲染
+const MenuItem = memo(({ href, name }: { href: string; name: string }) => (
+  <NavbarMenuItem className="p-0">
+    <Link
+      className="w-full flex items-center p-3 rounded-lg hover:bg-default-100 transition-colors duration-200 font-medium text-base"
+      href={href}
+      prefetch={false}
+    >
+      {iconMap[href] || <Home className="w-5 h-5 mr-2" />} {name}
+    </Link>
+  </NavbarMenuItem>
+))
+
+MenuItem.displayName = 'MenuItem'
+
+export const KunMobileMenu = memo(() => {
   return (
-    <NavbarMenu className="pt-6 pb-8 px-4">
+    <NavbarMenu className="pt-6 pb-8 px-4 overscroll-contain">
       <NavbarMenuItem className="mb-6">
         <Link className="flex items-center" href="/">
           <Image
@@ -40,17 +56,12 @@ export const KunMobileMenu = () => {
       </NavbarMenuItem>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {kunMobileNavItem.map((item, index) => (
-          <NavbarMenuItem key={index} className="p-0">
-            <Link
-              className="w-full flex items-center p-3 rounded-lg hover:bg-default-100 transition-colors duration-200 font-medium text-base"
-              href={item.href}
-            >
-              {iconMap[item.href] || <Home className="w-5 h-5 mr-2" />} {item.name}
-            </Link>
-          </NavbarMenuItem>
+        {kunMobileNavItem.map((item) => (
+          <MenuItem key={item.href} href={item.href} name={item.name} />
         ))}
       </div>
     </NavbarMenu>
   )
-}
+})
+
+KunMobileMenu.displayName = 'KunMobileMenu'
