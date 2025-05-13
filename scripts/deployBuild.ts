@@ -63,8 +63,8 @@ try {
   // 尝试停止已存在的PM2进程，允许失败
   safeExecSync('pnpm stop', 'PM2进程停止', true)
 
-  // 启动应用
-  safeExecSync('pnpm start', '应用启动')
+  // 启动应用 - 使用PM2
+  safeExecSync('pnpm start:pm2', '通过PM2启动应用')
 
   console.log('✅ 部署完成!\n')
 } catch (e) {

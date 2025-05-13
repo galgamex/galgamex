@@ -2,9 +2,8 @@ module.exports = {
   apps: [
     {
       name: 'kun-galgamex-next',
-      cwd: '/www/galgamex',
-      script: 'node',
-      args: '.next/server.js',
+      script: 'node_modules/next/dist/bin/next',
+      args: 'start',
       instances: 1,
       autorestart: true,
       watch: false,

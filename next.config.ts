@@ -11,7 +11,7 @@ import path from 'path'
 // const __filename = fileURLToPath(import.meta.url)
 // const __dirname = path.dirname(__filename)
 
-const PRODUCTION_DOMAIN = 'https://www.galgamex.net'
+const PRODUCTION_DOMAIN = ''
 
 const nextConfig: NextConfig = {
   pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
