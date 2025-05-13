@@ -52,9 +52,6 @@ try {
   // 清理构建
   safeExecSync('pnpm build:clean', '清理构建')
 
-  // 构建应用
-  safeExecSync('pnpm build', '应用构建')
-
   // 确保out目录存在
   const outDir = path.resolve(__dirname, '..', 'out')
   if (!fs.existsSync(outDir)) {
@@ -66,7 +63,7 @@ try {
   // 尝试停止已存在的PM2进程，允许失败
   safeExecSync('pnpm stop', 'PM2进程停止', true)
 
-  // 使用PM2启动应用
+  // 启动应用
   safeExecSync('pm2 start ecosystem.config.js', '使用PM2启动应用')
 
   console.log('✅ 部署完成!\n')
