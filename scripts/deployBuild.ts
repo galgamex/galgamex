@@ -64,7 +64,7 @@ try {
   safeExecSync('pnpm stop', 'PM2进程停止', true)
 
   // 启动应用
-  safeExecSync('pm2 start ecosystem.config.js', '使用PM2启动应用')
+  safeExecSync('pnpm start', '应用启动')
 
   console.log('✅ 部署完成!\n')
 } catch (e) {

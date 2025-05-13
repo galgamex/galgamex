@@ -11,8 +11,7 @@ import path from 'path'
 // const __filename = fileURLToPath(import.meta.url)
 // const __dirname = path.dirname(__filename)
 
-// 修改为相对路径，避免域名依赖
-const PRODUCTION_DOMAIN = ''
+const PRODUCTION_DOMAIN = 'https://www.galgamex.net'
 
 const nextConfig: NextConfig = {
   pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
