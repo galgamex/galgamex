@@ -65,10 +65,21 @@ export const createGalgame = async (
         })
       }
 
+      // 先获取用户信息以检查角色
+      const user = await prisma.user.findUnique({
+        where: { id: uid }
+      })
+
+      if (!user) {
+        return '用户未找到'
+      }
+
+      // 根据用户角色决定是否增加daily_image_count
       await prisma.user.update({
         where: { id: uid },
         data: {
-          daily_image_count: { increment: 1 },
+          // 管理员不增加daily_image_count计数
+          daily_image_count: user.role >= 3 ? undefined : { increment: 1 },
           moemoepoint: { increment: 3 }
         }
       })

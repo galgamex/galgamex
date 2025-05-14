@@ -24,9 +24,14 @@ export const updateUserAvatar = async (uid: number, avatar: ArrayBuffer) => {
 
   const imageLink = `${process.env.KUN_VISUAL_NOVEL_IMAGE_BED_URL}/user/avatar/user_${uid}/avatar-mini.avif`
 
+  // 只更新头像链接，不增加管理员的daily_image_count计数
   await prisma.user.update({
     where: { id: uid },
-    data: { avatar: imageLink }
+    data: {
+      avatar: imageLink,
+      // 只有非管理员才增加计数
+      daily_image_count: user.role < 3 ? { increment: 1 } : undefined
+    }
   })
 
   return { avatar: imageLink }

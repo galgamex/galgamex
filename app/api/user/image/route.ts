@@ -24,10 +24,13 @@ export const uploadImage = async (uid: number, image: ArrayBuffer) => {
     return res
   }
 
-  await prisma.user.update({
-    where: { id: uid },
-    data: { daily_image_count: { increment: 1 } }
-  })
+  // 只有非管理员用户才增加daily_image_count计数
+  if (user.role < 3) {
+    await prisma.user.update({
+      where: { id: uid },
+      data: { daily_image_count: { increment: 1 } }
+    })
+  }
 
   const imageLink = `${process.env.KUN_VISUAL_NOVEL_IMAGE_BED_URL}/user/image/${uid}/${newFileName}.avif`
   return { imageLink }
