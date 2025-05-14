@@ -1,14 +1,35 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Input } from '@nextui-org/input'
 import { Button } from '@nextui-org/button'
 import { Chip } from '@nextui-org/chip'
-import { Plus, X } from 'lucide-react'
+import { Plus, X, Cloud, Link as LinkIcon, Database } from 'lucide-react'
 import { ErrorType } from '../share'
 import { SUPPORTED_RESOURCE_LINK_MAP } from '~/constants/resource'
 import { fetchLinkData, fetchListData } from './fetchAlistSize'
+import { detectLinkType } from '~/utils/linkDetector'
+import { Microsoft } from '~/components/kun/icons/Microsoft'
 import toast from 'react-hot-toast'
+import type { JSX } from 'react'
+
+// 与DownloadCard组件保持一致的图标映射
+const storageIcons: { [key: string]: JSX.Element } = {
+  s3: <Cloud className="size-4" />,
+  onedrive: <Microsoft className="size-4" />,
+  baidu: <LinkIcon className="size-4" />,
+  aliyun: <Cloud className="size-4" />,
+  quark: <Cloud className="size-4" />,
+  '123pan': <Cloud className="size-4" />,
+  lanzou: <Cloud className="size-4" />,
+  googledrive: <Cloud className="size-4" />,
+  uc: <Cloud className="size-4" />,
+  cmcloud: <Cloud className="size-4" />,
+  thunder: <Cloud className="size-4" />,
+  weiyun: <Cloud className="size-4" />,
+  galgamex: <Database className="size-4" />,
+  user: <LinkIcon className="size-4" />
+}
 
 interface ResourceLinksInputProps {
   errors: ErrorType
@@ -28,6 +49,28 @@ export const ResourceLinksInput = ({
   setSize
 }: ResourceLinksInputProps) => {
   const links = content.trim() ? content.trim().split(',') : ['']
+  // 存储每个链接对应的类型
+  const [linkTypes, setLinkTypes] = useState<string[]>(Array(links.length).fill(storage))
+
+  // 当content或storage变化时重新检测类型
+  useEffect(() => {
+    if (storage === 's3') return;
+
+    // 将links的长度与linkTypes的长度同步
+    if (links.length !== linkTypes.length) {
+      // 如果links长度变化了，重新初始化linkTypes，避免下标不一致问题
+      const newLinkTypes = Array(links.length).fill(storage);
+
+      // 然后对新数组中有链接的项进行类型检测
+      links.forEach((link, index) => {
+        if (link) {
+          newLinkTypes[index] = detectLinkType(link);
+        }
+      });
+
+      setLinkTypes(newLinkTypes);
+    }
+  }, [content, storage, linkTypes.length, links.length]);
 
   const checkLinkSize = async (link: string) => {
     toast('正在尝试从 TouchGal Alist 获取文件大小')
@@ -52,7 +95,48 @@ export const ResourceLinksInput = ({
     if (links.some((link) => link.includes('pan.galgamex.com/s/'))) {
       checkLinkSize(links[0])
     }
-  }, [links, setSize])
+  }, [links, setSize, size])
+
+  // 获取链接类型
+  const getLinkType = (index: number): string => {
+    if (storage === 's3') return storage;
+    return linkTypes[index] || storage;
+  }
+
+  // 获取链接类型对应的图标
+  const getLinkIcon = (index: number): JSX.Element => {
+    const type = getLinkType(index);
+    return storageIcons[type] || storageIcons.user;
+  }
+
+  // 当用户手动修改链接时检测类型
+  const handleLinkChange = (index: number, value: string) => {
+    const newLinks = [...links];
+    newLinks[index] = value;
+    setContent(newLinks.filter(Boolean).toString());
+
+    // 更新该链接的类型
+    if (value && storage !== 's3') {
+      const newType = detectLinkType(value);
+      const newLinkTypes = [...linkTypes];
+      newLinkTypes[index] = newType;
+      setLinkTypes(newLinkTypes);
+    }
+  };
+
+  // 当添加新链接时
+  const handleAddLink = () => {
+    setContent([...links, ''].toString());
+    setLinkTypes([...linkTypes, storage]);
+  };
+
+  // 当删除链接时
+  const handleRemoveLink = (index: number) => {
+    const newLinks = links.filter((_, i) => i !== index);
+    setContent(newLinks.toString());
+    const newLinkTypes = linkTypes.filter((_, i) => i !== index);
+    setLinkTypes(newLinkTypes);
+  };
 
   return (
     <div className="space-y-2">
@@ -65,10 +149,15 @@ export const ResourceLinksInput = ({
 
       {links.map((link, index) => (
         <div key={index} className="flex items-center gap-2">
-          <Chip color="primary" variant="flat">
+          <Chip
+            color="primary"
+            variant="flat"
+            startContent={getLinkIcon(index)}
+          >
             {
+              // 显示自动检测的网盘类型名称，或者默认存储类型
               SUPPORTED_RESOURCE_LINK_MAP[
-              storage as keyof typeof SUPPORTED_RESOURCE_LINK_MAP
+              getLinkType(index) as keyof typeof SUPPORTED_RESOURCE_LINK_MAP
               ]
             }
           </Chip>
@@ -85,10 +174,8 @@ export const ResourceLinksInput = ({
               isInvalid={!!errors.content}
               errorMessage={errors.content?.message}
               onChange={(e) => {
-                e.preventDefault()
-                const newLinks = [...links]
-                newLinks[index] = e.target.value
-                setContent(newLinks.filter(Boolean).toString())
+                e.preventDefault();
+                handleLinkChange(index, e.target.value);
               }}
             />
           </div>
@@ -99,7 +186,7 @@ export const ResourceLinksInput = ({
                 <Button
                   isIconOnly
                   variant="flat"
-                  onPress={() => setContent([...links, ''].toString())}
+                  onPress={handleAddLink}
                 >
                   <Plus className="size-4" />
                 </Button>
@@ -108,10 +195,7 @@ export const ResourceLinksInput = ({
                   isIconOnly
                   variant="flat"
                   color="danger"
-                  onPress={() => {
-                    const newLinks = links.filter((_, i) => i !== index)
-                    setContent(newLinks.toString())
-                  }}
+                  onPress={() => handleRemoveLink(index)}
                 >
                   <X className="size-4" />
                 </Button>
