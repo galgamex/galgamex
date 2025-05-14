@@ -109,7 +109,7 @@ export const SUPPORTED_PLATFORM_MAP: Record<string, string> = {
   other: '其它'
 }
 
-export const SUPPORTED_RESOURCE_LINK = ['galgamex', 's3', 'user']
+export const SUPPORTED_RESOURCE_LINK = ['galgamex', 's3', 'baidu', 'aliyun', 'quark', '123pan', 'lanzou', 'onedrive', 'googledrive', 'uc', 'cmcloud', 'thunder', 'weiyun', 'user']
 
 export const storageTypes = [
   {
@@ -123,6 +123,61 @@ export const storageTypes = [
     description: '此选项适合 <100MB 的补丁, 稳定, 永远不会失效过期'
   },
   {
+    value: 'baidu',
+    label: '百度网盘',
+    description: '使用百度网盘存储和分享资源'
+  },
+  {
+    value: 'aliyun',
+    label: '阿里云盘',
+    description: '使用阿里云盘存储和分享资源'
+  },
+  {
+    value: 'quark',
+    label: '夸克网盘',
+    description: '使用夸克网盘存储和分享资源'
+  },
+  {
+    value: '123pan',
+    label: '123网盘',
+    description: '使用123网盘存储和分享资源'
+  },
+  {
+    value: 'lanzou',
+    label: '蓝奏云',
+    description: '使用蓝奏云存储和分享资源'
+  },
+  {
+    value: 'onedrive',
+    label: 'OneDrive',
+    description: '使用微软OneDrive存储和分享资源'
+  },
+  {
+    value: 'googledrive',
+    label: 'Google Drive',
+    description: '使用Google Drive存储和分享资源'
+  },
+  {
+    value: 'uc',
+    label: 'UC网盘',
+    description: '使用UC网盘存储和分享资源'
+  },
+  {
+    value: 'cmcloud',
+    label: '中国移动云盘',
+    description: '使用中国移动云盘存储和分享资源'
+  },
+  {
+    value: 'thunder',
+    label: '迅雷云盘',
+    description: '使用迅雷云盘存储和分享资源'
+  },
+  {
+    value: 'weiyun',
+    label: '腾讯微云',
+    description: '使用腾讯微云存储和分享资源'
+  },
+  {
     value: 'user',
     label: '自定义链接 (>100MB)',
     description: '此选项适合 >100MB 的补丁, 这需要您自行提供下载链接'
@@ -132,6 +187,17 @@ export const storageTypes = [
 export const SUPPORTED_RESOURCE_LINK_MAP: Record<string, string> = {
   galgamex: 'Galgamex 资源盘',
   s3: '对象存储下载',
+  baidu: '百度网盘下载',
+  aliyun: '阿里云盘下载',
+  quark: '夸克网盘下载',
+  '123pan': '123网盘下载',
+  lanzou: '蓝奏云下载',
+  onedrive: 'OneDrive下载',
+  googledrive: 'Google Drive下载',
+  uc: 'UC网盘下载',
+  cmcloud: '中国移动云盘下载',
+  thunder: '迅雷云盘下载',
+  weiyun: '腾讯微云下载',
   user: '自定义链接下载'
 }
 
