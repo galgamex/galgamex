@@ -12,7 +12,8 @@ export const uploadImage = async (uid: number, image: ArrayBuffer) => {
   if (!user) {
     return '用户未找到'
   }
-  if (user.daily_image_count >= 50) {
+  // 管理员不受每日上传数量限制
+  if (user.role < 3 && user.daily_image_count >= 50) {
     return '您今日上传的图片已达到 50 张限额'
   }
 
