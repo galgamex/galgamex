@@ -21,14 +21,14 @@ const nsfwStatusMap: Record<NsfwStatusType, {
     },
     nsfw: {
         icon: <Ban className="size-4" />,
-        text: '成人模式 (NSFW)',
+        text: '限制级模式 (NSFW)',
         description: '仅显示可能含有限制级内容的资源',
         color: 'warning'
     },
     all: {
         icon: <CircleSlash className="size-4" />,
         text: '全部内容',
-        description: '同时显示安全与成人内容',
+        description: '同时显示安全与限制级内容',
         color: 'default'
     }
 }
