@@ -18,12 +18,27 @@ interface Props {
 
 export const HomeContainer = ({ galgames, resources }: Props) => {
   const [windowWidth, setWindowWidth] = useState(640)
-  const [isBannerVisible, setIsBannerVisible] = useState(true)
+  // 使用懒初始化函数来避免闪烁，在第一次渲染前就确定状态
+  const [isBannerVisible, setIsBannerVisible] = useState(() => {
+    if (typeof window === 'undefined') return true;
+
+    // 检查是否刚刚切换了NSFW设置
+    const nsfwSettingChanged = localStorage.getItem('nsfw-setting-changed');
+    if (nsfwSettingChanged) return true;
+
+    // 检查是否之前隐藏了横幅
+    return !localStorage.getItem('nsfw-banner-hidden');
+  });
+
+  const [isClientLoaded, setIsClientLoaded] = useState(false);
   const settings = useSettingStore((state) => state.data)
 
   // 初始化组件和处理窗口大小变化
   useEffect(() => {
     if (typeof window !== 'undefined') {
+      // 设置客户端已加载标志
+      setIsClientLoaded(true);
+
       // 窗口大小调整处理
       setWindowWidth(window.innerWidth)
       const handleResize = () => {
@@ -40,12 +55,6 @@ export const HomeContainer = ({ galgames, resources }: Props) => {
         // 清除设置变更标志
         localStorage.removeItem('nsfw-setting-changed')
         localStorage.removeItem('nsfw-setting-previous')
-      } else {
-        // 如果没有设置变更，检查是否之前隐藏了横幅
-        const bannerHidden = localStorage.getItem('nsfw-banner-hidden')
-        if (bannerHidden) {
-          setIsBannerVisible(false)
-        }
       }
 
       return () => window.removeEventListener('resize', handleResize)
@@ -60,7 +69,7 @@ export const HomeContainer = ({ galgames, resources }: Props) => {
 
   return (
     <div className="mx-auto space-y-2 max-w-[1500px]">
-      {isBannerVisible && (
+      {isClientLoaded && isBannerVisible && (
         <div className="mb-2 bg-content1/40 p-3 mt-4 rounded-lg border border-default-200" data-nosnippet data-noindex>
           <NsfwStatusBanner onClose={handleBannerClose} />
         </div>
