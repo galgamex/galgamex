@@ -1,18 +1,18 @@
 export const resourceTypes = [
   {
     value: 'pc',
+    label: 'PC',
+    description: 'PC'
+  },
+  {
+    value: 'app',
+    label: 'APK',
+    description: '可以直接在手机安装并游玩的 Galgame'
+  },
+  {
+    value: 'galgame',
     label: 'Galgame',
-    description: 'Galgame游戏'
-  },
-  {
-    value: 'mobile',
-    label: '同人游戏',
-    description: '类似RPG,SLG,ACT等游戏'
-  },
-  {
-    value: 'row',
-    label: '生肉',
-    description: '没有中文翻译, 仅有日语或其它语言的 Galgame'
+    description: '视觉小说类游戏'
   },
   {
     value: 'chinese',
@@ -20,9 +20,14 @@ export const resourceTypes = [
     description: '汉化 Galgame 下载资源, 有简体中文或繁体中文支持'
   },
   {
-    value: 'patch',
-    label: '补丁',
-    description: '与这个 Galgame 相关的补丁资源'
+    value: 'row',
+    label: '生肉',
+    description: '没有中文翻译, 仅有日语或其它语言的 Galgame'
+  },
+  {
+    value: 'mobile',
+    label: '同人游戏',
+    description: '类似RPG,SLG,ACT等游戏'
   },
   {
     value: 'emulator',
@@ -31,9 +36,9 @@ export const resourceTypes = [
       '可以在手机模拟器, 例如 KiriKiri, ONS, Tyranor 等模拟器中运行的 Galgame 游戏'
   },
   {
-    value: 'app',
-    label: 'APK',
-    description: '可以直接在手机安装并游玩的 Galgame'
+    value: 'patch',
+    label: '补丁',
+    description: '与这个 Galgame 相关的补丁资源'
   },
   {
     value: 'tool',
@@ -54,11 +59,12 @@ export const resourceTypes = [
 
 export const SUPPORTED_TYPE = [
   'pc',
+  'app',
+  'galgame',
   'chinese',
+  'row',
   'mobile',
   'emulator',
-  'row',
-  'app',
   'patch',
   'tool',
   'notice',
@@ -66,12 +72,13 @@ export const SUPPORTED_TYPE = [
 ]
 export const SUPPORTED_TYPE_MAP: Record<string, string> = {
   all: '全部类型',
-  pc: 'Galgame',
+  pc: 'PC',
+  app: 'APK',
+  galgame: 'Galgame',
   chinese: '汉化',
+  row: '生肉',
   mobile: '同人游戏',
   emulator: '模拟器资源',
-  row: '生肉',
-  app: 'APK',
   patch: '补丁',
   tool: '游戏工具',
   notice: '官方通知',
