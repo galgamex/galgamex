@@ -36,8 +36,14 @@ export const NSFWSwitcher = () => {
         selectedKeys={new Set([settings.kunNsfwEnable])}
         selectionMode="single"
         onSelectionChange={(key) => {
-          setData({ kunNsfwEnable: key.anchorKey ?? 'sfw' })
-          location.reload()
+          const newSetting = key.anchorKey ?? 'sfw';
+          if (newSetting !== settings.kunNsfwEnable) {
+            localStorage.setItem('nsfw-setting-changed', 'true');
+            localStorage.setItem('nsfw-setting-previous', settings.kunNsfwEnable);
+            localStorage.removeItem('nsfw-banner-hidden');
+          }
+          setData({ kunNsfwEnable: newSetting });
+          location.reload();
         }}
       >
         {['sfw', 'nsfw', 'all'].map((key) => (
