@@ -16,13 +16,13 @@ const nsfwStatusMap: Record<NsfwStatusType, {
     sfw: {
         icon: <ShieldCheck className="size-4" />,
         text: '安全模式 (SFW)',
-        description: '仅显示适合公共场合浏览的内容',
+        description: '仅显示适合公共场合的内容',
         color: 'success'
     },
     nsfw: {
         icon: <Ban className="size-4" />,
         text: '限制级模式 (NSFW)',
-        description: '仅显示可能含有限制级内容的资源',
+        description: '仅显示含有限制级内容',
         color: 'warning'
     },
     all: {

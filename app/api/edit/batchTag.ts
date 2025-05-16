@@ -21,12 +21,12 @@ export const handleBatchPatchTags = async (
   const existingTags =
     tagsToAdd.length > 0
       ? await prisma.patch_tag.findMany({
-          where: {
-            OR: tagsToAdd.map((tag) => ({
-              OR: [{ name: tag }, { alias: { has: tag } }]
-            }))
-          }
-        })
+        where: {
+          OR: tagsToAdd.map((tag) => ({
+            OR: [{ name: tag }, { alias: { has: tag } }]
+          }))
+        }
+      })
       : []
 
   const existingTagMap = new Map(existingTags.map((tag) => [tag.name, tag]))
@@ -48,9 +48,9 @@ export const handleBatchPatchTags = async (
       const newTags =
         tagsToCreate.length > 0
           ? await tx.patch_tag.findMany({
-              where: { name: { in: tagsToCreate } },
-              select: { id: true, name: true }
-            })
+            where: { name: { in: tagsToCreate } },
+            select: { id: true, name: true }
+          })
           : []
 
       const allTagIds = [

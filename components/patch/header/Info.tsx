@@ -147,7 +147,7 @@ export const PatchHeaderInfo = ({
                 {intro.vndbId && (
                   <div className="flex items-center gap-2 text-sm text-default-500">
                     <LinkIcon className="size-4" />
-                    <span>VNDB ID: {intro.vndbId}</span>
+                    <span>ID: {intro.vndbId}</span>
                   </div>
                 )}
               </div>
