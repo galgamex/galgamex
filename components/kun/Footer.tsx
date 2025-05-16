@@ -4,6 +4,7 @@ import { kunMoyuMoe } from '~/config/moyu-moe'
 import Link from 'next/link'
 import Image from 'next/image'
 import { createUrl } from '~/utils/createUrl'
+import { Github } from 'lucide-react'
 
 export const KunFooter = () => {
   return (
@@ -36,7 +37,15 @@ export const KunFooter = () => {
               友情链接
             </Link>
 
-
+            <Link
+              href="https://github.com/galgamex/galgamex"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1"
+            >
+              <Github className="size-4" />
+              <span>Github</span>
+            </Link>
           </div>
 
           <div className="flex space-x-8">
