@@ -20,8 +20,8 @@ https://t.me/galgamex
 
 ## 开源声明 / 开源协议
 
-本项目由 [鲲 Galgame 补丁 - kun-galgame-patch-next](https://github.com/KUN1007/kun-galgame-patch-next) 修改而来, 原仓库地址
+本项目由 [TouchGal - kun-touchgal-next](https://github.com/KUN1007/kun-touchgal-next) 修改而来, 原仓库地址
 
-[https://github.com/KUN1007/kun-galgame-patch-next](https://github.com/KUN1007/kun-touchgal-next)
+[https://github.com/KUN1007/kun-touchgal-next](https://github.com/KUN1007/kun-touchgal-next)
 
 本项目遵从 `AGPL-3.0` 开源协议, 进行任何的修改分发时请注明原始仓库与作者地址
