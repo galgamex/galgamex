@@ -5,8 +5,17 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { createUrl } from '~/utils/createUrl'
 import { Github } from 'lucide-react'
+import { useEffect, useState } from 'react'
 
 export const KunFooter = () => {
+  // 使用状态来控制是否已经挂载到客户端
+  const [isMounted, setIsMounted] = useState(false)
+
+  // 在客户端挂载后设置状态
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
+
   return (
     <footer className="w-full mt-8 text-sm border-t border-divider">
       <div className="px-2 mx-auto sm:px-6 max-w-[1500px]">
@@ -21,7 +30,8 @@ export const KunFooter = () => {
             <span>© 2025 {kunMoyuMoe.titleShort}</span>
           </Link>
 
-          <div className="flex space-x-8">
+          {/* 服务端始终渲染，但在客户端通过CSS控制显示 */}
+          <div className={isMounted ? "hidden md:flex space-x-8" : "flex space-x-8"}>
             <Link href={createUrl('/doc')} className="flex items-center">
               使用指南
             </Link>
@@ -48,7 +58,7 @@ export const KunFooter = () => {
             </Link>
           </div>
 
-          <div className="flex space-x-8">
+          <div className={isMounted ? "hidden md:flex space-x-8" : "flex space-x-8"}>
             <span className="flex items-center">联系我们</span>
             <Link
               href={kunMoyuMoe.domain.telegram_group}
