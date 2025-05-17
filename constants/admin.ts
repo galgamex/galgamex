@@ -32,5 +32,6 @@ export const ADMIN_STATS_SUM_MAP: Record<string, string> = {
   galgameCount: 'Galgame 总数',
   galgameResourceCount: 'Galgame 资源总数',
   galgamePatchResourceCount: 'Galgame 补丁总数',
-  galgameCommentCount: '评论总数'
+  galgameCommentCount: '评论总数',
+  totalDownloads: '总下载量'
 }

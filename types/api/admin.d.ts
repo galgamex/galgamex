@@ -16,6 +16,7 @@ export interface SumData {
   galgameResourceCount: number
   galgamePatchResourceCount: number
   galgameCommentCount: number
+  totalDownloads: number
 }
 
 export interface OverviewData {

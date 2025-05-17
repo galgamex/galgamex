@@ -13,7 +13,8 @@ export const KunAdminSum: FC = () => {
     galgameCount: 0,
     galgameResourceCount: 0,
     galgamePatchResourceCount: 0,
-    galgameCommentCount: 0
+    galgameCommentCount: 0,
+    totalDownloads: 0
   })
 
   const fetchSummaryData = async () => {
