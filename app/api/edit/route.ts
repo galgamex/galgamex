@@ -16,7 +16,7 @@ const checkStringArrayValid = (type: 'alias' | 'tag', aliasString: string) => {
   if (maxLength) {
     return `单个${label}的长度不可超过 500 个字符`
   }
-  const minLength = aliasArray.some((alias) => alias.trim.length)
+  const minLength = aliasArray.some((alias) => alias.trim().length === 0)
   if (minLength) {
     return `单个${label}至少一个字符`
   }

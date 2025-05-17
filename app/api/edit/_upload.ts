@@ -74,6 +74,12 @@ export const uploadPatchBanner = async (image: ArrayBuffer, id: number) => {
 
   const bucketName = `patch/${id}/banner`
 
-  await uploadImageToS3(`${bucketName}/banner.avif`, banner)
-  await uploadImageToS3(`${bucketName}/banner-mini.avif`, miniBanner)
+  try {
+    await uploadImageToS3(`${bucketName}/banner.avif`, banner)
+    await uploadImageToS3(`${bucketName}/banner-mini.avif`, miniBanner)
+    return true
+  } catch (error) {
+    console.error('上传图片到S3出错:', error)
+    return '上传图片失败，请稍后重试'
+  }
 }
