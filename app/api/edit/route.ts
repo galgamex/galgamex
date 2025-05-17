@@ -36,22 +36,37 @@ export const POST = async (req: NextRequest) => {
     return NextResponse.json('本页面仅管理员可访问')
   }
 
-  const { alias, banner, tag, ...rest } = input
-  const aliasResult = checkStringArrayValid('alias', alias)
-  if (typeof aliasResult === 'string') {
-    return NextResponse.json(aliasResult)
-  }
-  const tagResult = checkStringArrayValid('tag', tag)
-  if (typeof tagResult === 'string') {
-    return NextResponse.json(tagResult)
-  }
-  const bannerArrayBuffer = await new Response(banner)?.arrayBuffer()
+  try {
+    const { alias, banner, tag, ...rest } = input
 
-  const response = await createGalgame(
-    { alias: aliasResult, tag: tagResult, banner: bannerArrayBuffer, ...rest },
-    payload.uid
-  )
-  return NextResponse.json(response)
+    // 检查banner是否存在
+    if (!banner || !(banner instanceof File)) {
+      return NextResponse.json('请上传封面图片')
+    }
+
+    const aliasResult = checkStringArrayValid('alias', alias)
+    if (typeof aliasResult === 'string') {
+      return NextResponse.json(aliasResult)
+    }
+    const tagResult = checkStringArrayValid('tag', tag)
+    if (typeof tagResult === 'string') {
+      return NextResponse.json(tagResult)
+    }
+
+    const bannerArrayBuffer = await new Response(banner)?.arrayBuffer()
+    if (!bannerArrayBuffer || bannerArrayBuffer.byteLength === 0) {
+      return NextResponse.json('封面图片无效或为空')
+    }
+
+    const response = await createGalgame(
+      { alias: aliasResult, tag: tagResult, banner: bannerArrayBuffer, ...rest },
+      payload.uid
+    )
+    return NextResponse.json(response)
+  } catch (error) {
+    console.error('发布Galgame失败:', error)
+    return NextResponse.json('发布失败，请检查您的输入并重试', { status: 500 })
+  }
 }
 
 export const PUT = async (req: NextRequest) => {
