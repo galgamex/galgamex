@@ -12,7 +12,8 @@ export const BatchTag = ({ initialTag, saveTag, errors }: Props) => {
   // 定义快捷标签分类
   const quickTags = {
     风格: ['欧美风', '日系风', '国产风', '像素风', '2D', '3D'],
-    玩法: ['SLG', 'RPG', 'ACT', 'PUZ'],
+    玩法: ['SLG', 'RPG', 'ACT', 'PUZ', 'ADV'],
+    内容: ['步兵', '骑兵'],
     平台: ['Steam', 'DLsite', 'BOKI2', 'F95zone'],
     年份: [
       '2025', '2024', '2023', '2022', '2021', '2020', '2019', '2018', '2017', '2016',
@@ -89,6 +90,7 @@ export const BatchTag = ({ initialTag, saveTag, errors }: Props) => {
         <p className="text-sm font-medium">快捷添加标签（点击添加）:</p>
         {renderTagCategory('风格', quickTags.风格)}
         {renderTagCategory('玩法', quickTags.玩法)}
+        {renderTagCategory('内容', quickTags.内容)}
         {renderTagCategory('平台', quickTags.平台)}
         {renderTagCategory('年份', quickTags.年份)}
       </div>
